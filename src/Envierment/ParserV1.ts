@@ -22,23 +22,23 @@ import {
 	type RegisterSchema,
 	type SlotSchema,
 } from "../Schemas/EnvSchema.ts";
-import type { Builer } from "./Builder.ts";
+import type { Builder } from "./Builder.ts";
 
 /**
  * Параметры конструктора парсера
  */
 export type ParserConstructorType = {
-	builer: Builer;
+	builder: Builder;
 };
 
 /**
  * Абстрактный базовый класс для парсеров окружения
  */
 export abstract class Parser {
-	protected readonly builer: Builer;
+	protected readonly builder: Builder;
 
-	constructor({ builer }: ParserConstructorType) {
-		this.builer = builer;
+	constructor({ builder }: ParserConstructorType) {
+		this.builder = builder;
 	}
 
 	/**
@@ -76,10 +76,10 @@ type HousingClass = DeviceClassesByBaseHousingType[HousingName] extends Construc
 // SERIALIZER - Дополненная версия с поддержкой слотов и реагентов
 // ============================================================================
 class SerializerV1 {
-	private readonly builer: Builer;
+	private readonly builder: Builder;
 
-	constructor(builer: Builer) {
-		this.builer = builer;
+	constructor(builder: Builder) {
+		this.builder = builder;
 	}
 
 	private debug = false;
@@ -131,12 +131,12 @@ class SerializerV1 {
 		return JSON.stringify(this.toData(debug), null, 2);
 	}
 	private stringifyProject(): ProjectSchema | undefined {
-		return this.builer.meta.project;
+		return this.builder.meta.project;
 	}
 
 	private stringifyChips(): ChipSchema[] {
 		const chips: ChipSchema[] = [];
-		this.builer.Chips.forEach((chip: Chip) => {
+		this.builder.Chips.forEach((chip: Chip) => {
 			const registers: RegisterSchema[] = [];
 			for (const register of chip.registers) {
 				if (register[1] !== 0) {
@@ -179,7 +179,7 @@ class SerializerV1 {
 	}
 
 	private stringifyNetworks(): NetworkSchema[] {
-		return this.builer.Networks.values()
+		return this.builder.Networks.values()
 			.map((network: Network) => {
 				const props = this.serializeNetworkChannels(network);
 
@@ -212,7 +212,7 @@ class SerializerV1 {
 	}
 
 	private stringifyDevices(): DeviceSchema[] {
-		return this.builer.Devices.values()
+		return this.builder.Devices.values()
 			.map((device: Device) => this.serializeDevice(device))
 			.toArray();
 	}
@@ -350,17 +350,17 @@ class SerializerV1 {
 // ============================================================================
 
 class DeserializerV1 {
-	private readonly builer: Builer;
+	private readonly builder: Builder;
 
-	constructor(builer: Builer) {
-		this.builer = builer;
+	constructor(builder: Builder) {
+		this.builder = builder;
 	}
 
 	public parse(data: EnvSchema): void {
 		data = v.parse(EnvSchema, data);
-		this.builer.reset();
+		this.builder.reset();
 		if (data.project) {
-			this.builer.meta.project = data.project;
+			this.builder.meta.project = data.project;
 		}
 		this.parseChips(data);
 		this.parseNetworks(data);
@@ -400,14 +400,14 @@ class DeserializerV1 {
 				chip.registers.set(chip.SP, chip.memory.length);
 			}
 
-			this.builer.Chips.set(chipSchema.id, chip);
+			this.builder.Chips.set(chipSchema.id, chip);
 		});
 	}
 
 	private parseNetworks(data: EnvSchema): void {
 		data.networks.forEach((networkSchema) => {
 			const network = this.createNetwork(networkSchema);
-			this.builer.Networks.set(networkSchema.id, network);
+			this.builder.Networks.set(networkSchema.id, network);
 		});
 	}
 
@@ -461,7 +461,7 @@ class DeserializerV1 {
 	}
 
 	private connectPin(pin: NonNullable<HousingSchema["pins"]>[number], housingSchema: HousingSchema) {
-		if (!this.builer.Devices.has(pin.device)) {
+		if (!this.builder.Devices.has(pin.device)) {
 			throw new Error(
 				i18n.t("error.parser.device_not_found_for_pin", {
 					device_id: pin.device,
@@ -471,7 +471,7 @@ class DeserializerV1 {
 			);
 		}
 
-		if (!this.builer.Devices.has(housingSchema.id)) {
+		if (!this.builder.Devices.has(housingSchema.id)) {
 			throw new Error(
 				i18n.t("error.parser.housing_not_found", {
 					housing_id: housingSchema.id,
@@ -479,8 +479,8 @@ class DeserializerV1 {
 			);
 		}
 
-		const housing = this.builer.Devices.get(housingSchema.id)!;
-		const device = this.builer.Devices.get(pin.device)!;
+		const housing = this.builder.Devices.get(housingSchema.id)!;
+		const device = this.builder.Devices.get(pin.device)!;
 
 		if (housing.network.id !== device.network.id) {
 			throw new Error(
@@ -525,14 +525,14 @@ class DeserializerV1 {
 		this.connectDeviceSlots(device, deviceSchema);
 		this.connectDeviceReagents(device, deviceSchema);
 
-		this.builer.Devices.set(deviceSchema.id, device);
+		this.builder.Devices.set(deviceSchema.id, device);
 
 		if (deviceSchema.name) {
 			device.name = deviceSchema.name;
 		}
 
 		if (device instanceof Housing) {
-			this.builer.Runners.set(deviceSchema.id, new Ic10Runner({ housing: device }));
+			this.builder.Runners.set(deviceSchema.id, new Ic10Runner({ housing: device }));
 		}
 	}
 
@@ -545,14 +545,14 @@ class DeserializerV1 {
 		const HousingClass = this.findHousingClass(deviceSchema.PrefabName);
 		let chip: Chip | undefined;
 		if (deviceSchema.chip) {
-			chip = this.builer.Chips.get(deviceSchema.chip);
+			chip = this.builder.Chips.get(deviceSchema.chip);
 			if (!chip) {
 				throw new Error(
 					i18n.t("error.parser.chip_not_found_for_housing", {
 						chip_id: String(deviceSchema.chip),
 						housing: deviceSchema.id,
 						prefab: deviceSchema.PrefabName,
-						available_chips: Array.from(this.builer.Chips.keys()).join(", "),
+						available_chips: Array.from(this.builder.Chips.keys()).join(", "),
 					}),
 				);
 			}
@@ -679,16 +679,16 @@ class DeserializerV1 {
 	}
 
 	private getNetwork(networkId: string): Network {
-		if (!this.builer.Networks.has(networkId)) {
+		if (!this.builder.Networks.has(networkId)) {
 			throw new Error(
 				i18n.t("error.parser.network_not_found", {
 					network_id: networkId,
-					available_networks: Array.from(this.builer.Networks.keys()).join(", "),
+					available_networks: Array.from(this.builder.Networks.keys()).join(", "),
 				}),
 			);
 		}
 
-		return this.builer.Networks.get(networkId)!;
+		return this.builder.Networks.get(networkId)!;
 	}
 
 	private connectPort(device: Device, network: Network, port: PortSchema["port"]): void {
@@ -776,8 +776,8 @@ export class ParserV1 extends Parser {
 
 	constructor(params: ParserConstructorType) {
 		super(params);
-		this.serializer = new SerializerV1(this.builer);
-		this.deserializer = new DeserializerV1(this.builer);
+		this.serializer = new SerializerV1(this.builder);
+		this.deserializer = new DeserializerV1(this.builder);
 	}
 
 	/**

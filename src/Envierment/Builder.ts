@@ -7,7 +7,7 @@ import type { Ic10Runner } from "../Ic10/Ic10Runner.ts";
 import type { EnvSchema, ProjectSchema } from "../Schemas/EnvSchema.ts";
 import { type Parser, ParserV1 } from "./ParserV1.ts";
 
-export class Builer {
+export class Builder {
 	private readonly lattestParser = ParserV1;
 
 	public meta: {
@@ -31,13 +31,13 @@ export class Builer {
 		this.initialized = false;
 	}
 
-	static from(yml: string): Builer {
-		const BUILDER = new Builer();
+	static from(yml: string): Builder {
+		const BUILDER = new Builder();
 		const data = JSON5.parse(yml) as EnvSchema;
 		let Parser: Parser;
 		switch (data.version) {
 			case 1:
-				Parser = new ParserV1({ builer: BUILDER });
+				Parser = new ParserV1({ builder: BUILDER });
 				break;
 			default:
 				throw new Error(`Unsupported version: ${data.version}`);
@@ -96,7 +96,7 @@ export class Builer {
 	}
 
 	public toJson(debug: boolean = false, minify: boolean = false): string {
-		return new this.lattestParser({ builer: this }).stringify(debug, minify);
+		return new this.lattestParser({ builder: this }).stringify(debug, minify);
 	}
 
 	[Symbol.toPrimitive](hint: string): string {
@@ -110,7 +110,7 @@ export class Builer {
 	}
 	toData(debug: boolean = false): EnvSchema {
 		try {
-			return new this.lattestParser({ builer: this }).toData(debug);
+			return new this.lattestParser({ builder: this }).toData(debug);
 		} catch (e) {
 			return {} as EnvSchema;
 		}

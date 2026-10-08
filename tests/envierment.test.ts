@@ -2,13 +2,13 @@ import { describe, expect, test } from "vitest";
 import { Chip } from "../src/Core/Chip.ts";
 import type { Housing } from "../src/Core/Housing.ts";
 import { Network } from "../src/Core/Network.ts";
-import { Builer } from "../src/Envierment/Builder.ts";
+import { Builder } from "../src/Envierment/Builder.ts";
 import { ParserV1 } from "../src/Envierment/ParserV1.ts";
 import type { EnvSchema } from "../src/Schemas/EnvSchema.ts";
 
-describe("Builer", () => {
+describe("Builder", () => {
 	test("creates empty builder", () => {
-		const builder = new Builer();
+		const builder = new Builder();
 		expect(builder.Chips.size).toBe(0);
 		expect(builder.Devices.size).toBe(0);
 		expect(builder.Networks.size).toBe(0);
@@ -16,7 +16,7 @@ describe("Builer", () => {
 	});
 
 	test("reset clears all maps", () => {
-		const builder = new Builer();
+		const builder = new Builder();
 		builder.Networks.set("net1", new Network({ id: "net1", networkType: "data" }));
 		builder.Chips.set(1, new Chip({ id: 1 }));
 		builder.reset();
@@ -31,8 +31,8 @@ describe("Builer", () => {
 
 describe("ParserV1 - Network connections", () => {
 	test("parses data network correctly", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -49,8 +49,8 @@ describe("ParserV1 - Network connections", () => {
 	});
 
 	test("parses power network correctly", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -66,8 +66,8 @@ describe("ParserV1 - Network connections", () => {
 	});
 
 	test("parses multiple network types", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -91,8 +91,8 @@ describe("ParserV1 - Network connections", () => {
 	});
 
 	test("parses network with channel props", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -116,8 +116,8 @@ describe("ParserV1 - Network connections", () => {
 
 describe("ParserV1 - Device connections", () => {
 	test("parses device with data port connection", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -141,8 +141,8 @@ describe("ParserV1 - Device connections", () => {
 	});
 
 	test("parses device with power port connection", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -166,8 +166,8 @@ describe("ParserV1 - Device connections", () => {
 	});
 
 	test("parses device with default port", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -190,8 +190,8 @@ describe("ParserV1 - Device connections", () => {
 	});
 
 	test("parses device with multiple ports", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -222,8 +222,8 @@ describe("ParserV1 - Device connections", () => {
 
 describe("ParserV1 - Housing with chip", () => {
 	test("parses housing with chip", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -260,8 +260,8 @@ describe("ParserV1 - Housing with chip", () => {
 	});
 
 	test("parses housing with connected pins", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -299,8 +299,8 @@ describe("ParserV1 - Housing with chip", () => {
 
 describe("ParserV1 - Error handling", () => {
 	test("throws error for unknown network", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -319,8 +319,8 @@ describe("ParserV1 - Error handling", () => {
 	});
 
 	test("throws error for incompatible port and network type", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -339,8 +339,8 @@ describe("ParserV1 - Error handling", () => {
 	});
 
 	test("throws error for unknown prefab", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -358,8 +358,8 @@ describe("ParserV1 - Error handling", () => {
 	});
 
 	test("throws error for chip not found", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -381,8 +381,8 @@ describe("ParserV1 - Error handling", () => {
 
 describe("ParserV1 - Roundtrip serialization", () => {
 	test("serializes and deserializes network", () => {
-		const builder1 = new Builer();
-		const parser1 = new ParserV1({ builer: builder1 });
+		const builder1 = new Builder();
+		const parser1 = new ParserV1({ builder: builder1 });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -400,8 +400,8 @@ describe("ParserV1 - Roundtrip serialization", () => {
 	});
 
 	test("serializes and deserializes device with ports", () => {
-		const builder1 = new Builer();
-		const parser1 = new ParserV1({ builer: builder1 });
+		const builder1 = new Builder();
+		const parser1 = new ParserV1({ builder: builder1 });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -425,8 +425,8 @@ describe("ParserV1 - Roundtrip serialization", () => {
 	});
 
 	test("roundtrip preserves data", () => {
-		const builder1 = new Builer();
-		const parser1 = new ParserV1({ builer: builder1 });
+		const builder1 = new Builder();
+		const parser1 = new ParserV1({ builder: builder1 });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -454,8 +454,8 @@ describe("ParserV1 - Roundtrip serialization", () => {
 		const serialized = parser1.toData();
 
 		// Parse again with new builder
-		const builder2 = new Builer();
-		const parser2 = new ParserV1({ builer: builder2 });
+		const builder2 = new Builder();
+		const parser2 = new ParserV1({ builder: builder2 });
 		parser2.parse(serialized);
 
 		expect(builder2.Chips.size).toBe(1);
@@ -464,7 +464,7 @@ describe("ParserV1 - Roundtrip serialization", () => {
 	});
 });
 
-describe("Builer.from()", () => {
+describe("Builder.from()", () => {
 	test("creates builder from JSON string", () => {
 		const json = JSON.stringify({
 			version: 1,
@@ -473,7 +473,7 @@ describe("Builer.from()", () => {
 			networks: [{ id: "data-net", type: "data" }],
 		});
 
-		const builder = Builer.from(json);
+		const builder = Builder.from(json);
 
 		expect(builder.Networks.size).toBe(1);
 		expect(builder.Networks.has("data-net")).toBe(true);
@@ -487,14 +487,14 @@ describe("Builer.from()", () => {
 			networks: [],
 		});
 
-		expect(() => Builer.from(json)).toThrow();
+		expect(() => Builder.from(json)).toThrow();
 	});
 });
 
 describe("ParserV1 - Device properties", () => {
 	test("parses device with props", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -520,8 +520,8 @@ describe("ParserV1 - Device properties", () => {
 
 describe("ParserV1 - Composite port expansion", () => {
 	test("Connection port expands to Data Input and Power Input", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -547,8 +547,8 @@ describe("ParserV1 - Composite port expansion", () => {
 	});
 
 	test("Data Input port accepts data network", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
@@ -573,8 +573,8 @@ describe("ParserV1 - Composite port expansion", () => {
 
 describe("ParserV1 - Network channel serialization", () => {
 	test("serializes network channels", () => {
-		const builder = new Builer();
-		const parser = new ParserV1({ builer: builder });
+		const builder = new Builder();
+		const parser = new ParserV1({ builder: builder });
 
 		const envData: EnvSchema = {
 			version: 1,
