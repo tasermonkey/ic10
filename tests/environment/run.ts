@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { ValiError } from "valibot";
-import { Builder } from "../../src/Envierment/Builder.ts";
+import { Builder } from "../../src/Environment/Builder.ts";
 import { Languages } from "../../src/Languages/index.ts";
 import i18n from "../../src/Languages/lang.ts";
 

@@ -2,8 +2,8 @@ import { describe, expect, test } from "vitest";
 import { Chip } from "../src/Core/Chip.ts";
 import type { Housing } from "../src/Core/Housing.ts";
 import { Network } from "../src/Core/Network.ts";
-import { Builder } from "../src/Envierment/Builder.ts";
-import { ParserV1 } from "../src/Envierment/ParserV1.ts";
+import { Builder } from "../src/Environment/Builder.ts";
+import { ParserV1 } from "../src/Environment/ParserV1.ts";
 import type { EnvSchema } from "../src/Schemas/EnvSchema.ts";
 
 describe("Builder", () => {
