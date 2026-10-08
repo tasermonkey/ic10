@@ -43,6 +43,17 @@ export class DefineInstruction extends Instruction {
 				],
 			},
 			{
+				title: "zero",
+				code: "define zero 0\nadd r0 zero 1",
+				expected: [
+					{
+						type: "register",
+						register: 0,
+						value: 1,
+					},
+				],
+			},
+			{
 				title: "dont set label",
 				code: "define t1 label\nmove r0 t1\nlabel:",
 				expected: [
@@ -88,7 +99,8 @@ export class DefineInstruction extends Instruction {
 				canBeDefine: false,
 				calculate: function (context, argument) {
 					const value = parseArgumentAnyNumber(context, argument);
-					if (value) {
+					// `value` is `false` when unparsable; 0 is a valid constant.
+					if (value !== false) {
 						return new Define("const", value);
 					}
 					this.addError(

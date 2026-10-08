@@ -127,6 +127,24 @@ export class LInstruction extends Instruction {
 }
 
 export class SdInstruction extends Instruction {
+	static override tests(): InstructionTestData[] {
+		if (typeof isProd !== "undefined" && isProd) {
+			return [];
+		}
+		return [
+			{
+				title: "by literal id",
+				code: ["sd 0 Setting 7", "l r0 db Setting"],
+				expected: [{ type: "register", register: 0, value: 7 }],
+			},
+			{
+				title: "by id in register",
+				code: ["move r1 0", "sd r1 Setting 8", "l r0 db Setting"],
+				expected: [{ type: "register", register: 0, value: 8 }],
+			},
+		];
+	}
+
 	override run(): void {
 		const device = this.getArgumentValue<calculateDevicePinOrIdResult>("device") as Required<
 			Pick<calculateDevicePinOrIdResult, "pin"> & Pick<calculateDevicePinOrIdResult, "port" | "id">
@@ -158,6 +176,24 @@ export class SdInstruction extends Instruction {
 }
 
 export class LdInstruction extends Instruction {
+	static override tests(): InstructionTestData[] {
+		if (typeof isProd !== "undefined" && isProd) {
+			return [];
+		}
+		return [
+			{
+				title: "by literal id",
+				code: ["s db Setting 5", "ld r0 0 Setting"],
+				expected: [{ type: "register", register: 0, value: 5 }],
+			},
+			{
+				title: "by id in aliased register",
+				code: ["alias ref r1", "move ref 0", "s db Setting 6", "ld r0 ref Setting"],
+				expected: [{ type: "register", register: 0, value: 6 }],
+			},
+		];
+	}
+
 	override run(): void {
 		const result = this.getArgumentValue<number>("result");
 		const device = this.getArgumentValue<calculateDevicePinOrIdResult>("device") as Required<

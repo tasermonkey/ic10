@@ -61,6 +61,14 @@ const BaseConfigs = {
 		canBeConst: false,
 		canBeDefine: false,
 	},
+	// Reference IDs are plain numbers, so a `define` can hold one (`define Furnace $4D655`).
+	// DefineInstruction stores its value with type "const", hence canBeConst.
+	deviceRef: {
+		canBeLabel: false,
+		canBeAlias: true,
+		canBeConst: true,
+		canBeDefine: true,
+	},
 	Enum: {
 		canBeLabel: false,
 		canBeAlias: false,
@@ -78,14 +86,6 @@ export type calculateDevicePinOrIdResult = {
 
 // Вспомогательные функции для работы с результатами
 const ResultHelpers = {
-	isValidPinResult: (result: number | [number, number] | number): result is number | [number, number] => {
-		return typeof result === "number" || Array.isArray(result);
-	},
-
-	isValidIdResult: (result: calculateDevicePinOrIdResult): result is { id: number } => {
-		return result.id !== undefined;
-	},
-
 	formatPinResult: (pinResult: number | [number, number]): calculateDevicePinOrIdResult => {
 		if (Array.isArray(pinResult)) {
 			return {
@@ -134,28 +134,27 @@ export const ValueCalculators = {
 	},
 
 	calculateDevicePinOrId: (context: Context, argument: Argument): calculateDevicePinOrIdResult => {
-		// Сначала пробуем обработать как пин устройства
-		let pinResult = getDevicePin(context, argument.text);
-		if (pinResult === false) {
-			pinResult = ErrorHandlers.handleError(context, argument, i18n.t("error.invalid_argument_device_pin"));
-		}
-		// Если получили валидный результат для пина (не число с ошибкой)
-		if (ResultHelpers.isValidPinResult(pinResult)) {
+		// First try to handle it as a device pin
+		const pinResult = getDevicePin(context, argument.text);
+		if (pinResult !== false) {
 			return ResultHelpers.formatPinResult(pinResult);
 		}
 
-		// Если не сработало как пин, пробуем как ID устройства
-		const idResult = ValueCalculators.calculateDeviceId(context, argument);
-
-		// Если получили ID без ошибки
-		if (ResultHelpers.isValidIdResult(idResult)) {
-			return idResult;
+		// Not a pin: try it as a reference ID (number, register, define). Only the housing's network is
+		// searched, as in game. No error is recorded for the failed pin parse; that used to turn every
+		// ID into pin 0 and made `ld`/`sd` unusable.
+		const value = parseArgumentAnyNumber(context, argument);
+		if (value === false) {
+			return {
+				error: ErrorHandlers.handleError(context, argument, i18n.t("error.invalid_argument_device_pin_or_id")),
+			};
 		}
-
-		// Если оба варианта не сработали, возвращаем ошибку
-		return {
-			error: ErrorHandlers.handleError(context, argument, i18n.t("error.invalid_argument_device_pin_or_id")),
-		};
+		if (!context.isConnectDeviceById(value)) {
+			return {
+				error: ErrorHandlers.handleError(context, argument, i18n.t("error.invalid_argument_device_id")),
+			};
+		}
+		return { id: value };
 	},
 
 	calculateLogic: (context: Context, argument: Argument): ReturnType<typeof Logics.getByKey> | 0 => {
@@ -270,13 +269,13 @@ export const ArgumentCalculators = {
 
 	deviceId: (name?: string) => ({
 		name,
-		...BaseConfigs.device,
+		...BaseConfigs.deviceRef,
 		calculate: (context: Context, argument: Argument) => ValueCalculators.calculateDeviceId(context, argument),
 	}),
 
 	devicePinOrId: (name?: string) => ({
 		name,
-		...BaseConfigs.device,
+		...BaseConfigs.deviceRef,
 		calculate: (context: Context, argument: Argument) => ValueCalculators.calculateDevicePinOrId(context, argument),
 	}),
 
