@@ -2,6 +2,8 @@
  * Regression tests for engine bugs fixed in this fork. The instruction tests can't catch these:
  * they only compare final values, and a rejected argument silently evaluates to 0.
  */
+import { execFileSync } from "node:child_process";
+import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 import { ErrorSeverity } from "../../src/Ic10/Errors/Errors.ts";
 import {
@@ -180,5 +182,21 @@ describe("yield / sleep suspend requests", () => {
 		await runner.step();
 		await runner.step();
 		expect(events).toEqual([[{ kind: "yield" }, 1]]);
+	});
+});
+
+describe("i18n", () => {
+	test("messages are English without any setup by the library's user", () => {
+		// A fresh process: tests/setup.ts initialises i18n for this one, which would hide the problem.
+		const out = execFileSync(
+			process.execPath,
+			[
+				"--input-type=module",
+				"-e",
+				'import i18n from "./src/Languages/lang.ts"; console.log(i18n.t("error.pin_not_allowed_in_instruction"));',
+			],
+			{ cwd: join(import.meta.dirname, "..", ".."), encoding: "utf8" },
+		);
+		expect(out.trim()).toBe("You can't use pin in this instruction");
 	});
 });
