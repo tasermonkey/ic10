@@ -80,7 +80,8 @@ abstract class ExecutionBase extends Context implements IExecutionContext {
 			return;
 		}
 
-		this.setRegister(raValue, originalLine);
+		// ra holds the line after the jump-and-link (the game: "store next line number in ra").
+		this.setRegister(raValue, originalLine + 1);
 	}
 
 	private updateLineIndex(index?: number): void {

@@ -139,6 +139,19 @@ describe("errors never escape step()", () => {
 	});
 });
 
+describe("jump-and-link return address", () => {
+	test.each([
+		["jal", "jal sub"],
+		["a branch-and-link", "beqzal r5 sub"],
+	])("%s stores the next line in ra, so j ra returns past it", async (_kind, call) => {
+		const runner = await realRunner(`${call}\nmove r0 1\nj end\nsub:\nmove r1 ra\nj ra\nend:`);
+		await runToStop(runner, 100);
+		expect(runner.realContext.getRegister(1)).toBe(1); // ra = the line after the call
+		expect(runner.realContext.getRegister(0)).toBe(1); // and execution carried on from there
+		expect(runner.context.criticalError).toBe(false);
+	});
+});
+
 describe("yield / sleep suspend requests", () => {
 	async function suspends(code: string, steps: number) {
 		const runner = await realRunner(code);

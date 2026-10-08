@@ -674,11 +674,11 @@ export class BeqalInstruction extends makeBinarySet(BinaryBranchAndLinkInstructi
 		if (typeof isProd !== "undefined" && isProd) {
 			return [];
 		}
-		// Kept as in the original due to the specifics of RA/nextLineIndex
+		// ra is the line after the beqal (line 2), as in game
 		return [
 			{
 				code: `move r0 1\nmove r1 1\nbeqal r0 r1 4\nmove r2 1\nmove r3 1`,
-				expected: [expectReg(RA, 2), expectReg(2, 0), expectReg(3, 1)],
+				expected: [expectReg(RA, 3), expectReg(2, 0), expectReg(3, 1)],
 			},
 			{
 				code: `move r0 1\nmove r1 2\nbeqal r0 r1 4\nmove r2 1\nmove r3 1`,
