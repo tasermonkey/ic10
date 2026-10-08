@@ -15,7 +15,7 @@ class Glob {
 	}
 }
 
-console.log("🚀 Whatching ...");
+console.log("🚀 Watching ...");
 
 // === SETTINGS ===
 const CONFIG: {
@@ -38,7 +38,7 @@ const CONFIG: {
 	scripts: [
 		{
 			pattern: new Glob("Ic10/Instruction/**"),
-			command: "npm run generate:intruction && npm run generate:vscode",
+			command: "npm run generate:instruction && npm run generate:vscode",
 		},
 		{
 			pattern: new Glob("Defines/**"),

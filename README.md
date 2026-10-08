@@ -81,7 +81,7 @@ npm run upgrade
 - `download` - Download latest data from server
 - `generate-device` - Generate device classes
 - `generate:index` - Update index files
-- `generate-intruction-index` - Generate instruction index
+- `generate-instruction-index` - Generate instruction index
 - `generate-vscode` - Update VSCode configuration
 
 ### Code Quality
@@ -107,7 +107,7 @@ This script performs:
 npm run dev
 ```
 
-The `whatch.ts` script monitors changes and automatically:
+The `watch.ts` script monitors changes and automatically:
 - Regenerates index files when sources change
 - Updates devices when definitions change
 - Rebuilds instruction index when instruction classes change
@@ -142,7 +142,7 @@ comming soon
 - Groups devices by base types (Housing, Structure, Item)
 - Generates index files for export
 
-### Instruction Generation (`generate-intruction-index.ts`)
+### Instruction Generation (`generate-instruction-index.ts`)
 - Automatically discovers instruction classes
 - Creates instruction map for quick access
 - Generates TypeScript types for instruction names
@@ -154,7 +154,7 @@ comming soon
 
 ## 📊 Change Monitoring
 
-The `whatch.ts` system provides:
+The `watch.ts` system provides:
 - **Debounce mechanism** - Prevents multiple rebuilds
 - **Selective regeneration** - Only necessary parts on change
 - **Template support** - Different scripts for different file types

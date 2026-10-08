@@ -32,14 +32,14 @@
 		"codemod": "node tools/codemod-esm.ts",
 		"codemod:check": "node tools/codemod-esm.ts --check",
 		"generate:index": "node tools/generate-index.ts && npm run codemod && npm run fix",
-		"generate:intruction": "node tools/generate-intruction-index.ts && npm run codemod && npm run fix",
+		"generate:instruction": "node tools/generate-instruction-index.ts && npm run codemod && npm run fix",
 		"generate:device": "node tools/generate-devices.ts && npm run codemod && npm run fix",
 		"generate:vscode": "node tools/generate-vscode.ts && npm run codemod && npm run fix",
 		"generate:schema": "node tools/generate-schema.ts && npm run codemod && npm run fix",
 		"generate:langs": "node tools/generate-langs.ts && npm run codemod && npm run fix",
 		"download": "node tools/download.ts && npm run codemod && npm run fix",
 		"download:missing": "node tools/download.ts --missing",
-		"generate": "npm run download:missing && npm run generate:device && npm run generate:intruction && npm run generate:index && npm run generate:schema && npm run generate:vscode && npm run generate:langs",
+		"generate": "npm run download:missing && npm run generate:device && npm run generate:instruction && npm run generate:index && npm run generate:schema && npm run generate:vscode && npm run generate:langs",
 		"upgrade": "npm run download && npm run generate && npm test",
 		"typecheck": "tsc -p tsconfig.json",
 		"build": "npm run generate && npm test && npm run build:lib",
@@ -52,8 +52,8 @@
 		"fix": "biome check . --write --unsafe",
 		"format": "biome format --write",
 		"format:check": "biome format",
-		"dev": "node tools/whatch.ts",
-		"show": "vitest run tests/ic10/complited.test.ts"
+		"dev": "node tools/watch.ts",
+		"show": "vitest run tests/ic10/completed.test.ts"
 	},
 	"devDependencies": {
 		"@babel/generator": "^7.29.8",

@@ -202,7 +202,7 @@ Test runner auto-discovers all instruction tests. Tests run in dual context (san
 |--------|----------|
 | `generate-devices.ts` | Device classes using Babel AST |
 | `generate-index.ts` | `src/index.ts` barrel exports |
-| `generate-intruction-index.ts` | `instructions` map in `src/Ic10/Instruction/index.ts` |
+| `generate-instruction-index.ts` | `instructions` map in `src/Ic10/Instruction/index.ts` |
 | `generate-schema.ts` | `env.schema.json` from valibot |
 | `generate-vscode.ts` | VS Code language config |
 | `generate-langs.ts` | i18n language files |
