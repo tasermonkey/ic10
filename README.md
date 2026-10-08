@@ -15,6 +15,27 @@
 [![Node](https://img.shields.io/badge/runtime-Node%2024%2B-339933.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/lang-TypeScript-blue.svg)](https://www.typescriptlang.org/)
 
+> ## About this fork
+>
+> This is a fork of [Stationeers-ic/ic10](https://github.com/Stationeers-ic/ic10), maintained on the
+> `node-esm` branch. It exists to power a **testing framework for IC10 scripts**: Vitest tests that
+> build an emulated game world (devices, networks, property values), run a script against it tick
+> by tick, and assert on registers and device state. The framework (`ic10-test`) lives in
+> [tasermonkey/chipdata-workspace](https://github.com/tasermonkey/chipdata-workspace), which uses
+> this fork as a git submodule; its `TEST_FRAMEWORK_PLAN.md` explains the design.
+>
+> Changes from upstream, all made for that purpose:
+>
+> - **Node 24 + npm, real ESM.** No Bun. Sources run directly on Node (type stripping), tests use
+>   Vitest, and imports are relative with `.ts` extensions (see `tools/codemod-esm.ts`).
+> - **Engine fixes** the tests depend on: `ld`/`sd` by reference ID (including IDs in defines),
+>   `define X 0`, the sandbox "no network for port" error, and `yield`/`sleep` reporting a suspend
+>   request instead of waiting in real time (which also fixes `sleep`'s double ×1000).
+> - **Readability:** typo fixes (`Builder`, `Environment`, `watch.ts`, …), English comments and
+>   messages, and documented environment-schema fields.
+>
+> Changes aren't sent upstream; game-data updates come from regenerating with the fork's own tools.
+> The license stays AGPL-3.0. The npm and CI badges below describe the upstream project.
 
 This project is an IC10 emulator (programming language for the game Stationeers) with a complete toolkit for development, testing, and code generation.
 
