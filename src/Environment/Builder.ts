@@ -3,7 +3,7 @@ import type { Chip } from "../Core/Chip.ts";
 import type { Device } from "../Core/Device.ts";
 import type { Network } from "../Core/Network.ts";
 import { ErrorSeverity } from "../Ic10/Errors/Errors.ts";
-import type { Ic10Runner } from "../Ic10/Ic10Runner.ts";
+import { type Ic10Runner, JUMP_LIMIT_ERROR_CODE } from "../Ic10/Ic10Runner.ts";
 import type { EnvSchema, ProjectSchema } from "../Schemas/EnvSchema.ts";
 import { type Parser, ParserV1 } from "./ParserV1.ts";
 
@@ -55,7 +55,13 @@ export class Builder {
 			await runner.run();
 			runner.init();
 
-			const err = runner.context.errors.filter((error) => error.severity === ErrorSeverity.Strong);
+			// Strong errors, and critical ones (e.g. an instruction that threw) apart from the jump
+			// limit, which every looping script reaches in the sandbox pass.
+			const err = runner.context.errors.filter(
+				(error) =>
+					error.severity === ErrorSeverity.Strong ||
+					(error.severity === ErrorSeverity.Critical && error.code !== JUMP_LIMIT_ERROR_CODE),
+			);
 			if (err.length > 0) {
 				return false;
 			}

@@ -41,8 +41,7 @@ export class ItemEntity {
 			this._propertiesRaw.set(propCode, value);
 			return;
 		}
-		throw "unknown_prop";
-		// otherwise ignore the unknown property (or an exception could be thrown)
+		throw new Error(`Unknown slot property: ${prop}`);
 	}
 
 	public getProp(prop: number | string): number {

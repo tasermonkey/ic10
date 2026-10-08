@@ -6,7 +6,7 @@ import type { SuspendRequest } from "./Context/Context.ts";
 import { ContextSwitcher, type contextNames } from "./Context/ContextSwitcher.ts";
 import { RealContext } from "./Context/RealContext.ts";
 import { SandboxContext } from "./Context/SandboxContext.ts";
-import { ErrorSeverity, FatalIc10Error, type Ic10Error, RuntimeIc10Error } from "./Errors/Errors.ts";
+import { ErrorSeverity, FatalIc10Error, Ic10Error, RuntimeIc10Error } from "./Errors/Errors.ts";
 import { Argument } from "./Instruction/Helpers/Argument.ts";
 import { CommentLine } from "./Lines/CommentLine.ts";
 import { EmptyLine } from "./Lines/EmptyLine.ts";
@@ -16,6 +16,9 @@ import type { Line } from "./Lines/Line.ts";
 
 export const RegExpLabelLine = /((?<label>\w+):)\s*(?<comment>#.*)?/im;
 export const RegExpInstructionLine = /^(?<instruction>\w+)(?:\s+(?<arguments>.+?))?(?:\s*#(?<comment>.*))?$/im;
+
+/** `code` of the error raised when a runner exceeds its jump limit (expected for looping scripts). */
+export const JUMP_LIMIT_ERROR_CODE = "JUMP_LIMIT";
 
 export type Ic10RunnerConstructor = {
 	housing: Housing;
@@ -146,6 +149,7 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 		if (this.context.getJumpsCount() > this.jumpLimit) {
 			const error = new RuntimeIc10Error({
 				message: i18n.t("error.jump_limit_exceeded"),
+				code: JUMP_LIMIT_ERROR_CODE,
 				line: currentLineIndex,
 				severity: ErrorSeverity.Critical,
 			});
@@ -182,13 +186,24 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 
 		this.context.setExecuteLine(line);
 		this.context.takeSuspend(); // drop anything stale, so only this line's request is reported
-		await line.runCommentBeforeRun();
-		// Execute the current line
-		if (line instanceof InstructionLine) {
-			await line.run();
+		try {
+			await line.runCommentBeforeRun();
+			// Execute the current line
+			if (line instanceof InstructionLine) {
+				await line.run();
+			}
+			await line.runCommentAfterRun();
+			line.end();
+		} catch (thrown) {
+			// Nothing may escape step(): in game, an error halts the chip; it doesn't crash anything.
+			// Record it as a critical error on this line and stop.
+			const error = this.toChipError(thrown, currentLineIndex);
+			this.addError(error);
+			this.emit("fatalError", error);
+			this.executionStopped = true;
+			this.emit("stop");
+			return false;
 		}
-		await line.runCommentAfterRun();
-		line.end();
 		this.$suspend = this.context.takeSuspend();
 
 		// Step end event
@@ -214,6 +229,17 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 		} while (continueRun && !this.executionStopped);
 		this.emit("runEnd");
 		return this;
+	}
+
+	/** Turn anything thrown while executing a line into a critical Ic10Error for that line. */
+	private toChipError(thrown: unknown, lineIndex: number): Ic10Error {
+		if (thrown instanceof Ic10Error) {
+			thrown.severity = ErrorSeverity.Critical;
+			if (thrown.line === undefined) thrown.line = lineIndex;
+			return thrown;
+		}
+		const message = thrown instanceof Error ? thrown.message : String(thrown);
+		return new RuntimeIc10Error({ message, line: lineIndex, severity: ErrorSeverity.Critical });
 	}
 
 	public addError(error: Ic10Error): this {
