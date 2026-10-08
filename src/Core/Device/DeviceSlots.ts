@@ -29,7 +29,7 @@ export class ItemEntity {
 	}
 
 	public setProp(prop: number | string, value: number): void {
-		// Тройная проверка: распознаём по ключу, либо по значению
+		// Triple check: resolve by key, or by value
 		let propCode: number | undefined;
 		if (LogicSlot.hasKey(prop)) {
 			const code = LogicSlot.getByKey(prop);
@@ -42,7 +42,7 @@ export class ItemEntity {
 			return;
 		}
 		throw "unknown_prop";
-		// иначе игнорируем неизвестную пропертy (или можно выбросить исключение)
+		// otherwise ignore the unknown property (or an exception could be thrown)
 	}
 
 	public getProp(prop: number | string): number {
@@ -69,7 +69,7 @@ export class Slot extends DeviceScope {
 	constructor(device: Device, slot: NonNullable<SlotsType>[number]) {
 		super({ device });
 		this.slot = slot;
-		// Заполняем двунаправленный мэппинг только валидные коды
+		// Fill the bidirectional mapping with valid codes only
 		slot.logic.forEach((l) => {
 			if (LogicSlot.hasKey(l)) {
 				const c = LogicSlot.getByKey(l);
@@ -85,7 +85,7 @@ export class Slot extends DeviceScope {
 			return 0;
 		}
 		let propCode: number | undefined;
-		// Ищем по ключу/значению в BiMap
+		// Look up by key/value in the BiMap
 		if (this.logicNameToCode.hasKey(prop as string)) {
 			propCode = this.logicNameToCode.getByKey(prop as string);
 		} else if (this.logicNameToCode.hasValue(prop as number)) {
@@ -151,7 +151,7 @@ export class Slot extends DeviceScope {
 			return;
 		}
 		if (count < 0) {
-			// Удаляем всё содержание слота
+			// Remove all slot contents
 			this.ITEM = null;
 			return;
 		}

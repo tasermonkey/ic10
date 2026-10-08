@@ -4,7 +4,7 @@ import { TypeIc10Error } from "../Errors/Errors.ts";
 import type { Argument } from "../Instruction/Helpers/Argument.ts";
 import { crc32, stringToCode } from "./functions.ts";
 
-// Регулярные выражения для парсинга
+// Regular expressions for parsing
 export const singleRegister = /^r(?<reg>\d+)$/;
 export const recursiveRegister = /^(?<count>r{2,})(?<reg>\d+)$/;
 export const singleDevice = /^d(?<reg>\d+)$|^db$/;
@@ -15,7 +15,7 @@ export const hash = /^HASH\("(?<hash>.+)"\)$/;
 export const str = /^STR\("(?<str>.+)"\)$/;
 
 /**
- * Обрабатывает специальные числовые значения JavaScript
+ * Handles special JavaScript numeric values
  */
 export function jsThing(value: number): number {
 	if (Object.is(value, -0)) return 0;
@@ -24,7 +24,7 @@ export function jsThing(value: number): number {
 }
 
 /**
- * Получает константу по имени
+ * Gets a constant by name
  */
 export function getConst(argument: Argument, group?: string): number | false {
 	if (group === undefined) {
@@ -34,7 +34,7 @@ export function getConst(argument: Argument, group?: string): number | false {
 }
 
 /**
- * Парсит аргумент в число, используя все доступные методы парсинга
+ * Parses an argument into a number using all available parsing methods
  */
 export function parseArgumentAnyNumber(context: Context, argument: Argument): number | false {
 	const parsers = [
@@ -56,7 +56,7 @@ export function parseArgumentAnyNumber(context: Context, argument: Argument): nu
 }
 
 /**
- * Парсит простое число
+ * Parses a plain number
  */
 function parseSimpleNumber(text: string): number | false {
 	const value = parseFloat(text);
@@ -64,21 +64,21 @@ function parseSimpleNumber(text: string): number | false {
 }
 
 /**
- * Парсит шестнадцатеричное число (начинается с $)
+ * Parses a hexadecimal number (starts with $)
  */
 export function parseHex(text: string): number | false {
 	return text.startsWith("$") ? parseInt(text.slice(1), 16) : false;
 }
 
 /**
- * Парсит двоичное число (начинается с %)
+ * Parses a binary number (starts with %)
  */
 export function parseBin(text: string): number | false {
 	return text.startsWith("%") ? parseInt(text.slice(1), 2) : false;
 }
 
 /**
- * Парсит хеш-выражение HASH("text")
+ * Parses a hash expression HASH("text")
  */
 export function parseHash(text: string): number | false {
 	const match = hash.exec(text);
@@ -86,7 +86,7 @@ export function parseHash(text: string): number | false {
 }
 
 /**
- * Парсит строковое выражение STR("text")
+ * Parses a string expression STR("text")
  */
 export function parseStr(context: Context, argument: Argument): number | false {
 	const match = str.exec(argument.text);
@@ -106,7 +106,7 @@ export function parseStr(context: Context, argument: Argument): number | false {
 }
 
 /**
- * Парсит значение регистра
+ * Parses a register value
  */
 export function parseRegister(context: Context, argument: Argument): number | false {
 	const regNum = getRegister(context, argument.text);
@@ -114,16 +114,16 @@ export function parseRegister(context: Context, argument: Argument): number | fa
 }
 
 /**
- * Получает номер регистра из текста (с поддержкой рекурсивных ссылок)
+ * Gets the register number from text (with support for recursive references)
  */
 export function getRegister(context: Context, text: string): number | false {
-	// Прямой регистр (rN)
+	// Direct register (rN)
 	const singleMatch = singleRegister.exec(text);
 	if (singleMatch) {
 		return parseInt(singleMatch.groups?.reg ?? "0", 10);
 	}
 
-	// Рекурсивный регистр (rr...rN)
+	// Recursive register (rr...rN)
 	const recursiveMatch = recursiveRegister.exec(text);
 	if (recursiveMatch) {
 		return resolveRecursiveReference(context, recursiveMatch, -1);
@@ -133,10 +133,10 @@ export function getRegister(context: Context, text: string): number | false {
 }
 
 /**
- * Получает номер пина устройства из текста
+ * Gets the device pin number from text
  */
 export function getDevicePin(context: Context, text: string): number | false | [number, number] {
-	// Специальный случай для db и db:port
+	// Special case for db and db:port
 	if (text === "db") return -1;
 
 	const dbWithPort = /^db:(?<port>\d+)$/;
@@ -146,7 +146,7 @@ export function getDevicePin(context: Context, text: string): number | false | [
 		return [-1, port];
 	}
 
-	// Устройство с портом: dN:port
+	// Device with port: dN:port
 	const singleWithPortMatch = singleDeviceWithPort.exec(text);
 	if (singleWithPortMatch) {
 		const pin = parseInt(singleWithPortMatch.groups?.reg ?? "0", 10);
@@ -154,7 +154,7 @@ export function getDevicePin(context: Context, text: string): number | false | [
 		return [pin, port];
 	}
 
-	// Рекурсивное устройство с портом: dr...rN:port
+	// Recursive device with port: dr...rN:port
 	const recursiveWithPortMatch = recursiveDeviceWithPort.exec(text);
 	if (recursiveWithPortMatch) {
 		const pin = resolveRecursiveReference(context, recursiveWithPortMatch);
@@ -162,13 +162,13 @@ export function getDevicePin(context: Context, text: string): number | false | [
 		return [pin, port];
 	}
 
-	// Прямое устройство (dN)
+	// Direct device (dN)
 	const singleMatch = singleDevice.exec(text);
 	if (singleMatch) {
 		return parseInt(singleMatch.groups?.reg ?? "0", 10);
 	}
 
-	// Рекурсивное устройство (dr...rN)
+	// Recursive device (dr...rN)
 	const recursiveMatch = recursiveDevice.exec(text);
 	if (recursiveMatch) {
 		return resolveRecursiveReference(context, recursiveMatch);
@@ -178,13 +178,13 @@ export function getDevicePin(context: Context, text: string): number | false | [
 }
 
 /**
- * Разрешает рекурсивные ссылки на регистры/устройства
+ * Resolves recursive references to registers/devices
  */
 function resolveRecursiveReference(context: Context, match: RegExpExecArray, offeset: number = 0): number {
 	const rCount = (match.groups?.count ?? "").length;
 	let currentReg = parseInt(match.groups?.reg ?? "0", 10);
 
-	// Цепочка переходов: количество переходов = rCount - 1
+	// Chain of indirections: number of hops = rCount - 1
 	for (let i = 0; i < rCount + offeset; i++) {
 		currentReg = context.getRegister(currentReg);
 	}

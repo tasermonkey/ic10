@@ -22,34 +22,34 @@ export type Ic10RunnerConstructor = {
 	randomSeed?: number;
 };
 
-// Типы событий
+// Event types
 export interface Ic10RunnerEvents {
-	// Основные события выполнения
+	// Core execution events
 	run: () => void;
 	runEnd: () => void;
 	step: (lineIndex: number, line: Line) => void;
 	stepEnd: (lineIndex: number, line: Line) => void;
 
-	// События контекста
+	// Context events
 	contextSwitch: (fromContext: string, toContext: string) => void;
 	contextInit: (contextName: string) => void;
 
-	// События ошибок
+	// Error events
 	error: (error: Ic10Error) => void;
 	fatalError: (error: Ic10Error) => void;
 
-	// События выполнения строк
+	// Line execution events
 	lineExecute: (line: Line) => void;
 	lineEnd: (line: Line) => void;
 
-	// События управления выполнением
+	// Execution control events
 	stop: () => void;
 	reset: () => void;
 }
 
 /**
- * Контекст запуска
- * Класс эмулирующий работу CPU и RAM для ic10
+ * Execution context
+ * Class that emulates the CPU and RAM for ic10
  */
 export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 	public readonly contextSwitcher: ContextSwitcher;
@@ -115,7 +115,7 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 		this.lines = this.lexer(this.context.getIc10Code());
 		this.executionStopped = false;
 		if (reset) {
-			this.context.reset(); // Добавить метод reset() в Context
+			this.context.reset(); // Add a reset() method to Context
 		}
 		this.lines.filter((l) => l instanceof LabelLine).forEach((l) => l.run());
 		this.emit("contextInit", this.contextSwitcher.name);
@@ -162,20 +162,20 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 			return false;
 		}
 
-		// Событие начала шага
+		// Step start event
 		this.emit("step", currentLineIndex, line);
 		this.emit("lineExecute", line);
 
 		this.context.setExecuteLine(line);
 		await line.runCommentBeforeRun();
-		// Выполняем текущую строку
+		// Execute the current line
 		if (line instanceof InstructionLine) {
 			await line.run();
 		}
 		await line.runCommentAfterRun();
 		line.end();
 
-		// Событие завершения шага
+		// Step end event
 		this.emit("stepEnd", currentLineIndex, line);
 		this.emit("lineEnd", line);
 
@@ -281,17 +281,17 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 		const len = input.length;
 
 		while (i < len) {
-			// Пропускаем пробелы
+			// Skip whitespace
 			while (i < len && /\s/.test(input[i] as string)) i++;
 			if (i >= len) break;
 
 			const argStart = i;
 
-			// Проверяем на идентификатор с аргументом в скобках, например HASH("...")
+			// Check for an identifier with a parenthesized argument, e.g. HASH("...")
 			const funcMatch = input.slice(i).match(/^([A-Za-z_][A-Za-z0-9_]*)\(/);
 			if (funcMatch && funcMatch[1]) {
 				const funcName = funcMatch[1];
-				i += funcName.length + 1; // пропускаем идентификатор и (
+				i += funcName.length + 1; // skip the identifier and (
 
 				let depth = 1;
 				let inQuotes = false;
@@ -315,7 +315,7 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 				continue;
 			}
 
-			// Обычный аргумент до пробела
+			// Regular argument up to the next space
 			let argEnd = i;
 			while (argEnd < len && !/\s/.test(input[argEnd] as string)) argEnd++;
 			result.push(
@@ -331,7 +331,7 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 		return result;
 	}
 
-	// Дополнительные методы для управления выполнением
+	// Additional methods for controlling execution
 	public stopExecution(): void {
 		this.executionStopped = true;
 		this.emit("stop");
@@ -354,7 +354,7 @@ export class ValidateIc10Runner extends Ic10Runner {
 		const randomSeed = options?.randomSeed ?? new Random().next();
 		const jumpLimit = options?.jumpLimit ?? 1000;
 
-		// Создаем временный контекст песочницы
+		// Create a temporary sandbox context
 		const sandboxContext = new SandboxContext({
 			id: 0,
 			name: "validation",
@@ -363,7 +363,7 @@ export class ValidateIc10Runner extends Ic10Runner {
 			register_length: options?.register_length ?? 18,
 		});
 
-		// Создаем временный ContextSwitcher
+		// Create a temporary ContextSwitcher
 		const contextSwitcher = new ContextSwitcher<"validation">({
 			contexts: {
 				validation: sandboxContext,
@@ -371,7 +371,7 @@ export class ValidateIc10Runner extends Ic10Runner {
 			defaultContext: "validation",
 		});
 
-		// Создаем фейковый housing (минимальная заглушка)
+		// Create a fake housing (minimal stub)
 		const fakeHousing = {
 			chip: null,
 			applyRunner: () => {},
@@ -379,7 +379,7 @@ export class ValidateIc10Runner extends Ic10Runner {
 
 		super({ housing: fakeHousing, jumpLimit, randomSeed });
 
-		// Подменяем contextSwitcher
+		// Swap in the contextSwitcher
 		(this as any).contextSwitcher = contextSwitcher;
 	}
 
@@ -389,7 +389,7 @@ export class ValidateIc10Runner extends Ic10Runner {
 		try {
 			await validator.run();
 		} catch (error) {
-			// Ошибки уже должны быть в контексте
+			// Errors should already be in the context
 		}
 
 		return validator.context.errors;

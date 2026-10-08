@@ -25,7 +25,7 @@ export class Housing extends Device {
 			this.$memory = this.chip.memory;
 			this.chip.count = 1;
 			this.chip?.applyHousing(this);
-			//TODO: сделать разные индексы слотов для разных устройств
+			//TODO: use different slot indexes for different devices
 			this?.slots?.getSlot(0)?.putItem(this.chip);
 		}
 	}

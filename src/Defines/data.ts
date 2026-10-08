@@ -4,7 +4,7 @@ import DEVICES from "./devices.ts";
 import ITEMS from "./items.ts";
 import REAGENTS from "./reagents.ts";
 
-// Типы с readonly для большей точности
+// Readonly types for greater precision
 export type LogicConstType = typeof GROUPED_CONSTS.LogicType;
 export type LogicSlotConstType = typeof GROUPED_CONSTS.LogicSlotType;
 export type LogicBatchMethodType = typeof GROUPED_CONSTS.LogicBatchMethod;
@@ -21,7 +21,7 @@ export const LogicBatchMethod = new BiMap<
 	LogicBatchMethodType[keyof LogicBatchMethodType]
 >();
 
-// Если хотите получить точные union types всех возможных значений
+// For exact union types of all possible values
 export type ReagentHash = (typeof REAGENTS)[number] extends { hash: infer H } ? H : never;
 export type ReagentName = (typeof REAGENTS)[number]["name"];
 
@@ -34,7 +34,7 @@ export type DeviceHash = {
 
 type DeviceName = (typeof DEVICES)[keyof typeof DEVICES]["PrefabName"];
 
-// Использование
+// Usage
 export const Reagents = new BiMap<ReagentHash, ReagentName>();
 export const Devices = new BiMap<Exclude<DeviceHash, null>, Exclude<DeviceName, null>>();
 export const Items = new BiMap<ItemHash, ItemName>();
@@ -54,7 +54,7 @@ Object.entries(DEVICES).forEach(([_, device]) => {
 	}
 });
 
-// Типобезопасное заполнение
+// Type-safe population
 Object.entries(GROUPED_CONSTS.LogicType).forEach(([key, val]) => {
 	Logics.set(key as keyof LogicConstType, val as LogicConstType[keyof LogicConstType]);
 });

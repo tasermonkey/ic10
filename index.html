@@ -87,7 +87,7 @@
 	<h1>ic10 Runner</h1>
 
 	<div class="row">
-		<button type="button" id="runBtn">Запустить</button>
+		<button type="button" id="runBtn">Run</button>
 		<span id="status" aria-live="polite"></span>
 	</div>
 
@@ -95,11 +95,11 @@
 s db Mode 1
 s db Setting STR("TEST")</textarea>
 
-	<h3>Консоль</h3>
+	<h3>Console</h3>
 	<div id="console" role="log" aria-live="polite"></div>
 
 	<script>
-		// Вывод в блок "Консоль"
+		// Output to the "Console" block
 		(function setupUiConsole() {
 			const el = document.getElementById('console');
 			const native = {
@@ -188,7 +188,7 @@ s db Setting STR("TEST")</textarea>
 					el.appendChild(container);
 					el.scrollTop = el.scrollHeight;
 				} catch (err) {
-					appendLine('error', ['Ошибка вывода таблицы:', err]);
+					appendLine('error', ['Error printing table:', err]);
 				}
 			}
 
@@ -225,10 +225,10 @@ s db Setting STR("TEST")</textarea>
 				statusEl.textContent = text || '';
 			}
 			function ensureIc10() {
-				if (!window.ic10) throw new Error('ic10 не загружен. Проверьте путь к /dist/ic10.umd.js');
+				if (!window.ic10) throw new Error('ic10 is not loaded. Check the path to /dist/ic10.umd.js');
 			}
 
-			// ==== Реализация createRunner и утилит на базе глобального ic10 ====
+			// ==== Implementation of createRunner and utilities on top of the global ic10 ====
 
 			function createRunner(ic10Code, options) {
 				options = options || {};
@@ -246,7 +246,7 @@ s db Setting STR("TEST")</textarea>
 			}
 
 			async function runInstructionTest(runner, testData) {
-				await runner.run(); // песочница
+				await runner.run(); // sandbox
 				runner.switchContext('real');
 				if (testData.iterations_count) {
 					for (let i = 0; i < testData.iterations_count; i++) {
@@ -259,8 +259,8 @@ s db Setting STR("TEST")</textarea>
 			}
 
 			async function runDualContext(runner) {
-				await runner.run(); // песочница
-				await runner.switchContext().run(); // рабочая среда
+				await runner.run(); // sandbox
+				await runner.switchContext().run(); // production environment
 				return runner;
 			}
 
@@ -303,11 +303,11 @@ s db Setting STR("TEST")</textarea>
 				}
 			}
 
-			// ==== Кнопка "Запустить" ====
+			// ==== "Run" button ====
 
 			async function run() {
 				clearUiConsole();
-				setStatus('Выполнение...');
+				setStatus('Running...');
 				runBtn.disabled = true;
 
 				try {
@@ -316,8 +316,8 @@ s db Setting STR("TEST")</textarea>
 					const code = codeEl.value;
 					const runner = createRunner(code, { register_length: 16, stack_length: 512, hash: 125 });
 
-					console.log('Запуск в песочнице');
-					// Если у Ic10Runner есть init(), можно вызвать безопасно
+					console.log('Running in sandbox');
+					// If Ic10Runner has init(), it can be called safely
 					if (typeof runner.init === 'function') {
 						await runner.init().run();
 					} else {
@@ -332,7 +332,7 @@ s db Setting STR("TEST")</textarea>
 						(error) => error.severity === ic10.ErrorSeverity.Strong,
 					);
 					if (strongErrors.length === 0) {
-						console.log('Запуск в рабочей среде');
+						console.log('Running in production environment');
 						await runner.switchContext().run();
 						runner.context.errors.map((error) => {
 							console.error(error.formated_message);
@@ -355,7 +355,7 @@ s db Setting STR("TEST")</textarea>
 					const switcherErrors = runner.contextSwitcher?.getErrors?.() || [];
 					switcherErrors.forEach((e) => console.log(e.formated_message));
 				} catch (e) {
-					console.error('Ошибка выполнения:', e);
+					console.error('Execution error:', e);
 				} finally {
 					runBtn.disabled = false;
 					setStatus('');

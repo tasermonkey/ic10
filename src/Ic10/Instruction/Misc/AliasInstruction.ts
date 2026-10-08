@@ -23,7 +23,7 @@ export class AliasInstruction extends Instruction {
 					const t = argument.text;
 					if (this.context.hasDefines(t)) {
 						const v = this.context.getDefines(t)!;
-						// если значение это строка значит это alias и его можно переопределить
+						// if the value is a string, it is an alias and can be redefined
 						this.addError(
 							new RuntimeIc10Error({
 								message: i18n.t("error.alias_already_defined", { alias: t }),

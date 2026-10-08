@@ -122,11 +122,11 @@ function testPath(path: string) {
 	}
 }
 
-// Примеры использования
+// Usage examples
 testPath("slots.*.SlotIndex");
 testPath("slots.*.SlotType");
 // testPath("slots.*.logic.*");
 // testPath("tags.*");
 // testPath("logics.*.name");
-// testPath("slots.*"); // Должен выдать ошибку
-// testPath("*"); // Должен выдать ошибку
+// testPath("slots.*"); // Should throw an error
+// testPath("*"); // Should throw an error

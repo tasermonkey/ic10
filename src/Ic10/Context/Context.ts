@@ -7,148 +7,148 @@ import type { Define } from "../Instruction/Helpers/Define.ts";
 import type { Line } from "../Lines/Line.ts";
 
 export type ContextConstructor = {
-	/** Человекочитаемое имя контекста (для логов/отладки) */
+	/** Human-readable context name (for logging/debugging) */
 	name: string;
-	/** Устройство-владелец (Housing), предоставляющее доступ к сети, чипу и пр. */
+	/** Owning device (Housing) that provides access to the network, chip, etc. */
 	housing: Housing;
 };
 
-// Типы событий для Context
+// Event types for Context
 export interface ContextEvents {
-	// События выполнения
+	// Execution events
 	lineChange: (line: Line | undefined) => void;
 	lineExecute: (line: Line) => void;
 	lineEnd: (line: Line) => void;
 
-	// События ошибок
+	// Error events
 	error: (error: Ic10Error) => void;
 	criticalError: (error: Ic10Error) => void;
 
-	// События памяти
+	// Memory events
 	registerRead: (register: number, value: number) => void;
 	registerWrite: (register: number, oldValue: number, newValue: number) => void;
 
-	// События стека
+	// Stack events
 	stackPush: (value: number) => void;
 	stackPop: (value: number) => void;
 	stackPeek: (value: number) => void;
 
-	// События устройств
+	// Device events
 	deviceParameterRead: (pin: number, property: number, value: number) => void;
 	deviceParameterWrite: (pin: number, property: number, oldValue: number, newValue: number) => void;
 	deviceStackClear: (pin: number) => void;
 	deviceStackRead: (pin: number, index: number, value: number) => void;
 	deviceStackWrite: (pin: number, index: number, oldValue: number, newValue: number) => void;
 
-	// События определений
+	// Define events
 	defineSet: (name: string, value: Define) => void;
 	defineGet: (name: string, value: Define | undefined) => void;
 
-	// Общие события
+	// General events
 	reset: () => void;
 	jump: (fromLine: number, toLine: number) => void;
 }
 
 // =============================================
-// Интерфейсы для логических групп
+// Interfaces for logical groups
 // =============================================
 
-/** Интерфейс для управления выполнением кода */
+/** Interface for controlling code execution */
 export interface IExecutionContext {
-	/** Получить количество прыжков */
+	/** Get the jump count */
 	getJumpsCount(): number;
-	/** Увеличить счетчик прыжков */
+	/** Increment the jump counter */
 	incrementJumpsCount(): void;
-	/** Получить индекс следующей строки */
+	/** Get the next line index */
 	getNextLineIndex(): number;
-	/** Установить индекс следующей строки */
+	/** Set the next line index */
 	setNextLineIndex(index?: number, writeRA?: boolean): void;
-	/** Установить текущую выполняемую строку */
+	/** Set the line currently being executed */
 	setExecuteLine(line: Line): void;
 }
 
-/** Интерфейс для работы с алиасами и константами */
+/** Interface for working with aliases and constants */
 export interface IDefinesContext {
-	/** Проверить наличие Define по имени */
+	/** Check whether a Define exists by name */
 	hasDefines(name: string): boolean;
-	/** Установить значение Define */
+	/** Set a Define value */
 	setDefines(name: string, value: Define): void;
-	/** Получить Define по имени */
+	/** Get a Define by name */
 	getDefines(name: string): Define | undefined;
 }
 
-/** Интерфейс для работы с памятью/регистрами */
+/** Interface for working with memory/registers */
 export interface IMemoryContext {
-	/** Проверить существование регистра */
+	/** Check whether a register exists */
 	hasRegister(reg: number): boolean;
-	/** Получить значение регистра */
+	/** Get a register value */
 	getRegister(reg: number): number;
-	/** Установить значение регистра */
+	/** Set a register value */
 	setRegister(reg: number, value: number): void;
 }
 
-/** Интерфейс для работы с устройствами по пинам */
+/** Interface for working with devices by pin */
 export interface IDevicesByPinContext {
-	/** Проверить подключение устройства к пину */
+	/** Check whether a device is connected to a pin */
 	isConnectDeviceByPin(pin: number): boolean;
-	/** Получить параметр устройства по пину */
+	/** Get a device parameter by pin */
 	getDeviceParameterByPin(pin: number, prop: number): number;
-	/** Установить параметр устройства по пину */
+	/** Set a device parameter by pin */
 	setDeviceParameterByPin(pin: number, prop: number, value: number): void;
-	/** Очистить стек устройства по пину */
+	/** Clear a device's stack by pin */
 	clearDeviceStackByPin(pin: number): void;
-	/** Получить значение из стека устройства по пину */
+	/** Get a value from a device's stack by pin */
 	getDeviceStackByPin(pin: number, index: number): number;
-	/** Установить значение в стек устройства по пину */
+	/** Set a value in a device's stack by pin */
 	setDeviceStackByPin(pin: number, index: number, value: number): void;
 
 	canLoadDeviceParameterByPin(pin: number, prop: number): boolean;
 	canStoreDeviceParameterByPin(pin: number, prop: number): boolean;
 
 	getDevicePortChanelByPin(pin: number, port: number, chanel: number): number;
-	/** Установить параметр устройства по пину */
+	/** Set a device parameter by pin */
 	setDevicePortChanelByPin(pin: number, port: number, chanel: number, value: number): void;
 }
 
-/** Интерфейс для пакетных операций с устройствами по хэшу */
+/** Interface for batch operations on devices by hash */
 export interface IDevicesByHashContext {
-	/** Пакетное чтение параметра устройства по хэшу */
+	/** Batch read of a device parameter by hash */
 	deviceBatchReadByHash(deviceHash: number, prop: number, mode: number): number;
-	/** Пакетная запись параметра устройства по хэшу */
+	/** Batch write of a device parameter by hash */
 	deviceBatchWriteByHash(deviceHash: number, prop: number, value: number): void;
-	/** Пакетное чтение параметра слота устройства по хэшу */
+	/** Batch read of a device slot parameter by hash */
 	deviceSlotBatchReadByHash(deviceHash: number, slot: number, param: number, mode: number): number;
 }
 
-/** Интерфейс для пакетных операций с устройствами по хэшу и имени */
+/** Interface for batch operations on devices by hash and name */
 export interface IDevicesByHashAndNameContext {
-	/** Пакетное чтение параметра устройства по хэшу и имени */
+	/** Batch read of a device parameter by hash and name */
 	deviceBatchReadByHashAndName(deviceHash: number, deviceName: number, param: number, mode: number): number;
-	/** Пакетная запись параметра устройства по хэшу и имени */
+	/** Batch write of a device parameter by hash and name */
 	deviceBatchWriteByHashAndName(deviceHash: number, deviceName: number, param: number, value: number): void;
 }
 
-/** Интерфейс для работы со стеком */
+/** Interface for working with the stack */
 export interface IStackContext {
-	/** Положить значение в стек */
+	/** Push a value onto the stack */
 	push(value: number): void;
-	/** Извлечь значение из стека */
+	/** Pop a value from the stack */
 	pop(): number;
-	/** Посмотреть значение на вершине стека */
+	/** Peek at the value on top of the stack */
 	peek(): number;
-	/** Получить стек */
+	/** Get the stack */
 	stack(): StackInterface;
 }
 
-/** Интерфейс для базовых операций контекста */
+/** Interface for basic context operations */
 export interface IBaseContext {
-	/** Полный сброс контекста */
+	/** Fully reset the context */
 	reset(): void;
-	/** Проверить валидность чипа */
+	/** Check that the chip is valid */
 	validChip(): boolean;
-	/** Собрать ошибки из сети */
+	/** Collect errors from the network */
 	collectErrors(): void;
-	/** Добавить ошибку */
+	/** Add an error */
 	addError(error: Ic10Error): this;
 
 	sleep(seconds: number): Promise<void>;
@@ -188,7 +188,7 @@ export interface IDevicesReagentContext {
 }
 
 /**
- * Класс дает простое API для Инструкций с доступом к элементам Network, Housing ...
+ * Provides a simple API for Instructions with access to Network, Housing, ... elements
  */
 export abstract class Context
 	extends EventEmitter<ContextEvents>
@@ -206,21 +206,21 @@ export abstract class Context
 		IDevicesReagentContext
 {
 	debug(...args: any[]): void {}
-	/** Имя контекста (используется в отладке/логировании) */
+	/** Context name (used for debugging/logging) */
 	public readonly name: string;
 
-	/** Локальный пул ошибок, собранных за итерацию/тик (уникализирован по id) */
+	/** Local pool of errors collected during an iteration/tick (deduplicated by id) */
 	public $errors: Map<number, Ic10Error> = new Map();
 
-	/** Ссылка на устройство-владелец, через которое доступны чип, сеть и т.п. */
+	/** Reference to the owning device, through which the chip, network, etc. are accessed */
 	public readonly $housing: Housing;
 	public $executeLine?: Line;
 	public $criticalError?: Ic10Error = undefined;
 
 	/**
-	 * Создает новый контекст.
-	 * @param name Имя контекста
-	 * @param housing Устройство-владелец, предоставляющее доступ к чипу и сети
+	 * Creates a new context.
+	 * @param name Context name
+	 * @param housing Owning device that provides access to the chip and network
 	 */
 	constructor({ name, housing }: ContextConstructor) {
 		super();
@@ -240,23 +240,23 @@ export abstract class Context
 	}
 
 	/**
-	 * Возвращает текущий список накопленных ошибок (без дубликатов).
-	 * Обратите внимание: ошибки уникализируются по id.
+	 * Returns the current list of accumulated errors (without duplicates).
+	 * Note: errors are deduplicated by id.
 	 */
 	get errors() {
 		return this.$errors.values().toArray();
 	}
 
 	/**
-	 * Удобный доступ к чипу, закрепленному за данным Housing.
-	 * Предполагается, что чип существует к моменту вызова.
+	 * Convenient access to the chip attached to this Housing.
+	 * Assumes the chip exists at the time of the call.
 	 */
 	public get chip(): Chip {
 		return this.$housing.chip!;
 	}
 
 	/**
-	 * Доступ к Housing для наследников.
+	 * Access to the Housing for subclasses.
 	 */
 	public get housing() {
 		return this.$housing;
@@ -313,10 +313,10 @@ export abstract class Context
 	}
 
 	/**
-	 * Возвращает исходный код IC10, загруженный в чип.
-	 * Перед получением проверяет валидность чипа. Если чип невалиден,
-	 * регистрирует (и, вероятно, выбросит) FatalIc10Error.
-	 * @throws FatalIc10Error Когда чип невалиден
+	 * Returns the IC10 source code loaded into the chip.
+	 * Checks that the chip is valid before retrieving it. If the chip is invalid,
+	 * registers (and probably throws) a FatalIc10Error.
+	 * @throws FatalIc10Error When the chip is invalid
 	 */
 	public getIc10Code(): string {
 		if (!this.validChip()) {

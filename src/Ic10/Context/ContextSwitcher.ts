@@ -20,7 +20,7 @@ function isContextTypeConstructor<T extends string | number | symbol = contextNa
 }
 
 /**
- * Класс для переключения контекстов
+ * Class for switching between contexts
  */
 export class ContextSwitcher<T extends string | number | symbol = contextNames> {
 	private readonly contexts: contextList<T>;
@@ -57,7 +57,7 @@ export class ContextSwitcher<T extends string | number | symbol = contextNames> 
 	}
 
 	/**
-	 * Получить уникальные ошибки из всех контекстов
+	 * Get unique errors from all contexts
 	 */
 	getErrors(): Ic10Error[] {
 		const map = new Map<number, Ic10Error>();

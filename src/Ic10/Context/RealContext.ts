@@ -20,7 +20,7 @@ import {
 } from "./Context.ts";
 
 // =============================================
-// Базовый класс с основной логикой выполнения
+// Base class with the core execution logic
 // =============================================
 
 abstract class ExecutionBase extends Context implements IExecutionContext {
@@ -100,7 +100,7 @@ abstract class ExecutionBase extends Context implements IExecutionContext {
 }
 
 // =============================================
-// Класс для работы с определениями (defines)
+// Class for working with definitions (defines)
 // =============================================
 
 abstract class DefinesBase extends ExecutionBase implements IDefinesContext {
@@ -121,7 +121,7 @@ abstract class DefinesBase extends ExecutionBase implements IDefinesContext {
 }
 
 // =============================================
-// Класс для работы с регистрами
+// Class for working with registers
 // =============================================
 
 abstract class MemoryBase extends DefinesBase implements IMemoryContext {
@@ -159,7 +159,7 @@ abstract class MemoryBase extends DefinesBase implements IMemoryContext {
 }
 
 // =============================================
-// Вспомогательные методы для работы с устройствами
+// Helper methods for working with devices
 // =============================================
 
 abstract class DeviceHelpers extends MemoryBase {
@@ -295,7 +295,7 @@ abstract class DeviceHelpers extends MemoryBase {
 }
 
 // =============================================
-// Класс для работы с устройствами по пинам
+// Class for working with devices by pin
 // =============================================
 
 abstract class DevicesByPinBase extends DeviceHelpers implements IDevicesByPinContext {
@@ -371,7 +371,7 @@ abstract class DevicesByPinBase extends DeviceHelpers implements IDevicesByPinCo
 }
 
 // =============================================
-// Класс для работы со стеком
+// Class for working with the stack
 // =============================================
 
 abstract class StackBase extends DevicesByPinBase implements IStackContext {
@@ -438,7 +438,7 @@ abstract class StackBase extends DevicesByPinBase implements IStackContext {
 }
 
 // =============================================
-// Классы для работы с устройствами по различным критериям
+// Classes for working with devices by various criteria
 // =============================================
 
 abstract class DevicesByHashBase extends StackBase implements IDevicesByHashContext {
@@ -622,7 +622,7 @@ abstract class DevicesReagentBase extends DevicesSlotBase implements IDevicesRea
 }
 
 // =============================================
-// Финальный класс RealContext
+// Final RealContext class
 // =============================================
 
 export class RealContext extends DevicesReagentBase {

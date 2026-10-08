@@ -9,10 +9,10 @@ const newT = (...args: Parameters<typeof i18n.t>): ReturnType<typeof i18n.t> => 
 	return oldT.call(i18n, ...args);
 };
 
-// Копируем все свойства, включая бренд
+// Copy all properties, including the brand
 Object.assign(newT, oldT);
 
 i18n.t = newT as typeof i18n.t;
 
-// Экспорт singleton
+// Export the singleton
 export default i18n;

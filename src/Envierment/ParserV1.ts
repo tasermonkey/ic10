@@ -25,14 +25,14 @@ import {
 import type { Builder } from "./Builder.ts";
 
 /**
- * Параметры конструктора парсера
+ * Parser constructor parameters
  */
 export type ParserConstructorType = {
 	builder: Builder;
 };
 
 /**
- * Абстрактный базовый класс для парсеров окружения
+ * Abstract base class for environment parsers
  */
 export abstract class Parser {
 	protected readonly builder: Builder;
@@ -42,12 +42,12 @@ export abstract class Parser {
 	}
 
 	/**
-	 * Парсит данные и загружает их в окружение
+	 * Parses data and loads it into the environment
 	 */
 	abstract parse(data: any): void;
 
 	/**
-	 * Сериализует текущее состояние окружения в строку
+	 * Serializes the current environment state to a string
 	 */
 	abstract stringify(): string;
 	abstract toData(): EnvSchema;
@@ -69,11 +69,11 @@ type HousingClass = DeviceClassesByBaseHousingType[HousingName] extends Construc
 	: never;
 
 // ============================================================================
-// SERIALIZER - Сериализация окружения в схему
+// SERIALIZER - Serializes the environment into a schema
 // ============================================================================
 
 // ============================================================================
-// SERIALIZER - Дополненная версия с поддержкой слотов и реагентов
+// SERIALIZER - Extended version with slot and reagent support
 // ============================================================================
 class SerializerV1 {
 	private readonly builder: Builder;
@@ -226,7 +226,7 @@ class SerializerV1 {
 			props: this.serializeDeviceProps(device),
 		};
 
-		// Housing устройства содержат IC10 код
+		// Housing devices contain IC10 code
 		if (device instanceof Housing) {
 			//data is HousingSchema
 			data.chip = device?.chip?.id;
@@ -243,13 +243,13 @@ class SerializerV1 {
 			//data is DeviceSchema
 		}
 
-		// Сериализация слотов
+		// Serialize slots
 		const slots = this.serializeDeviceSlots(device);
 		if (slots && slots.length > 0) {
 			data.slots = slots;
 		}
 
-		// Сериализация реагентов
+		// Serialize reagents
 		const reagents = this.serializeDeviceReagents(device);
 		if (reagents && reagents.length > 0) {
 			data.reagents = reagents;
@@ -290,7 +290,7 @@ class SerializerV1 {
 	}
 
 	/**
-	 * Сериализует слоты устройства
+	 * Serializes the device's slots
 	 */
 	private serializeDeviceSlots(device: Device): SlotSchema[] | undefined {
 		if (!device.hasSlots) return undefined;
@@ -321,7 +321,7 @@ class SerializerV1 {
 	}
 
 	/**
-	 * Сериализует реагенты устройства
+	 * Serializes the device's reagents
 	 */
 	private serializeDeviceReagents(device: Device): ReagentSchema[] | undefined {
 		if (!device.hasReagents) return undefined;
@@ -346,7 +346,7 @@ class SerializerV1 {
 }
 
 // ============================================================================
-// DESERIALIZER - Дополненная версия с поддержкой слотов и реагентов
+// DESERIALIZER - Extended version with slot and reagent support
 // ============================================================================
 
 class DeserializerV1 {
@@ -441,12 +441,12 @@ class DeserializerV1 {
 	}
 
 	private parseDevices(data: EnvSchema): void {
-		// Первый проход - создание устройств
+		// First pass - create devices
 		for (const deviceSchema of data.devices) {
 			this.parseDevice(deviceSchema);
 		}
 
-		// Второй проход - подключение пинов для Housing устройств
+		// Second pass - connect pins for Housing devices
 		for (const deviceSchema of data.devices) {
 			if (this.isHousing(deviceSchema)) {
 				this.connectPins(deviceSchema);
@@ -763,12 +763,12 @@ class DeserializerV1 {
 	}
 }
 // ============================================================================
-// PARSER V1 - Объединяет сериализацию и десериализацию
+// PARSER V1 - Combines serialization and deserialization
 // ============================================================================
 
 /**
- * Парсер версии 1 для загрузки и сохранения окружения
- * Поддерживает устройства, сети и IC10 код для Housing устройств
+ * Version 1 parser for loading and saving the environment
+ * Supports devices, networks and IC10 code for Housing devices
  */
 export class ParserV1 extends Parser {
 	private readonly serializer: SerializerV1;
@@ -781,16 +781,16 @@ export class ParserV1 extends Parser {
 	}
 
 	/**
-	 * Парсит схему окружения и загружает её в builder
-	 * @param data - Схема окружения для загрузки
+	 * Parses the environment schema and loads it into the builder
+	 * @param data - Environment schema to load
 	 */
 	public parse(data: EnvSchema): void {
 		this.deserializer.parse(data);
 	}
 
 	/**
-	 * Сериализует текущее состояние окружения в YAML строку
-	 * @returns YAML строка с полной схемой окружения
+	 * Serializes the current environment state to a YAML string
+	 * @returns YAML string with the full environment schema
 	 */
 	public stringify(debug: boolean = false, minify: boolean = false): string {
 		return this.serializer.stringify(debug, minify);

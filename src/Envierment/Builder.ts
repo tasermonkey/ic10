@@ -46,7 +46,7 @@ export class Builder {
 		return BUILDER;
 	}
 
-	// Одноразовая инициализация: прогнать sandbox и проверить ошибки
+	// One-time initialization: run the sandbox and check for errors
 	public async init(): Promise<boolean> {
 		if (this.initialized) return true;
 
@@ -68,7 +68,7 @@ export class Builder {
 		return true;
 	}
 
-	// Один тик исполнения без sandbox-прогона
+	// A single execution tick without a sandbox run
 	public async step(): Promise<boolean> {
 		const promises: Promise<{ key: any; result: boolean }>[] = [];
 		for (const [key, runner] of this.Runners.entries()) {
@@ -80,19 +80,19 @@ export class Builder {
 
 		const results = await Promise.all(promises);
 
-		// Удаляем завершённые runners
+		// Remove finished runners
 		for (const { key, result } of results) {
 			if (!result) {
 				this.FinishedRunners.add(key);
 			}
 		}
 
-		// true — если остались активные runners
+		// true if there are still active runners
 		return this.Runners.size - this.FinishedRunners.size > 0;
 	}
 
 	public toYaml(): string {
-		throw new Error("ТЫ ЕБАННУТЫЙ?????");
+		throw new Error("YAML export is not supported; use toJson() instead.");
 	}
 
 	public toJson(debug: boolean = false, minify: boolean = false): string {

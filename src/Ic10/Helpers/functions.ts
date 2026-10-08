@@ -4,27 +4,27 @@ export function crc32(str: string) {
 	return hashString(str);
 }
 
-// Преобразование строки (до 6 ASCII-символов) в числовой код (база 256)
+// Converts a string (up to 6 ASCII characters) to a numeric code (base 256)
 export function stringToCode(str: string): number {
 	if (str.length > 6) {
-		throw new Error("Максимум 6 символов");
+		throw new Error("Maximum of 6 characters");
 	}
 
 	let code = 0;
 	for (let i = 0; i < str.length; i++) {
 		const ch = str.charCodeAt(i);
 		if (ch > 127) {
-			throw new Error("Недопустимый символ: не ASCII");
+			throw new Error("Invalid character: not ASCII");
 		}
 		code = code * 256 + ch;
 	}
 	return code;
 }
 
-// Преобразование числового кода обратно в строку
+// Converts a numeric code back to a string
 export function codeToString(code: number): string {
 	if (!Number.isInteger(code) || code < 0) {
-		throw new Error("Неверный код");
+		throw new Error("Invalid code");
 	}
 	if (code === 0) return "";
 
@@ -35,16 +35,16 @@ export function codeToString(code: number): string {
 	}
 
 	if (bytes.length > 6) {
-		throw new Error("Код не может быть представлен в 6 символах");
+		throw new Error("Code cannot be represented in 6 characters");
 	}
 
-	// Восстанавливаем порядок символов
+	// Restore the character order
 	let result = "";
 	for (let i = bytes.length - 1; i >= 0; i--) {
 		const b = bytes[i];
 		if (b > 127) {
-			// Чтобы вернуть только ASCII символы
-			throw new Error("Некорректный распакованный символ");
+			// To return only ASCII characters
+			throw new Error("Invalid unpacked character");
 		}
 		result += String.fromCharCode(b);
 	}

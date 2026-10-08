@@ -1,4 +1,4 @@
-// Тип конструктора для ошибок
+// Constructor type for errors
 
 import type { Device } from "../../Core/Device.ts";
 import type { Context } from "../Context/Context.ts";
@@ -19,14 +19,14 @@ export type GameLangErrorConstructorType = {
 
 // A const object instead of an enum, so Node's type stripping can run this file directly.
 export const ErrorSeverity = {
-	Weak: "weak", // Ошибка, которая не влияет на работу программы
-	Warning: "warning", // Ошибка, которая может привести к ошибкам в работе программы например не оптимизированный код
-	Strong: "strong", // Ошибка не позволяющая работать программы
-	Critical: "critical", // Ошибка в работе интерпретатора
+	Weak: "weak", // An error that does not affect program operation
+	Warning: "warning", // An error that may cause problems in program operation, e.g. unoptimized code
+	Strong: "strong", // An error that prevents the program from running
+	Critical: "critical", // An error in the interpreter itself
 } as const;
 export type ErrorSeverity = (typeof ErrorSeverity)[keyof typeof ErrorSeverity];
 
-// Базовый класс для всех ошибок игрового языка
+// Base class for all game language errors
 export class Ic10Error extends Error {
 	public severity: ErrorSeverity;
 	public code: string;
@@ -70,8 +70,8 @@ export class Ic10Error extends Error {
 	}
 
 	/**
-	 * ID ошибки помогает идентифицировать вне зависимости от контекста,
-	 * чтобы избежать дублирования ошибок
+	 * The error ID helps identify the error regardless of context,
+	 * to avoid duplicate errors
 	 */
 	get id(): number {
 		return crc32([this.line, this.start, this.length, this.name, this.code, this.device?.id ?? 0].join("|"));
@@ -84,15 +84,15 @@ export class Ic10Error extends Error {
 	get formated_message() {
 		const parts: string[] = [];
 
-		// Уровень серьёзности (обязательное поле)
+		// Severity level (required field)
 		parts.push(`[${this.severity}]`);
 
-		// Контекст выполнения (если есть)
+		// Execution context (if any)
 		if (this.context?.name) {
 			parts.push(`(${this.context.name})`);
 		}
 
-		// Позиция в коде (если есть данные)
+		// Position in the code (if available)
 		if (this.line !== undefined) {
 			const location = this.start !== undefined ? `${this.line}:${this.start}` : `${this.line}`;
 			parts.push(`[${location}]`);
@@ -102,10 +102,10 @@ export class Ic10Error extends Error {
 			parts.push(`(device: ${this.device.id})`);
 		}
 
-		// Код ошибки (обязательное поле)
+		// Error code (required field)
 		parts.push(`${this.code}:`);
 
-		// Основное сообщение (обязательное поле)
+		// Main message (required field)
 		parts.push(`"${this.message}"`);
 		parts.push(this.id.toString(16));
 
@@ -135,7 +135,7 @@ export class Ic10Error extends Error {
 	}
 }
 
-// --- Не возможно продолжить работу---
+// --- Unable to continue execution ---
 export class FatalIc10Error extends Ic10Error {
 	constructor(params: GameLangErrorConstructorType) {
 		super({
@@ -150,7 +150,7 @@ export class FatalIc10Error extends Ic10Error {
 	}
 }
 
-// --- Ошибки синтаксиса ---
+// --- Syntax errors ---
 export class SyntaxIc10Error extends Ic10Error {
 	constructor(params: GameLangErrorConstructorType) {
 		super({
@@ -161,10 +161,10 @@ export class SyntaxIc10Error extends Ic10Error {
 	}
 }
 
-// --- Ошибки парсинга ---
+// --- Parsing errors ---
 export class DeviceIc10Error extends Ic10Error {}
 
-// --- Ошибки аргументов ---
+// --- Argument errors ---
 export class ArgumentIc10Error extends Ic10Error {
 	constructor(params: GameLangErrorConstructorType) {
 		super({
@@ -182,7 +182,7 @@ export class ArgumentIc10Error extends Ic10Error {
 	}
 }
 
-// --- Ошибки исполнения ---
+// --- Runtime errors ---
 export class RuntimeIc10Error extends ArgumentIc10Error {
 	constructor(params: GameLangErrorConstructorType) {
 		super({
@@ -202,7 +202,7 @@ export class DebugInfo extends ArgumentIc10Error {
 	}
 }
 
-// --- Прочие ошибки ---
+// --- Other errors ---
 export class TypeIc10Error extends ArgumentIc10Error {
 	constructor(params: GameLangErrorConstructorType) {
 		super({

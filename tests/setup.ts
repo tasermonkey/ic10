@@ -5,10 +5,10 @@ import i18n from "../src/Languages/lang.ts";
 beforeAll(async () => {
 	await i18n
 		.init({
-			lng: "en", // язык по умолчанию
+			lng: "en", // default language
 			fallbackLng: "en",
 			debug: false,
 			resources: Languages,
 		})
-		.then(() => console.log("🟦🟦 Язык загружен 🟦🟦"));
+		.then(() => console.log("🟦🟦 Language loaded 🟦🟦"));
 });

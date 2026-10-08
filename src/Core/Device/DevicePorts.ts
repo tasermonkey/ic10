@@ -172,29 +172,29 @@ export class DevicePorts extends DeviceScope {
 	}
 
 	/**
-	 * Получить индекс порта по его типу
-	 * @returns индекс порта или -1 если порт не найден
+	 * Get a port's index by its type
+	 * @returns port index, or -1 if the port is not found
 	 */
 	public getPortIndex(type: PortType): number {
 		return this.portIndices.get(type) ?? -1;
 	}
 
 	/**
-	 * Проверить существует ли порт указанного типа
+	 * Check whether a port of the given type exists
 	 */
 	public hasPort(type: PortType): boolean {
 		return this.portIndices.has(type);
 	}
 
 	/**
-	 * Получить все порты устройства в виде Map
+	 * Get all of the device's ports as a Map
 	 */
 	public getAllPorts(): Map<PortType, number> {
 		return this.portIndices;
 	}
 
 	/**
-	 * Получить количество портов устройства
+	 * Get the number of the device's ports
 	 */
 	public getPortCount(): number {
 		return this.portIndices.size;

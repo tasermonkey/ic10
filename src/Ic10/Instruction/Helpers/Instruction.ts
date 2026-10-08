@@ -7,70 +7,70 @@ import type { Line } from "../../Lines/Line.ts";
 import type { Argument } from "./Argument.ts";
 
 export type InstructionConstructorType = {
-	/** Контекст исполнения инструкции (доступ к регистрам, устройствам, define и т.д.) */
+	/** Instruction execution context (access to registers, devices, defines, etc.) */
 	context: Context;
-	/** Строка исходного кода, к которой привязана инструкция (для трассировки/ошибок) */
+	/** Source code line the instruction is bound to (for tracing/errors) */
 	line: Line;
-	/** Сырые аргументы инструкции, полученные из парсера */
+	/** Raw instruction arguments obtained from the parser */
 	args: Argument[];
 };
 
 export type InstructionArgument = {
-	/** Опциональное имя аргумента (для доступа по имени) */
+	/** Optional argument name (for access by name) */
 	name?: string;
-	/** Разрешено ли подставлять alias в этот аргумент */
+	/** Whether alias substitution is allowed for this argument */
 	canBeAlias: boolean;
-	/** Разрешено ли подставлять const в этот аргумент */
+	/** Whether const substitution is allowed for this argument */
 	canBeConst: boolean;
-	/** Разрешено ли подставлять define в этот аргумент */
+	/** Whether define substitution is allowed for this argument */
 	canBeDefine: boolean;
-	/** Разрешено ли подставлять label в этот аргумент */
+	/** Whether label substitution is allowed for this argument */
 	canBeLabel: boolean;
 	/**
-	 * Функция вычисления значения аргумента.
-	 * Здесь выполняется парсинг/валидация и преобразование Argument -> нужное значение.
-	 * this — это текущий экземпляр инструкции.
+	 * Function that computes the argument value.
+	 * Performs parsing/validation and conversion of Argument -> the required value.
+	 * this is the current instruction instance.
 	 */
 	calculate: (this: Instruction, context: Context, argument: Argument) => any;
 };
 
-/** Ожидание значения регистра */
+/** Expected register value */
 export type InstructionTestExpectedRegister = {
 	type: "register";
-	/** Ожидаемый номер регистра */
+	/** Expected register number */
 	register: number;
-	/** Ожидаемое значение регистра после выполнения */
+	/** Expected register value after execution */
 	value: number;
 };
 
-/** Ожидание значения стека */
+/** Expected stack value */
 export type InstructionTestExpectedStack = {
 	type: "stack";
-	/** Ожидаемый номер регистра */
+	/** Expected register number */
 	index: number;
-	/** Ожидаемое значение регистра после выполнения */
+	/** Expected register value after execution */
 	value: number;
 };
 
-/** Ожидание параметра устройства */
+/** Expected device parameter */
 export type InstructionTestExpectedDevice = {
 	type: "device";
-	/** Пин устройства */
+	/** Device pin */
 	pin: number;
-	/** Параметр устройства */
+	/** Device parameter */
 	prop: number;
-	/** Ожидаемое значение параметра после выполнения */
+	/** Expected parameter value after execution */
 	value: number;
 };
 
-/** Ожидание индекса следующей строки (поток выполнения) */
+/** Expected next line index (control flow) */
 export type InstructionTestExpectedLoop = {
 	type: "loop";
-	/** Номер следующей строки после выполнения */
+	/** Next line number after execution */
 	nextLineIndex: number;
 };
 
-/** Унифицированный тип ожиданий */
+/** Unified expectation type */
 export type InstructionTestExpected =
 	| InstructionTestExpectedStack
 	| InstructionTestExpectedRegister
@@ -83,31 +83,31 @@ export type InstructionTestData = {
 		id?: number;
 		device: Device;
 	}[];
-	/** Заголовок/описание теста (опционально) */
+	/** Test title/description (optional) */
 	title?: string;
-	/** Код IC10 для выполнения в тесте */
+	/** IC10 code to execute in the test */
 	code: string | string[];
-	/** Количество итераций в real context */
+	/** Number of iterations in the real context */
 	iterations_count?: number;
-	/** Список ожидаемых изменений регистров/устройств/потока выполнения */
+	/** List of expected changes to registers/devices/control flow */
 	expected: InstructionTestExpected[];
 };
 
 export abstract class Instruction {
-	/** Сырые аргументы инструкции, пришедшие из парсера */
+	/** Raw instruction arguments received from the parser */
 	public args: Argument[] = [];
-	/** Контекст исполнения */
+	/** Execution context */
 	public readonly context: Context;
-	/** Строка исходного кода, к которой привязана инструкция */
+	/** Source code line the instruction is bound to */
 	public readonly line: Line;
-	/** Кэш описаний аргументов (правила валидации/преобразования) */
+	/** Cache of argument descriptors (validation/conversion rules) */
 	public $argumentList!: InstructionArgument[];
 
 	/**
-	 * Создает экземпляр инструкции.
-	 * @param context Контекст исполнения (регистры, устройства, defines и проч.)
-	 * @param line Строка исходного кода для трассировки и сообщений об ошибках
-	 * @param args Сырые аргументы инструкции
+	 * Creates an instruction instance.
+	 * @param context Execution context (registers, devices, defines, etc.)
+	 * @param line Source code line for tracing and error messages
+	 * @param args Raw instruction arguments
 	 */
 	public constructor({ context, line, args }: InstructionConstructorType) {
 		this.context = context;
@@ -116,8 +116,8 @@ export abstract class Instruction {
 	}
 
 	/**
-	 * Кешированный список описаний аргументов.
-	 * Вычисляется один раз методом argumentList() и переиспользуется.
+	 * Cached list of argument descriptors.
+	 * Computed once via argumentList() and reused.
 	 */
 	public get argumentListCached() {
 		if (!this.$argumentList) {
@@ -127,19 +127,19 @@ export abstract class Instruction {
 	}
 
 	/**
-	 * Набор юнит-тестов для инструкции.
-	 * Переопределяется в конкретных реализациях при необходимости.
+	 * Set of unit tests for the instruction.
+	 * Overridden in concrete implementations as needed.
 	 */
 	static tests(): InstructionTestData[] {
 		return [];
 	}
 
 	/**
-	 * Точка входа выполнения инструкции.
-	 * 1) Получает правила аргументов
-	 * 2) Проверяет соответствие количества переданных аргументов правилам
-	 * 3) В случае успеха запускает реализацию run()
-	 * В случае несоответствия — регистрирует ошибку и завершает выполнение.
+	 * Entry point for executing the instruction.
+	 * 1) Gets the argument rules
+	 * 2) Checks that the number of supplied arguments matches the rules
+	 * 3) On success, invokes the run() implementation
+	 * On mismatch, registers an error and stops execution.
 	 */
 	public execute(): void | Promise<void> {
 		const rules = this.argumentList();
@@ -159,10 +159,10 @@ export abstract class Instruction {
 	}
 
 	/**
-	 * Регистрирует ошибку, автоматически проставляя строку,
-	 * а для ArgumentIc10Error — ещё и проблемный аргумент.
-	 * @param error Ошибка для регистрации
-	 * @param argument Аргумент, вызвавший ошибку (опционально, нужно для ArgumentIc10Error)
+	 * Registers an error, automatically setting the line
+	 * and, for ArgumentIc10Error, the offending argument as well.
+	 * @param error Error to register
+	 * @param argument Argument that caused the error (optional, needed for ArgumentIc10Error)
 	 */
 	public addError(error: Ic10Error, argument?: Argument) {
 		error.setLine(this.line);
@@ -173,7 +173,7 @@ export abstract class Instruction {
 	}
 
 	/**
-	 * Переопределят функцию end в Line
+	 * Overrides the end function in Line
 	 * @see InstructionLine.end
 	 * @returns
 	 */
@@ -182,33 +182,33 @@ export abstract class Instruction {
 	}
 
 	/**
-	 * Возвращает список правил для аргументов инструкции:
-	 * - разрешённые подстановки (alias/const/define/label)
-	 * - функция calculate для вычисления значения
+	 * Returns the list of rules for the instruction's arguments:
+	 * - allowed substitutions (alias/const/define/label)
+	 * - the calculate function for computing the value
 	 */
 	public abstract argumentList(): InstructionArgument[];
 
 	/**
-	 * Реализация логики инструкции.
-	 * Здесь уже можно безопасно использовать getArgumentValue()
-	 * для получения типизированных значений аргументов.
+	 * Implementation of the instruction logic.
+	 * getArgumentValue() can safely be used here
+	 * to get typed argument values.
 	 */
 	public abstract run(): void | Promise<void>;
 
 	/**
-	 * Возвращает вычисленное значение аргумента по индексу или имени.
-	 * Выполняет:
-	 * - Разрешение имени аргумента в индекс (если передана строка)
-	 * - Проверку наличия аргумента и соответствующего правила
-	 * - Подстановку define/alias/const/label в зависимости от разрешений в правиле
-	 * - Вызов rule.calculate для финального вычисления значения
-	 * @param indexOrName Индекс (0-based) или имя аргумента, указанное в правилах
-	 * @returns Значение аргумента требуемого типа T (по умолчанию number)
+	 * Returns the computed argument value by index or name.
+	 * Performs:
+	 * - Resolving the argument name to an index (if a string is passed)
+	 * - Checking that the argument and its corresponding rule exist
+	 * - Substituting define/alias/const/label depending on the rule's permissions
+	 * - Calling rule.calculate for the final value computation
+	 * @param indexOrName Index (0-based) or argument name as specified in the rules
+	 * @returns Argument value of the required type T (number by default)
 	 */
 	public getArgumentValue<T = number>(indexOrName: number | string): T {
 		const list = this.argumentListCached;
 
-		// Поддержка передачи имени аргумента
+		// Support passing the argument name
 		let index: number;
 		if (typeof indexOrName === "string") {
 			index = list.findIndex((rule) => rule.name === indexOrName);
@@ -226,7 +226,7 @@ export abstract class Instruction {
 		}
 
 		if (typeof this.args[index] === "undefined") {
-			// Сообщение адаптируем в зависимости от того, было ли передано имя или индекс
+			// Adapt the message depending on whether a name or an index was passed
 			const msg =
 				typeof indexOrName === "string"
 					? i18n.t("error.missing_argument", { name: indexOrName })
@@ -258,7 +258,7 @@ export abstract class Instruction {
 
 		const rule = list[index];
 
-		// Подстановка define/alias/const/label, если это разрешено правилом
+		// Substitute define/alias/const/label if the rule allows it
 		if (this.context.hasDefines(arg.text)) {
 			const define = this.context.getDefines(arg.text)!;
 			switch (define.type) {
@@ -277,7 +277,7 @@ export abstract class Instruction {
 			}
 		}
 
-		// Делегируем финальное вычисление значения правилу
+		// Delegate the final value computation to the rule
 		return rule.calculate.call(this, this.context, arg) as T;
 	}
 }

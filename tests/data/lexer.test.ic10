@@ -1,7 +1,7 @@
-# Комментарий
+# Comment
 define INPUTSLOT 0 # sorter input-slot
 alias Furnace d0
-alias Furnace2 d0 #Комментарий
+alias Furnace2 d0 #Comment
 alias h r10
 alias SlotOccupied r0
 
@@ -16,7 +16,7 @@ j ra
 move r8 9
 move rr8 9
 
-# Комментарий
+# Comment
 
 
 yield

@@ -39,7 +39,7 @@
             </root>
         </mxGraphModel>
     </diagram>
-    <diagram name="Страница — 1" id="V8KqElsHYLVdyvT8VotK">
+    <diagram name="Page — 1" id="V8KqElsHYLVdyvT8VotK">
         <mxGraphModel dx="1412" dy="575" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
@@ -47,7 +47,7 @@
                 <mxCell id="oiibnv2EOFYBwpJB7q5H-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="oiibnv2EOFYBwpJB7q5H-8" target="oiibnv2EOFYBwpJB7q5H-23" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="oiibnv2EOFYBwpJB7q5H-8" value="&lt;span style=&quot;font-weight: 400;&quot;&gt;Инициализация проекта&lt;/span&gt;" style="swimlane;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                <mxCell id="oiibnv2EOFYBwpJB7q5H-8" value="&lt;span style=&quot;font-weight: 400;&quot;&gt;Project initialization&lt;/span&gt;" style="swimlane;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="94" y="40" width="640" height="400" as="geometry">
                         <mxRectangle x="94" y="40" width="180" height="30" as="alternateBounds"/>
                     </mxGeometry>
@@ -55,38 +55,38 @@
                 <mxCell id="oiibnv2EOFYBwpJB7q5H-16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="oiibnv2EOFYBwpJB7q5H-8" source="4rec9Dz1lcHQf-7zMOeP-2" target="oiibnv2EOFYBwpJB7q5H-15" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="oiibnv2EOFYBwpJB7q5H-17" value="Данные" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="oiibnv2EOFYBwpJB7q5H-16" vertex="1" connectable="0">
+                <mxCell id="oiibnv2EOFYBwpJB7q5H-17" value="Data" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="oiibnv2EOFYBwpJB7q5H-16" vertex="1" connectable="0">
                     <mxGeometry x="-0.1055" y="2" relative="1" as="geometry">
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <object label="Создание окружения" id="4rec9Dz1lcHQf-7zMOeP-2">
+                <object label="Create environment" id="4rec9Dz1lcHQf-7zMOeP-2">
                     <mxCell style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="oiibnv2EOFYBwpJB7q5H-8" vertex="1">
                         <mxGeometry x="30" y="50" width="140" height="120" as="geometry"/>
                     </mxCell>
                 </object>
-                <mxCell id="4rec9Dz1lcHQf-7zMOeP-3" value="Создание сети" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="4rec9Dz1lcHQf-7zMOeP-2" vertex="1">
+                <mxCell id="4rec9Dz1lcHQf-7zMOeP-3" value="Create network" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="4rec9Dz1lcHQf-7zMOeP-2" vertex="1">
                     <mxGeometry y="30" width="140" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="4rec9Dz1lcHQf-7zMOeP-4" value="Создание&amp;nbsp; чипа" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="4rec9Dz1lcHQf-7zMOeP-2" vertex="1">
+                <mxCell id="4rec9Dz1lcHQf-7zMOeP-4" value="Create&amp;nbsp; chip" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="4rec9Dz1lcHQf-7zMOeP-2" vertex="1">
                     <mxGeometry y="60" width="140" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="4rec9Dz1lcHQf-7zMOeP-5" value="Создание&amp;nbsp; сокета" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="4rec9Dz1lcHQf-7zMOeP-2" vertex="1">
+                <mxCell id="4rec9Dz1lcHQf-7zMOeP-5" value="Create&amp;nbsp; socket" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="4rec9Dz1lcHQf-7zMOeP-2" vertex="1">
                     <mxGeometry y="90" width="140" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="oiibnv2EOFYBwpJB7q5H-6" value="&lt;p&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Аналог провода в игре.&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Хранит список всех подключеных устрорйств.&lt;/span&gt;&lt;/p&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;dashed=1;" parent="oiibnv2EOFYBwpJB7q5H-8" vertex="1">
+                <mxCell id="oiibnv2EOFYBwpJB7q5H-6" value="&lt;p&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Equivalent of a cable in the game.&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Stores the list of all connected devices.&lt;/span&gt;&lt;/p&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;dashed=1;" parent="oiibnv2EOFYBwpJB7q5H-8" vertex="1">
                     <mxGeometry x="220" y="30" width="300" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="oiibnv2EOFYBwpJB7q5H-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;" parent="oiibnv2EOFYBwpJB7q5H-8" source="4rec9Dz1lcHQf-7zMOeP-3" target="oiibnv2EOFYBwpJB7q5H-6" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="oiibnv2EOFYBwpJB7q5H-9" value="Аналог чипа ic10 и является оперативной памятью&lt;div&gt;Хранит код, регистры стак, список инструкций&lt;/div&gt;&lt;div&gt;Определяет ограничение памяти&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;dashed=1;" parent="oiibnv2EOFYBwpJB7q5H-8" vertex="1">
+                <mxCell id="oiibnv2EOFYBwpJB7q5H-9" value="Equivalent of the ic10 chip; acts as the working memory&lt;div&gt;Stores the code, registers, stack, and instruction list&lt;/div&gt;&lt;div&gt;Defines the memory limit&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;dashed=1;" parent="oiibnv2EOFYBwpJB7q5H-8" vertex="1">
                     <mxGeometry x="220" y="110" width="300" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="oiibnv2EOFYBwpJB7q5H-10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;" parent="oiibnv2EOFYBwpJB7q5H-8" source="4rec9Dz1lcHQf-7zMOeP-4" target="oiibnv2EOFYBwpJB7q5H-9" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="oiibnv2EOFYBwpJB7q5H-11" value="Аналог сокета в игре&lt;div&gt;Обеспечивает связь чипа с сетью&lt;/div&gt;&lt;div&gt;Является устройством&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;dashed=1;" parent="oiibnv2EOFYBwpJB7q5H-8" vertex="1">
+                <mxCell id="oiibnv2EOFYBwpJB7q5H-11" value="Equivalent of a socket in the game&lt;div&gt;Connects the chip to the network&lt;/div&gt;&lt;div&gt;Is a device&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;dashed=1;" parent="oiibnv2EOFYBwpJB7q5H-8" vertex="1">
                     <mxGeometry x="220" y="190" width="300" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="oiibnv2EOFYBwpJB7q5H-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;" parent="oiibnv2EOFYBwpJB7q5H-8" source="4rec9Dz1lcHQf-7zMOeP-5" target="oiibnv2EOFYBwpJB7q5H-11" edge="1">
@@ -95,10 +95,10 @@
                 <mxCell id="oiibnv2EOFYBwpJB7q5H-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="oiibnv2EOFYBwpJB7q5H-8" source="oiibnv2EOFYBwpJB7q5H-15" target="oiibnv2EOFYBwpJB7q5H-8" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="oiibnv2EOFYBwpJB7q5H-15" value="Создание&amp;nbsp;&lt;span style=&quot;color: rgb(169, 220, 118); font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace; background-color: rgb(45, 42, 46);&quot;&gt;Ic10Runner&lt;/span&gt;&lt;div&gt;в&amp;nbsp;&lt;span style=&quot;color: rgb(169, 220, 118); font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace; background-color: rgb(45, 42, 46);&quot;&gt;Ic10Runner&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;передаем все сокет в котором есть чип и который прандлежит сети&lt;/span&gt;&lt;br&gt;&lt;/div&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="oiibnv2EOFYBwpJB7q5H-8" vertex="1">
+                <mxCell id="oiibnv2EOFYBwpJB7q5H-15" value="Create&amp;nbsp;&lt;span style=&quot;color: rgb(169, 220, 118); font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace; background-color: rgb(45, 42, 46);&quot;&gt;Ic10Runner&lt;/span&gt;&lt;div&gt;into&amp;nbsp;&lt;span style=&quot;color: rgb(169, 220, 118); font-family: &amp;quot;JetBrains Mono&amp;quot;, monospace; background-color: rgb(45, 42, 46);&quot;&gt;Ic10Runner&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;pass every socket that contains a chip and belongs to the network&lt;/span&gt;&lt;br&gt;&lt;/div&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="oiibnv2EOFYBwpJB7q5H-8" vertex="1">
                     <mxGeometry x="40" y="280" width="250" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="oiibnv2EOFYBwpJB7q5H-23" value="Код" style="swimlane;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                <mxCell id="oiibnv2EOFYBwpJB7q5H-23" value="Code" style="swimlane;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="780" y="117.5" width="610" height="215" as="geometry">
                         <mxRectangle x="780" y="117.5" width="60" height="30" as="alternateBounds"/>
                     </mxGeometry>

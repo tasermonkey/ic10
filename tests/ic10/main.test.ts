@@ -19,8 +19,8 @@ describe("Ic10Runner", () => {
 		await runner.switchContext().run();
 	}
 
-	describe("База", () => {
-		test("Должен выполняться без сильных ошибок", async () => {
+	describe("Basics", () => {
+		test("Should run without critical errors", async () => {
 			code = `
           move r0 3
           alias test rr0
@@ -30,18 +30,18 @@ describe("Ic10Runner", () => {
         `;
 			createRunner(code);
 			await run();
-			// Проверяем ошибки песочницы
+			// Check sandbox errors
 			const sandboxErrors = runner.context.errors;
 			const strongSandboxErrors = sandboxErrors.filter((e) => e.severity === ErrorSeverity.Strong);
-			// Убеждаемся что нет критических ошибок
+			// Make sure there are no critical errors
 			expect(strongSandboxErrors).toHaveLength(0);
-			// Проверяем ошибки рабочей среды
+			// Check production environment errors
 			const runtimeErrors = runner.context.errors;
 			const strongRuntimeErrors = runtimeErrors.filter((e) => e.severity === ErrorSeverity.Strong);
-			// Убеждаемся что нет критических ошибок
+			// Make sure there are no critical errors
 			expect(strongRuntimeErrors).toHaveLength(0);
 		});
-		test("Должен правильно установить регистры", async () => {
+		test("Should set registers correctly", async () => {
 			code = `
           move r0 3
           alias test rr0
@@ -51,27 +51,27 @@ describe("Ic10Runner", () => {
         `;
 			createRunner(code);
 			await run();
-			// Проверяем значения регистров
+			// Check register values
 			const registers = runner.realContext.chip.registers;
-			// Добавьте свои проверки здесь
+			// Add your own checks here
 			expect(registers.get(0)).toBe(3);
 			expect(registers.get(1)).toBe(9999);
 			expect(registers.get(3)).toBe(9999);
 		});
-		test("Должен правильно обрабатывать ошибки", async () => {
-			code = "invalid_command r0 1"; // Заведомо неверный код
+		test("Should handle errors correctly", async () => {
+			code = "invalid_command r0 1"; // Deliberately invalid code
 			createRunner(code);
 			await run();
-			// Проверяем наличие ошибок в песочнице
+			// Check for errors in the sandbox
 			const sandboxErrors = runner.context.errors;
 			expect(sandboxErrors.length).toBeGreaterThan(0);
-			// Проверяем что есть хотя бы одна критическая ошибка
+			// Check that there is at least one critical error
 			const hasStrongError = sandboxErrors.some((e) => e.severity === ErrorSeverity.Strong);
 			expect(hasStrongError).toBe(true);
 		});
 	});
-	describe("Прыжки", () => {
-		test("Простой переход в низ", async () => {
+	describe("Jumps", () => {
+		test("Simple jump down", async () => {
 			code = `
 j label
 move r0 1
@@ -85,7 +85,7 @@ move r1 1
 			expect(registers.get(0)).toBe(0);
 			expect(registers.get(1)).toBe(1);
 		});
-		test("Простой переход в вверх", async () => {
+		test("Simple jump up", async () => {
 			code = `
 label:
 move r0 1
@@ -112,7 +112,7 @@ move r1 1
 		});
 	});
 
-	describe("Константы", () => {
+	describe("Constants", () => {
 		test("nan", () => {
 			expect(CONSTS.nan).toBeNaN();
 			expect(GROUPED_CONSTS.nan).toBeNaN();

@@ -17,7 +17,7 @@ import {
 } from "./Context.ts";
 
 // =============================================
-// Базовый класс для выполнения в песочнице
+// Base class for execution in the sandbox
 // =============================================
 
 abstract class SandboxExecutionBase extends Context implements IExecutionContext {
@@ -50,7 +50,7 @@ abstract class SandboxExecutionBase extends Context implements IExecutionContext
 }
 
 // =============================================
-// Класс для работы с определениями в песочнице
+// Class for working with definitions in the sandbox
 // =============================================
 
 abstract class SandboxDefinesBase extends SandboxExecutionBase implements IDefinesContext {
@@ -68,7 +68,7 @@ abstract class SandboxDefinesBase extends SandboxExecutionBase implements IDefin
 }
 
 // =============================================
-// Класс для работы с регистрами в песочнице
+// Class for working with registers in the sandbox
 // =============================================
 
 abstract class SandboxMemoryBase extends SandboxDefinesBase implements IMemoryContext {
@@ -84,7 +84,7 @@ abstract class SandboxMemoryBase extends SandboxDefinesBase implements IMemoryCo
 }
 
 // =============================================
-// Класс для работы с устройствами по пинам в песочнице
+// Class for working with devices by pin in the sandbox
 // =============================================
 
 abstract class SandboxDevicesByPinBase extends SandboxMemoryBase implements IDevicesByPinContext {
@@ -99,11 +99,11 @@ abstract class SandboxDevicesByPinBase extends SandboxMemoryBase implements IDev
 	override setDeviceParameterByPin(pin: number, param: number, value: number): void {}
 
 	override clearDeviceStackByPin(pin: number): void {
-		// Заглушка для песочницы
+		// Sandbox stub
 	}
 
 	override getDeviceStackByPin(pin: number, index: number): number {
-		return 0; // Заглушка для песочницы
+		return 0; // Sandbox stub
 	}
 
 	override setDeviceStackByPin(pin: number, index: number, value: number): void {}
@@ -121,7 +121,7 @@ abstract class SandboxDevicesByPinBase extends SandboxMemoryBase implements IDev
 }
 
 // =============================================
-// Класс для работы с устройствами по хэшу в песочнице
+// Class for working with devices by hash in the sandbox
 // =============================================
 
 abstract class SandboxDevicesByHashBase extends SandboxDevicesByPinBase implements IDevicesByHashContext {
@@ -137,7 +137,7 @@ abstract class SandboxDevicesByHashBase extends SandboxDevicesByPinBase implemen
 }
 
 // =============================================
-// Класс для работы с устройствами по хэшу и имени в песочнице
+// Class for working with devices by hash and name in the sandbox
 // =============================================
 
 abstract class SandboxDevicesByHashAndNameBase
@@ -152,7 +152,7 @@ abstract class SandboxDevicesByHashAndNameBase
 }
 
 // =============================================
-// Класс для работы со стеком в песочнице
+// Class for working with the stack in the sandbox
 // =============================================
 
 abstract class SandboxStackBase extends SandboxDevicesByHashAndNameBase {
@@ -231,7 +231,7 @@ abstract class SandboxDevicesSlotBase extends SandboxDevicesByIdBase implements 
 }
 
 // =============================================
-// Финальный класс SandboxContext
+// Final SandboxContext class
 // =============================================
 
 export class SandboxContext extends SandboxDevicesSlotBase {

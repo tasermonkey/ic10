@@ -119,12 +119,12 @@
 				"trunc",
 				"xor"
 			],
-			"description": "Введите имя инструкции"
+			"description": "Enter the instruction name"
 		},
 		{
 			"id": "testIndex",
 			"type": "promptString",
-			"description": "Введите номер теста"
+			"description": "Enter the test number"
 		}
 	]
 }

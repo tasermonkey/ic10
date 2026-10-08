@@ -5,26 +5,26 @@ export class DeviceError extends DeviceScope {
 	protected $errors: Map<number, Ic10Error> = new Map();
 
 	/**
-	 * Геттер массива ошибок устройства.
+	 * Getter for the device's error array.
 	 */
 	public get(): Ic10Error[] {
-		// Преобразование Map в массив
+		// Convert the Map to an array
 		return this.$errors.values().toArray();
 	}
 
 	/**
-	 * Очистка всех ошибок устройства.
+	 * Clear all device errors.
 	 */
 	public reset(): void {
 		this.$errors.clear();
 	}
 
 	/**
-	 * Добавление ошибки к устройству.
-	 * @param error - объект ошибки
+	 * Add an error to the device.
+	 * @param error - error object
 	 */
 	public add(error: Ic10Error): void {
-		error.setDevice(this.scope); // Связываем ошибку с устройством
+		error.setDevice(this.scope); // Associate the error with the device
 		this.$errors.set(error.id, error);
 	}
 }

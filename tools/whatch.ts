@@ -17,7 +17,7 @@ class Glob {
 
 console.log("🚀 Whatching ...");
 
-// === НАСТРОЙКИ ===
+// === SETTINGS ===
 const CONFIG: {
 	watchPath: string;
 	debounceDelay: number;
@@ -27,14 +27,14 @@ const CONFIG: {
 	}[];
 	ignoreFiles: Glob[];
 } = {
-	// Путь к отслеживаемой папке
+	// Path to the watched folder
 	watchPath: join(dirname(import.meta.dirname), "src"),
 
-	// Задержка для debounce (мс)
+	// Debounce delay (ms)
 	debounceDelay: 1500,
 
-	// Скрипты для разных шаблонов (в порядке специфичности)
-	// Более специфичные шаблоны должны быть выше
+	// Scripts for different patterns (in order of specificity)
+	// More specific patterns must come first
 	scripts: [
 		{
 			pattern: new Glob("Ic10/Instruction/**"),
@@ -54,31 +54,31 @@ const CONFIG: {
 		},
 	],
 
-	// Игнорируемые файлы
+	// Ignored files
 	ignoreFiles: [new Glob("**/index.ts"), new Glob("Defines/data.ts"), new Glob("**/*.json")],
 };
-// === КОНЕЦ НАСТРОЕК ===
+// === END OF SETTINGS ===
 
 console.log(`Watching ${CONFIG.watchPath} for changes...`);
 
-// Для debounce
+// For debounce
 let timeoutId: NodeJS.Timeout | null = null;
 const changedFiles = new Set<string>();
 
-// Функция для проверки, игнорируется ли файл
+// Function to check whether a file is ignored
 function isIgnored(filepath: string): boolean {
 	const relativePath = relative(`${CONFIG.watchPath}/`, filepath);
 	return CONFIG.ignoreFiles.some((glob) => glob.match(relativePath));
 }
 
-// Функция для проверки совпадения файла с шаблоном
+// Function to check whether a file matches a pattern
 function matchesPattern(filepath: string, pattern: Glob): boolean {
 	const relativePath = relative(`${CONFIG.watchPath}/`, filepath);
 	console.warn(relativePath, pattern.match(relativePath));
 	return pattern.match(relativePath);
 }
 
-// Функция для определения скриптов, которые нужно запустить
+// Function to determine which scripts need to run
 function getScriptsToRun(filepaths: string[]): Set<string> {
 	const scriptsToRun = new Set<string>();
 
@@ -93,11 +93,11 @@ function getScriptsToRun(filepaths: string[]): Set<string> {
 	return scriptsToRun;
 }
 
-// Функция запуска скрипта
+// Function to run a script
 function runScript(command: string) {
 	console.log(`\n🔄 Running: ${command}`);
 
-	// Разделяем команды с && и выполняем последовательно
+	// Split commands on && and run them sequentially
 	const commands = command.split("&&").map((cmd) => cmd.trim());
 
 	const runNextCommand = async (index: number) => {
@@ -132,33 +132,33 @@ const watcher = watch(CONFIG.watchPath, { recursive: true }, (event, filename) =
 	}
 	console.log(`Detected ${event} in ${filename}`);
 
-	// Добавляем файл в набор изменений
+	// Add the file to the change set
 	changedFiles.add(filepath);
 
-	// Сбрасываем предыдущий таймер
+	// Reset the previous timer
 	if (timeoutId) {
 		clearTimeout(timeoutId);
 	}
 
-	// Устанавливаем новый таймер
+	// Set a new timer
 	timeoutId = setTimeout(() => {
 		if (changedFiles.size > 0) {
 			console.log(`\n📁 Processing ${changedFiles.size} changed files...`);
 
-			// Определяем какие скрипты нужно запустить
+			// Determine which scripts need to run
 			const scriptsToRun = getScriptsToRun(Array.from(changedFiles));
 
 			if (scriptsToRun.size > 0) {
 				console.log(`🚀 Will run ${scriptsToRun.size} script(s):`);
 				scriptsToRun.forEach((script) => console.log(`  - ${script}`));
 
-				// Запускаем все необходимые скрипты
+				// Run all required scripts
 				scriptsToRun.forEach(runScript);
 			} else {
 				console.log(`ℹ️ No scripts to run for the changes`);
 			}
 
-			// Очищаем набор изменений
+			// Clear the change set
 			changedFiles.clear();
 		}
 		timeoutId = null;
@@ -168,7 +168,7 @@ const watcher = watch(CONFIG.watchPath, { recursive: true }, (event, filename) =
 process.on("SIGINT", () => {
 	console.log("Closing watcher...");
 
-	// Очищаем таймер
+	// Clear the timer
 	if (timeoutId) {
 		clearTimeout(timeoutId);
 	}

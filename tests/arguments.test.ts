@@ -17,7 +17,7 @@ import {
 	singleDevice,
 	singleRegister,
 	str,
-} from "../src/Ic10/Helpers/ArgumentParse.ts"; // путь к вашему файлу
+} from "../src/Ic10/Helpers/ArgumentParse.ts"; // path to your file
 import { crc32 } from "../src/Ic10/Helpers/functions.ts";
 import { Argument } from "../src/Ic10/Instruction/Helpers/Argument.ts";
 import { createRunner } from "./helpers.ts";
@@ -218,28 +218,28 @@ describe("getDevicePin", () => {
 		const context = createMockContext();
 		context.setRegister(1, 7);
 
-		// Для устройств с портами используем toEqual для сравнения массивов
+		// For devices with ports, use toEqual to compare arrays
 		expect(getDevicePin(context, "db:0")).toEqual([-1, 0]);
 		expect(getDevicePin(context, "d1:1")).toEqual([1, 1]);
 		expect(getDevicePin(context, "d2:3")).toEqual([2, 3]);
 		expect(getDevicePin(context, "dr1:3")).toEqual([7, 3]);
 
-		// Тестируем многоуровневую рекурсию
-		context.setRegister(2, 1); // r2 содержит 1
-		context.setRegister(3, 2); // r3 содержит 2
+		// Test multi-level recursion
+		context.setRegister(2, 1); // r2 contains 1
+		context.setRegister(3, 2); // r3 contains 2
 		expect(getDevicePin(context, "drr3:5")).toEqual([1, 5]);
 	});
 
-	// Добавляем тест для проверки что обычные устройства без портов все еще работают
+	// Add a test to check that regular devices without ports still work
 	test("mixed device syntax", () => {
 		const context = createMockContext();
 		context.setRegister(1, 8);
 
-		// Устройства без портов возвращают число
+		// Devices without ports return a number
 		expect(getDevicePin(context, "d5")).toBe(5);
 		expect(getDevicePin(context, "dr1")).toBe(8);
 
-		// Устройства с портами возвращают массив
+		// Devices with ports return an array
 		expect(getDevicePin(context, "d5:2")).toEqual([5, 2]);
 		expect(getDevicePin(context, "dr1:4")).toEqual([8, 4]);
 	});

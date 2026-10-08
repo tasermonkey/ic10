@@ -39,7 +39,7 @@ export async function runInstructionTest(runner: Ic10Runner, testData: Instructi
 			}
 		}
 	}
-	await runner.run(); // песочница
+	await runner.run(); // sandbox
 	runner.switchContext("real");
 	if (testData.iterations_count) {
 		for (let i = 0; i < testData.iterations_count; i++) {
@@ -57,8 +57,8 @@ export async function runInstructionTest(runner: Ic10Runner, testData: Instructi
 }
 
 export async function runDualContext(runner: Ic10Runner) {
-	await runner.run(); // песочница
-	await runner.switchContext().run(); // рабочая среда
+	await runner.run(); // sandbox
+	await runner.switchContext().run(); // production environment
 	return runner;
 }
 
@@ -66,7 +66,7 @@ export type InstructionLike = {
 	tests?: () => InstructionTestData[] | undefined;
 };
 
-/** Внутренняя утилита для получения фактического значения и описания ожидания */
+/** Internal utility for getting the actual value and the expectation description */
 export function resolveExpectation(
 	runner: Ic10Runner,
 	exp: InstructionTestExpected,
@@ -95,13 +95,13 @@ export function resolveExpectation(
 	}
 }
 
-/** Логирование результата ожидания (для CLI-скриптов) */
+/** Log the expectation result (for CLI scripts) */
 export function logExpectation(runner: Ic10Runner, exp: InstructionTestExpected) {
 	const { label, expected, got } = resolveExpectation(runner, exp);
 	console.log(`exp ${label} = ${expected} | got ${got}`);
 }
 
-/** Проверка ожидания через expect (для тестов) */
+/** Check the expectation via expect (for tests) */
 export function expectExpectation(
 	runner: Ic10Runner,
 	exp: InstructionTestExpected,
@@ -111,7 +111,7 @@ export function expectExpectation(
 	expectImpl(got).toBe(expected);
 }
 
-/** Проверить все ожидания */
+/** Check all expectations */
 export function expectAll(
 	runner: Ic10Runner,
 	expectedList: InstructionTestExpected[],
@@ -122,7 +122,7 @@ export function expectAll(
 	}
 }
 
-/** Залогировать все ожидания */
+/** Log all expectations */
 export function logAll(runner: Ic10Runner, expectedList: InstructionTestExpected[]) {
 	for (const exp of expectedList) {
 		logExpectation(runner, exp);

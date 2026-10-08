@@ -12,14 +12,14 @@ const runner = createRunner(code, {
 	stack_length: 512,
 	hash: 125,
 });
-console.log("Запуск в песочнице");
+console.log("Running in sandbox");
 await runner.init().run();
 runner.context.errors.forEach((error) => {
 	console.error(error.formated_message);
 });
 const err = runner.context.errors.filter((error) => error.severity === ErrorSeverity.Strong);
 if (err.length === 0) {
-	console.log("Запуск в рабочей среде");
+	console.log("Running in production environment");
 	await runner.switchContext().run();
 	runner.context.errors.forEach((error) => {
 		console.error(error.formated_message);

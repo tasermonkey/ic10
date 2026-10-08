@@ -22,10 +22,10 @@ function picklist<T extends Literal>(values: T[]) {
 	return union(values.map((value) => literal(value)));
 }
 
-// --- Вспомогательные функции для создания union из ключей ---
+// --- Helper functions for building unions from keys ---
 
 /**
- * Создает picklist из массива или итератора с удалением дубликатов
+ * Creates a picklist from an array or iterator, removing duplicates
  */
 function unionLiterals<T extends string>(items: IterableIterator<T> | T[]) {
 	const uniqueItems = Array.from(new Set(items));
@@ -33,7 +33,7 @@ function unionLiterals<T extends string>(items: IterableIterator<T> | T[]) {
 }
 
 /**
- * Создает picklist из ключей объекта с опциональной фильтрацией
+ * Creates a picklist from an object's keys with optional filtering
  */
 function unionFromKeys<T extends Record<string, unknown>>(obj: T, filter?: (key: string) => boolean) {
 	const keys = Object.keys(obj).filter(filter ?? (() => true));

@@ -10,13 +10,13 @@ const SOURCE_DIR = path.resolve(import.meta.dirname, "../src");
 const INDEX_PATH = path.join(SOURCE_DIR, "index.ts");
 
 async function generateIndex() {
-	// Находим все TS-файлы кроме index.ts и файлов в исключенных директориях
+	// Find all TS files except index.ts and files in excluded directories
 	const files = await glob("**/*.ts", {
 		cwd: SOURCE_DIR,
 		ignore: ["index.ts", "**/*.d.ts", "**/__tests__/**", "**/__mocks__/**", "**/internal/**", "**/private/**"],
 	});
 
-	// Создаем массив экспортов и сортируем их
+	// Create the array of exports and sort it
 	const exports = files
 		.map((file) => {
 			const imp = file.replaceAll("\\", "/").replace(/\.ts$/, "");
@@ -24,16 +24,16 @@ async function generateIndex() {
 		})
 		.sort();
 
-	// Создаем AST дерево
+	// Create the AST tree
 	const exportNodes = exports.map((exp) => t.exportAllDeclaration(t.stringLiteral(exp)));
 
-	// Создаем программу с экспортами
+	// Create the program with exports
 	const program = t.program(exportNodes);
 
-	// Генерируем код из AST
+	// Generate code from the AST
 	const { code } = generate(program as any);
 
-	// Формируем окончательное содержимое файла
+	// Build the final file contents
 	const content = `// AUTO-GENERATED FILE. DO NOT EDIT.
 // This file is automatically created by scripts/generate:index.ts.
 // Use 'npm run generate:index' to regenerate.
@@ -42,7 +42,7 @@ async function generateIndex() {
 ${code}
 `;
 
-	// Записываем в файл
+	// Write to the file
 	fs.writeFileSync(INDEX_PATH, content, "utf-8");
 	console.log(`✅ Generated ${INDEX_PATH} with ${exports.length} exports`);
 }

@@ -6,7 +6,7 @@ import { getDevicePin, getRegister, parseArgumentAnyNumber } from "../../Helpers
 import type { Argument } from "./Argument.ts";
 import type { InstructionArgument } from "./Instruction.ts";
 
-// Вспомогательные функции для обработки ошибок и проверок
+// Helper functions for error handling and checks
 const ErrorHandlers = {
 	handleError: (
 		context: Context,
@@ -41,7 +41,7 @@ const ErrorHandlers = {
 	},
 };
 
-// Базовые конфигурации для разных типов аргументов
+// Base configurations for different argument types
 const BaseConfigs = {
 	numberLike: {
 		canBeLabel: true,
@@ -84,7 +84,7 @@ export type calculateDevicePinOrIdResult = {
 	error?: number;
 };
 
-// Вспомогательные функции для работы с результатами
+// Helper functions for working with results
 const ResultHelpers = {
 	formatPinResult: (pinResult: number | [number, number]): calculateDevicePinOrIdResult => {
 		if (Array.isArray(pinResult)) {
@@ -97,7 +97,7 @@ const ResultHelpers = {
 	},
 };
 
-// Основные калькуляторы значений
+// Main value calculators
 export const ValueCalculators = {
 	calculateNumberLike: (context: Context, argument: Argument) => {
 		const value = parseArgumentAnyNumber(context, argument);
@@ -240,7 +240,7 @@ export const ValueCalculators = {
 };
 
 /**
- * Список стандартных аргументов для переиспользования
+ * List of standard arguments for reuse
  */
 export const ArgumentCalculators = {
 	anyNumber: (name?: string) => ({

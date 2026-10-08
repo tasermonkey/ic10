@@ -23,16 +23,16 @@ export type DeviceConstructor = {
 };
 
 /**
- * Абстрактный класс устройства (Device).
- * Представляет базовую логику для всех устройств в системе.
+ * Abstract device class (Device).
+ * Provides the base logic for all devices in the system.
  */
 export abstract class Device {
-	// Ссылка на сеть, к которой принадлежит устройство
-	// Уникальный хэш устройства (идентификатор типа устройства)
+	// Reference to the network the device belongs to
+	// Unique device hash (device type identifier)
 	public readonly hash: number;
 	public readonly prefabName?: HashString;
 	private _name!: HashString;
-	// Сырые данные устройства из DEVICES по хэшу
+	// Raw device data from DEVICES, looked up by hash
 	public readonly rawData: (typeof DEVICES)[keyof typeof DEVICES];
 
 	private _id: number;
@@ -45,14 +45,14 @@ export abstract class Device {
 	protected $slots?: DeviceSlots = undefined;
 
 	/**
-	 * Конструктор устройства.
-	 * @param network - сеть, к которой принадлежит устройство
-	 * @param hash - хэш типа устройства
+	 * Device constructor.
+	 * @param network - the network the device belongs to
+	 * @param hash - device type hash
 	 */
 	public constructor({ network, hash, id, name }: DeviceConstructor) {
-		this._id = id ?? crc32(uuidv4()); // Генерация уникального ID
+		this._id = id ?? crc32(uuidv4()); // Generate a unique ID
 		this.hash = hash;
-		this.rawData = DEVICES[this.hash]; // Получение данных устройства по хэшу
+		this.rawData = DEVICES[this.hash]; // Get device data by hash
 
 		this.name = name ?? this?.rawData?.PrefabName ?? "";
 		if (this?.rawData?.PrefabName) {
@@ -74,8 +74,8 @@ export abstract class Device {
 			this.$slots = new DeviceSlots({ device: this });
 		}
 
-		this.reset(); // Инициализация свойств и ошибок
-		this.$props?.forceWrite("PrefabHash", hash); // Установка свойства PrefabHash
+		this.reset(); // Initialize properties and errors
+		this.$props?.forceWrite("PrefabHash", hash); // Set the PrefabHash property
 		if (this.rawData === undefined) {
 			this.$errors.add(
 				new Ic10Error({
@@ -185,16 +185,16 @@ export abstract class Device {
 	}
 
 	/**
-	 * Сброс устройства: инициализация свойств, логики и ошибок.
+	 * Reset the device: initialize properties, logic and errors.
 	 */
 	public reset() {
-		this.$errors.reset(); // Очистка ошибок
-		this.$props?.reset(); // сброс свойств
-		this.$reagents?.reset(); // сброс свойств
+		this.$errors.reset(); // Clear errors
+		this.$props?.reset(); // reset properties
+		this.$reagents?.reset(); // reset properties
 	}
 
 	/**
-	 * Геттер уникального идентификатора устройства.
+	 * Getter for the device's unique identifier.
 	 */
 	public get id(): number {
 		return this._id;
@@ -205,7 +205,7 @@ export abstract class Device {
 	}
 }
 
-// Абстрактные классы-наследники для разных типов устройств
+// Abstract subclasses for different device types
 export abstract class Structure extends Device {}
 export abstract class Item extends Device {}
 export abstract class Entity extends Device {}

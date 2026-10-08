@@ -10,7 +10,7 @@ const outDir = path.resolve(process.cwd(), "src", "Devices");
 
 // ==================== TYPES ====================
 
-// Расширяем DeviceType для поддержки дополнительных свойств
+// Extend DeviceType to support additional properties
 interface ExtendedDeviceType extends DeviceType {
 	PowerCapacity?: number;
 	Cooling?: number;
@@ -34,18 +34,18 @@ type BaseRule = BaseSpec & {
 };
 
 export type ClassGenerator = {
-	// Основные свойства
+	// Core properties
 	className: string;
 	baseSpec: BaseSpec;
 	device: ExtendedDeviceType;
 
-	// AST узлы
+	// AST nodes
 	imports: Map<string, Set<string>>;
 	classBody: t.ClassBody;
 	constructorParams: t.Pattern | null;
 	superCall: t.CallExpression | null;
 
-	// Методы для модификации
+	// Modification methods
 	addImport: (from: string, what: string) => void;
 	addClassMember: (member: t.ClassMethod | t.ClassProperty | t.ClassPrivateProperty) => void;
 	updateConstructor: (params: t.Pattern, body: t.BlockStatement) => void;
@@ -55,9 +55,9 @@ export type ClassGenerator = {
 };
 
 export type Plugin = {
-	/** Проверяет, должен ли плагин применяться к устройству */
+	/** Checks whether the plugin should be applied to the device */
 	match: (device: ExtendedDeviceType) => boolean;
-	/** Модифицирует генератор класса */
+	/** Modifies the class generator */
 	transform: (device: ExtendedDeviceType, generator: ClassGenerator) => void;
 };
 
@@ -132,11 +132,11 @@ class ClassGeneratorImpl implements ClassGenerator {
 	}
 
 	private initializeBaseStructure() {
-		// Добавляем базовые импорты
+		// Add base imports
 		this.addImport(this.baseSpec.importFrom, this.baseSpec.baseName);
 		this.addImport(this.baseSpec.importFrom, this.baseSpec.ctorType);
 
-		// Создаем параметры конструктора
+		// Create constructor parameters
 		const omitFields = this.baseSpec.omitFields || ["hash"];
 		const omitType = t.tsTypeReference(
 			t.identifier("Omit"),
@@ -149,7 +149,7 @@ class ClassGeneratorImpl implements ClassGenerator {
 		this.constructorParams = t.objectPattern([t.restElement(t.identifier("args"))]);
 		(this.constructorParams as any).typeAnnotation = t.tsTypeAnnotation(omitType);
 
-		// Создаем вызов super()
+		// Create the super() call
 		const extraProps = this.baseSpec.getExtraProps?.(this.device) || {};
 		const superProps: (t.ObjectProperty | t.SpreadElement)[] = [
 			t.spreadElement(t.identifier("args")),
@@ -164,7 +164,7 @@ class ClassGeneratorImpl implements ClassGenerator {
 
 		this.superCall = t.callExpression(t.super(), [t.objectExpression(superProps)]);
 
-		// Создаем конструктор
+		// Create the constructor
 		const classConstructor = t.classMethod(
 			"constructor",
 			t.identifier("constructor"),
@@ -189,7 +189,7 @@ class ClassGeneratorImpl implements ClassGenerator {
 	updateConstructor(params: t.Pattern, body: t.BlockStatement) {
 		this.constructorParams = params;
 
-		// Находим и обновляем конструктор
+		// Find and update the constructor
 		const constructorIndex = this.classBody.body.findIndex(
 			(member) => t.isClassMethod(member) && member.kind === "constructor",
 		);
@@ -204,7 +204,7 @@ class ClassGeneratorImpl implements ClassGenerator {
 	updateSuperCall(call: t.CallExpression) {
 		this.superCall = call;
 
-		// Обновляем вызов super в конструкторе
+		// Update the super call in the constructor
 		const constructorIndex = this.classBody.body.findIndex(
 			(member) => t.isClassMethod(member) && member.kind === "constructor",
 		);
@@ -223,23 +223,23 @@ class ClassGeneratorImpl implements ClassGenerator {
 	}
 
 	setBaseSpec(spec: BaseSpec) {
-		// Обновляем базовый класс
+		// Update the base class
 		const oldBase = this.baseSpec.baseName;
 		this.baseSpec = spec;
 
-		// Обновляем импорты
+		// Update imports
 		this.imports.clear();
 		this.addImport(spec.importFrom, spec.baseName);
 		this.addImport(spec.importFrom, spec.ctorType);
 
-		// Переинициализируем базовую структуру
+		// Reinitialize the base structure
 		this.initializeBaseStructure();
 
 		console.log(`Changed base class for ${this.className} from ${oldBase} to ${spec.baseName}`);
 	}
 
 	generateCode(): string {
-		// Собираем импорты
+		// Collect imports
 		const importDeclarations: t.ImportDeclaration[] = [];
 		for (const [source, specifiers] of this.imports) {
 			importDeclarations.push(
@@ -250,12 +250,12 @@ class ClassGeneratorImpl implements ClassGenerator {
 			);
 		}
 
-		// Создаем класс
+		// Create the class
 		const classDecl = t.exportNamedDeclaration(
 			t.classDeclaration(t.identifier(this.className), t.identifier(this.baseSpec.baseName), this.classBody),
 		);
 
-		// Генерируем код
+		// Generate code
 		const program = t.program([...importDeclarations, classDecl]);
 		const { code } = generate(program as any, { retainLines: true, concise: false });
 		return `/* Auto-generated. Do not edit. */\n${code.trim()}`;
@@ -276,7 +276,7 @@ function getBaseSpec(device: ExtendedDeviceType): BaseSpec | null {
 function createClassGenerator(device: ExtendedDeviceType, base: BaseSpec): ClassGenerator {
 	const generator = new ClassGeneratorImpl(device, base);
 
-	// Применяем плагины
+	// Apply plugins
 	for (const plugin of PLUGINS) {
 		if (plugin.match(device)) {
 			try {
@@ -330,7 +330,7 @@ function buildIndexContent(devices: ExtendedDeviceType[]): string {
 
 	entries.sort((a, b) => a.className.localeCompare(b.className));
 
-	// Импорты
+	// Imports
 	const importDecls = entries.map((e) =>
 		t.importDeclaration(
 			[t.importSpecifier(t.identifier(e.className), t.identifier(e.className))],
@@ -349,7 +349,7 @@ function buildIndexContent(devices: ExtendedDeviceType[]): string {
 		]),
 	);
 
-	// DeviceClassesByBase (изменено: теперь объект baseName -> { PrefabName: Class })
+	// DeviceClassesByBase (changed: now an object baseName -> { PrefabName: Class })
 	const byBase = new Map<string, Entry[]>();
 	for (const e of entries) {
 		if (!byBase.has(e.baseName)) byBase.set(e.baseName, []);
@@ -359,7 +359,7 @@ function buildIndexContent(devices: ExtendedDeviceType[]): string {
 	const baseNames = Array.from(byBase.keys()).sort();
 	const classesByBaseProps: t.ObjectProperty[] = baseNames.map((baseName) => {
 		const entriesForBase = byBase.get(baseName)!;
-		// Формируем объект: ключи PrefabName, значения - классы
+		// Build the object: keys are PrefabName, values are classes
 		const prefabNameProps: t.ObjectProperty[] = entriesForBase
 			.filter((e) => e.device.PrefabName != null)
 			.map((e) => t.objectProperty(t.stringLiteral(String(e.device.PrefabName)), t.identifier(e.className)));
@@ -397,7 +397,7 @@ function buildIndexContent(devices: ExtendedDeviceType[]): string {
 		]),
 	);
 
-	// Сборка программы
+	// Assemble the program
 	const program = t.program([...importDecls, deviceClassesDecl, classesByBaseDecl, devicesByPrefabNameDecl]);
 
 	const { code } = generate(program as any, { retainLines: true, concise: false });
@@ -421,7 +421,7 @@ async function main() {
 	const generated: ExtendedDeviceType[] = [];
 	const tasks: Promise<any>[] = [];
 
-	// Статистика по плагинам
+	// Plugin statistics
 	const pluginStats = new Map<string, number>();
 	for (const plugin of PLUGINS) {
 		pluginStats.set(plugin.transform.name, 0);
@@ -452,7 +452,7 @@ async function main() {
 			countsByBase.set(base.baseName, (countsByBase.get(base.baseName) ?? 0) + 1);
 			tasks.push(writeDeviceFile(className, code));
 
-			// Собираем статистику по плагинам
+			// Collect plugin statistics
 			for (const plugin of PLUGINS) {
 				if (plugin.match(device)) {
 					pluginStats.set(plugin.transform.name, (pluginStats.get(plugin.transform.name) ?? 0) + 1);
@@ -486,54 +486,54 @@ async function main() {
 
 	const lines: string[] = [];
 	lines.push("—".repeat(60));
-	lines.push("Отчет генерации устройств");
-	lines.push(`Выходная папка: ${outDir}`);
-	lines.push(`Всего входных устройств: ${totalInput}`);
-	lines.push(`Сгенерировано классов: ${generated.length}`);
-	lines.push(`Записано файлов: ${filesWritten} (включая index.ts)`);
+	lines.push("Device generation report");
+	lines.push(`Output folder: ${outDir}`);
+	lines.push(`Total input devices: ${totalInput}`);
+	lines.push(`Classes generated: ${generated.length}`);
+	lines.push(`Files written: ${filesWritten} (including index.ts)`);
 	lines.push("");
-	lines.push("По базовым типам:");
+	lines.push("By base type:");
 	if (uniqueBases.length === 0) {
-		lines.push("  — нет сгенерированных классов");
+		lines.push("  — no classes generated");
 	} else {
 		for (const baseName of uniqueBases) {
 			lines.push(`  ${baseName}: ${countsByBase.get(baseName)}`);
 		}
 	}
 	lines.push("");
-	lines.push(`Пропущено устройств: ${skippedTotal}`);
-	lines.push(`  — без подходящего base: ${skipNoBase}`);
-	lines.push(`  — некорректное имя класса: ${skipInvalidName}`);
-	lines.push(`  — дубликат имени класса: ${skipDuplicate}`);
+	lines.push(`Devices skipped: ${skippedTotal}`);
+	lines.push(`  — no matching base: ${skipNoBase}`);
+	lines.push(`  — invalid class name: ${skipInvalidName}`);
+	lines.push(`  — duplicate class name: ${skipDuplicate}`);
 	lines.push("");
-	lines.push("Статистика по плагинам:");
+	lines.push("Plugin statistics:");
 	let hasPluginStats = false;
 	for (const [pluginName, count] of pluginStats) {
 		if (count > 0) {
-			lines.push(`  ${pluginName}: применен к ${count} устройствам`);
+			lines.push(`  ${pluginName}: applied to ${count} devices`);
 			hasPluginStats = true;
 		}
 	}
 	if (!hasPluginStats) {
-		lines.push("  — плагины не применялись");
+		lines.push("  — no plugins applied");
 	}
 	lines.push("");
-	lines.push(`PrefabName среди сгенерированных:`);
-	lines.push(`  — с PrefabName: ${generatedWithPrefabName.length}`);
-	lines.push(`  — без PrefabName: ${missingPrefabNameCount}`);
+	lines.push(`PrefabName among generated:`);
+	lines.push(`  — with PrefabName: ${generatedWithPrefabName.length}`);
+	lines.push(`  — without PrefabName: ${missingPrefabNameCount}`);
 	if (prefabNameDuplicates.length > 0) {
-		lines.push(`  — дубликаты ключей PrefabName: ${prefabNameDuplicates.length}`);
+		lines.push(`  — duplicate PrefabName keys: ${prefabNameDuplicates.length}`);
 		const maxToShow = 10;
 		const sample = prefabNameDuplicates.slice(0, maxToShow);
-		lines.push("    Примеры:");
+		lines.push("    Examples:");
 		for (const [name, count] of sample) {
 			lines.push(`      "${name}": ${count}`);
 		}
 		if (prefabNameDuplicates.length > maxToShow) {
-			lines.push(`      ... и ещё ${prefabNameDuplicates.length - maxToShow}`);
+			lines.push(`      ... and ${prefabNameDuplicates.length - maxToShow}`);
 		}
 	} else {
-		lines.push("  — дубликаты ключей PrefabName: не обнаружены");
+		lines.push("  — duplicate PrefabName keys: none found");
 	}
 	lines.push("—".repeat(60));
 
@@ -541,6 +541,6 @@ async function main() {
 }
 
 main().catch((err) => {
-	console.error("❌ Ошибка генерации:", err);
+	console.error("❌ Generation error:", err);
 	process.exit(1);
 });

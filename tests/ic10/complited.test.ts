@@ -2,81 +2,81 @@ import { describe, expect, test } from "vitest";
 import INSTRUCTIONS from "../../src/Defines/instructions.ts";
 import { instructions } from "../../src/Ic10/Instruction/index.ts";
 
-describe("Выполнено", () => {
-	test("Процент реализованных инструкций", () => {
+describe("Completed", () => {
+	test("Percentage of implemented instructions", () => {
 		const implemented = Object.keys(instructions);
 		const required = Object.keys(INSTRUCTIONS).filter((i) => i !== "label");
 
-		// Находим лишние инструкции (реализованные, но не требуемые)
+		// Find extra instructions (implemented but not required)
 		const extraInstructions = implemented.filter((i) => !required.includes(i));
 
-		// Формируем таблицу для требуемых инструкций
+		// Build the table for required instructions
 		const requiredTable = required.map((key) => ({
 			instruction: key,
 			status: implemented.includes(key) ? "✅" : "❌",
 			type: "required",
 		}));
 
-		// Формируем таблицу для лишних инструкций
+		// Build the table for extra instructions
 		const extraTable = extraInstructions.map((key) => ({
 			instruction: key,
 			status: "🟡",
 			type: "extra",
 		}));
 
-		// Объединяем таблицы
+		// Merge the tables
 		const table = [...requiredTable, ...extraTable].sort((a, b) => {
-			// Сначала сортируем по статусу, затем по типу
+			// Sort by status first, then by type
 			if (a.status !== b.status) {
 				return a.status.localeCompare(b.status);
 			}
 			return a.type.localeCompare(b.type);
 		});
 
-		// Выводим таблицу
+		// Print the table
 		console.table(table);
 
-		// Выводим детали нереализованных
+		// Print details of unimplemented ones
 		const notImplemented = required.filter((key) => !implemented.includes(key));
 		if (notImplemented.length > 0) {
-			console.log("\nНереализованные инструкции:");
+			console.log("\nUnimplemented instructions:");
 			notImplemented.forEach((key) => {
 				console.log(`\n${key}:`);
 				console.log(`  ${(INSTRUCTIONS as any)[key].description}  ${(INSTRUCTIONS as any)[key].example}`);
 			});
 		}
 
-		// Выводим информацию о лишних инструкциях
+		// Print information about extra instructions
 		if (extraInstructions.length > 0) {
-			console.log("\nЛишние инструкции (реализованы, но не требуются):");
+			console.log("\nExtra instructions (implemented but not required):");
 			extraInstructions.forEach((key) => {
 				console.log(`  ${key}`);
 			});
 		}
 
-		// Считаем процент реализации (только по требуемым инструкциям)
+		// Calculate the implementation percentage (required instructions only)
 		const percent = (implemented.filter((i) => required.includes(i)).length / required.length) * 100;
 
-		// Выводим общую статистику
-		console.log(`\nОбщая статистика:`);
-		console.log(`  - Требуемые инструкции: ${required.length}`);
-		console.log(`  - Реализованные требуемые: ${implemented.filter((i) => required.includes(i)).length}`);
-		console.log(`  - Лишние инструкции: ${extraInstructions.length}`);
-		console.log(`  - Всего реализовано: ${implemented.length}`);
+		// Print overall statistics
+		console.log(`\nOverall statistics:`);
+		console.log(`  - Required instructions: ${required.length}`);
+		console.log(`  - Implemented required: ${implemented.filter((i) => required.includes(i)).length}`);
+		console.log(`  - Extra instructions: ${extraInstructions.length}`);
+		console.log(`  - Total implemented: ${implemented.length}`);
 
-		// Выводим процент с эмодзи
+		// Print the percentage with an emoji
 		if (percent >= 100) {
 			console.log(
-				`\n🎉 Реализовано 100% требуемых инструкций (${implemented.filter((i) => required.includes(i)).length} из ${required.length})`,
+				`\n🎉 Implemented 100% of required instructions (${implemented.filter((i) => required.includes(i)).length} of ${required.length})`,
 			);
 		} else {
 			console.log(
-				`\n⚠️ Реализовано ${percent.toFixed(2)}% требуемых инструкций (${implemented.filter((i) => required.includes(i)).length} из ${required.length})`,
+				`\n⚠️ Implemented ${percent.toFixed(2)}% of required instructions (${implemented.filter((i) => required.includes(i)).length} of ${required.length})`,
 			);
 		}
 
 		if (extraInstructions.length > 0) {
-			console.log(`📝 Обнаружены лишние инструкции: ${extraInstructions.length}`);
+			console.log(`📝 Extra instructions found: ${extraInstructions.length}`);
 		}
 
 		expect(percent).toBeGreaterThanOrEqual(100);

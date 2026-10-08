@@ -23,11 +23,11 @@ export class DeviceProps extends DeviceScope {
 		super(props);
 		this.initProps();
 	}
-	// Сырые свойства устройства, хранящиеся по числовым кодам
+	// Raw device properties, stored by numeric code
 	#propertiesRaw: Map<number, number> = new Map();
-	// BiMap для связи имени логики с кодом
+	// BiMap linking logic names to codes
 	private logicNameToCode = new BiMap<string, number>();
-	// Метаданные логики (права доступа)
+	// Logic metadata (access permissions)
 	private logicMeta: Map<
 		number,
 		{
@@ -104,7 +104,7 @@ export class DeviceProps extends DeviceScope {
 	}
 
 	/**
-	 * Разрешает prop (имя или код) в код логики
+	 * Resolves a prop (name or code) to a logic code
 	 */
 	private resolveLogicCode(prop: prop): number | undefined {
 		if (typeof prop === "number") {
@@ -114,9 +114,9 @@ export class DeviceProps extends DeviceScope {
 	}
 
 	/**
-	 * Принудительно установить значение свойства по имени или коду.
-	 * @param prop - имя или код свойства
-	 * @param value - значение свойства
+	 * Force-set a property value by name or code.
+	 * @param prop - property name or code
+	 * @param value - property value
 	 */
 	public forceWrite(prop: prop, value: number) {
 		const logicCode = this.resolveLogicCode(prop);
@@ -127,9 +127,9 @@ export class DeviceProps extends DeviceScope {
 	}
 
 	/**
-	 * Принудительно получить значение без ошибок.
-	 * @param prop - имя или код свойства
-	 * @param value - значение свойства
+	 * Force-get a value without raising errors.
+	 * @param prop - property name or code
+	 * @param value - property value
 	 */
 	public forceRead(prop: prop): number | undefined {
 		const logicCode = this.resolveLogicCode(prop);
@@ -140,19 +140,19 @@ export class DeviceProps extends DeviceScope {
 	}
 
 	/**
-	 * Инициализация свойств и логики устройства.
-	 * Если устройство не найдено в DEVICES, добавляется предупреждение.
+	 * Initialize the device's properties and logic.
+	 * If the device is not found in DEVICES, a warning is added.
 	 */
 	public initProps() {
 		if (typeof this.scope.rawData === "undefined") {
-			// Устройство не найдено
+			// Device not found
 			this.scope.errors.add(
 				new Ic10Error({
 					message: i18n.t("error.device_not_found_in_init", { hash: this.scope.hash }),
 					severity: ErrorSeverity.Warning,
 				}),
 			);
-			// Добавляем логику по умолчанию для всех LogicType из CONSTS
+			// Add default logic for every LogicType from CONSTS
 			for (const [key, _value] of Logics) {
 				this.addLogic({
 					name: key,
@@ -160,7 +160,7 @@ export class DeviceProps extends DeviceScope {
 				});
 			}
 		} else {
-			// Если данные устройства есть, инициализируем логику из rawData
+			// If device data exists, initialize logic from rawData
 			const l = this.scope.rawData?.logics;
 			if (l) {
 				l.forEach((logic) => {
@@ -171,7 +171,7 @@ export class DeviceProps extends DeviceScope {
 	}
 
 	/**
-	 * Находит код логики по имени или коду из глобального Logics
+	 * Finds a logic code by name or code in the global Logics
 	 */
 	private findLogicCode(prop: prop): number | undefined {
 		if (typeof prop === "string") {
@@ -199,8 +199,8 @@ export class DeviceProps extends DeviceScope {
 	}
 
 	/**
-	 * Добавление логики (свойства с правами) в устройство.
-	 * @param logic - объект логики с именем и разрешениями
+	 * Add logic (a property with permissions) to the device.
+	 * @param logic - logic object with a name and permissions
 	 */
 	private addLogic(logic: LogicType) {
 		const code = this.findLogicCode(logic.name);

@@ -2,12 +2,12 @@ set -e
 npm run generate:index
 git add src/index.ts
 
-# автоматически поправить формат
+# automatically fix formatting
 npm run format
-# добавить все исправления форматирования в индекс
+# add all formatting fixes to the index
 git add -A
 
-# проверить формат еще раз и выполнить линты/тесты
+# check formatting again and run lints/tests
 npm run format:check
 npm run lint
 npm run test

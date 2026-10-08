@@ -4,7 +4,7 @@ import CONSTS from "../../Defines/consts.ts";
 import { ArgumentCalculators } from "./Helpers/ArgumentCalculators.ts";
 import { Instruction, type InstructionArgument, type InstructionTestData } from "./Helpers/Instruction.ts";
 
-// ===== Общие хелперы =====
+// ===== Common helpers =====
 const EPS = CONSTS.epsilon * 8;
 const RA = 17;
 
@@ -36,7 +36,7 @@ const un = {
 	nanz: (a: number) => !Number.isNaN(a),
 };
 
-// ===== Генераторы тестов и ожидаемых значений =====
+// ===== Test and expected value generators =====
 const expectReg = (register: number, value: number) => ({ type: "register", register, value }) as const;
 
 function tSetUnary(op: string, cases: Array<[a: number, ok: boolean]>): InstructionTestData[] {
@@ -58,7 +58,7 @@ function tSetTernary(op: string, cases: Array<[a: number, b: number, c: number, 
 	}));
 }
 
-// Абсолютная бинарная ветка через r0/r1 и line=4
+// Absolute binary branch via r0/r1 and line=4
 function tAbsBinBranch(
 	op: string,
 	cases: Array<[r0: number, r1: number, shouldBranch: boolean]>,
@@ -69,7 +69,7 @@ function tAbsBinBranch(
 	}));
 }
 
-// Относительная бинарная ветка c relative=2
+// Relative binary branch with relative=2
 function tRelBinBranch(op: string, cases: Array<[a: number, b: number, shouldBranch: boolean]>): InstructionTestData[] {
 	return cases.map(([a, b, br]) => ({
 		code: `${op} ${a} ${b} 2\nmove r2 1\nmove r3 1`,
@@ -77,7 +77,7 @@ function tRelBinBranch(op: string, cases: Array<[a: number, b: number, shouldBra
 	}));
 }
 
-// Абсолютная тернарная ветка с line=3 и прологом move r2 0
+// Absolute ternary branch with line=3 and a move r2 0 prologue
 function tAbsTernaryBranch(
 	op: string,
 	cases: Array<[a: number, b: number, c: number, shouldBranch: boolean]>,
@@ -88,7 +88,7 @@ function tAbsTernaryBranch(
 	}));
 }
 
-// ===== Базовые классы записи 1/0 =====
+// ===== Base classes for writing 1/0 =====
 abstract class UnarySetConditionInstruction extends Instruction {
 	override argumentList(): InstructionArgument[] {
 		return [ArgumentCalculators.registerLink("result"), ArgumentCalculators.anyNumber("a")];
@@ -137,7 +137,7 @@ abstract class TernarySetConditionInstruction extends Instruction {
 	}
 }
 
-// ===== Базовые классы ветвлений =====
+// ===== Base branch classes =====
 abstract class BinaryBranchInstruction extends Instruction {
 	override argumentList(): InstructionArgument[] {
 		return [
@@ -267,7 +267,7 @@ abstract class TernaryBranchAndLinkInstruction extends TernaryBranchInstruction 
 	}
 }
 
-// ===== Устройства (унификация) =====
+// ===== Devices (unified) =====
 abstract class DeviceSetConditionInstruction extends Instruction {
 	override argumentList(): InstructionArgument[] {
 		return [ArgumentCalculators.registerLink("result"), ArgumentCalculators.devicePin("device")];
@@ -324,12 +324,12 @@ abstract class DeviceBranchAndLinkInstruction extends Instruction {
 	}
 }
 
-// ===== Фабрики для снижения дублирования =====
+// ===== Factories to reduce duplication =====
 function makeUnarySet<TBase extends abstract new (...args: any[]) => Instruction>(
 	Base: TBase,
 	pred: (a: number) => boolean,
 ) {
-	//@ts-expect-error ХАК для сокращения повторений в коде
+	//@ts-expect-error HACK to reduce code repetition
 	return class extends Base {
 		public predicate(a: number): boolean {
 			return pred(a);
@@ -340,7 +340,7 @@ function makeBinarySet<TBase extends abstract new (...args: any[]) => Instructio
 	Base: TBase,
 	pred: (a: number, b: number) => boolean,
 ) {
-	//@ts-expect-error ХАК для сокращения повторений в коде
+	//@ts-expect-error HACK to reduce code repetition
 	return class extends Base {
 		public predicate(a: number, b: number): boolean {
 			return pred(a, b);
@@ -351,7 +351,7 @@ function makeTernarySet<TBase extends abstract new (...args: any[]) => Instructi
 	Base: TBase,
 	pred: (a: number, b: number, c: number) => boolean,
 ) {
-	//@ts-expect-error ХАК для сокращения повторений в коде
+	//@ts-expect-error HACK to reduce code repetition
 	return class extends Base {
 		public predicate(a: number, b: number, c: number): boolean {
 			return pred(a, b, c);
@@ -359,7 +359,7 @@ function makeTernarySet<TBase extends abstract new (...args: any[]) => Instructi
 	};
 }
 
-// ===== Реализации S* (запись 1/0) =====
+// ===== S* implementations (write 1/0) =====
 export class SltInstruction extends makeBinarySet(BinarySetConditionInstruction, cmp.lt) {
 	static override tests(): InstructionTestData[] {
 		if (typeof isProd !== "undefined" && isProd) {
@@ -427,7 +427,7 @@ export class SneInstruction extends makeBinarySet(BinarySetConditionInstruction,
 	}
 }
 
-// Приближенные
+// Approximate
 export class SapInstruction extends makeTernarySet(TernarySetConditionInstruction, approxEqual) {
 	static override tests(): InstructionTestData[] {
 		if (typeof isProd !== "undefined" && isProd) {
@@ -451,7 +451,7 @@ export class SnaInstruction extends makeTernarySet(TernarySetConditionInstructio
 	}
 }
 
-// Относительно 0
+// Relative to 0
 export class SltzInstruction extends makeUnarySet(UnarySetConditionInstruction, un.lt0) {
 	static override tests(): InstructionTestData[] {
 		if (typeof isProd !== "undefined" && isProd) {
@@ -519,7 +519,7 @@ export class SnezInstruction extends makeUnarySet(UnarySetConditionInstruction, 
 	}
 }
 
-// |a| сравнение с eps*8
+// |a| comparison against eps*8
 export class SapzInstruction extends makeUnarySet(UnarySetConditionInstruction, un.ap0) {
 	static override tests(): InstructionTestData[] {
 		if (typeof isProd !== "undefined" && isProd) {
@@ -543,7 +543,7 @@ export class SnazInstruction extends makeUnarySet(UnarySetConditionInstruction, 
 	}
 }
 
-// NaN проверки
+// NaN checks
 export class SnanInstruction extends makeUnarySet(UnarySetConditionInstruction, un.nan) {
 	static override tests(): InstructionTestData[] {
 		if (typeof isProd !== "undefined" && isProd) {
@@ -559,7 +559,7 @@ export class SnanInstruction extends makeUnarySet(UnarySetConditionInstruction, 
 }
 export class SnanzInstruction extends makeUnarySet(UnarySetConditionInstruction, un.nanz) {}
 
-// Устройство set/not set
+// Device set/not set
 export class SdseInstruction extends DeviceSetConditionInstruction {
 	public predicateDeviceSet(isSet: boolean): boolean {
 		return isSet;
@@ -571,7 +571,7 @@ export class SdnsInstruction extends DeviceSetConditionInstruction {
 	}
 }
 
-// ===== Абсолютные ветвления a ? b -> line =====
+// ===== Absolute branches a ? b -> line =====
 export class BltInstruction extends makeBinarySet(BinaryBranchInstruction, cmp.lt) {}
 export class BgtInstruction extends makeBinarySet(BinaryBranchInstruction, cmp.gt) {}
 export class BleInstruction extends makeBinarySet(BinaryBranchInstruction, cmp.le) {}
@@ -600,7 +600,7 @@ export class BneInstruction extends makeBinarySet(BinaryBranchInstruction, cmp.n
 	}
 }
 
-// Абсолютные ветвления с приближенным сравнением
+// Absolute branches with approximate comparison
 export class BapInstruction extends makeTernarySet(TernaryBranchInstruction, approxEqual) {
 	static override tests(): InstructionTestData[] {
 		if (typeof isProd !== "undefined" && isProd) {
@@ -614,14 +614,14 @@ export class BapInstruction extends makeTernarySet(TernaryBranchInstruction, app
 }
 export class BnaInstruction extends makeTernarySet(TernaryBranchInstruction, (a, b, c) => !approxEqual(a, b, c)) {}
 
-// Абсолютные ветвления к нулю/NaN
+// Absolute branches against zero/NaN
 export class BeqzInstruction extends makeUnarySet(UnaryBranchInstruction, un.eq0) {}
 export class BnezInstruction extends makeUnarySet(UnaryBranchInstruction, un.ne0) {}
 export class BapzInstruction extends makeUnarySet(UnaryBranchInstruction, un.ap0) {}
 export class BnazInstruction extends makeUnarySet(UnaryBranchInstruction, un.na0) {}
 export class BnanInstruction extends makeUnarySet(UnaryBranchInstruction, un.nan) {}
 
-// Абсолютные ветвления по устройству
+// Absolute branches on device
 export class BdseInstruction extends DeviceBranchInstruction {
 	public predicateDeviceSet(isSet: boolean): boolean {
 		return isSet;
@@ -633,7 +633,7 @@ export class BdnsInstruction extends DeviceBranchInstruction {
 	}
 }
 
-// ===== Относительные ветвления =====
+// ===== Relative branches =====
 export class BrltInstruction extends makeBinarySet(RelativeBinaryBranchInstruction, cmp.lt) {}
 export class BrgtInstruction extends makeBinarySet(RelativeBinaryBranchInstruction, cmp.gt) {
 	static override tests(): InstructionTestData[] {
@@ -663,7 +663,7 @@ export class BrapzInstruction extends makeUnarySet(RelativeUnaryBranchInstructio
 export class BrnazInstruction extends makeUnarySet(RelativeUnaryBranchInstruction, un.na0) {}
 export class BrnanInstruction extends makeUnarySet(RelativeUnaryBranchInstruction, un.nan) {}
 
-// ===== Варианты с сохранением ra (AL) =====
+// ===== Variants that save ra (AL) =====
 export class BltalInstruction extends makeBinarySet(BinaryBranchAndLinkInstruction, cmp.lt) {}
 export class BgtalInstruction extends makeBinarySet(BinaryBranchAndLinkInstruction, cmp.gt) {}
 export class BlealInstruction extends makeBinarySet(BinaryBranchAndLinkInstruction, cmp.le) {}
@@ -674,7 +674,7 @@ export class BeqalInstruction extends makeBinarySet(BinaryBranchAndLinkInstructi
 		if (typeof isProd !== "undefined" && isProd) {
 			return [];
 		}
-		// Оставляем как в оригинале из-за специфики RA/nextLineIndex
+		// Kept as in the original due to the specifics of RA/nextLineIndex
 		return [
 			{
 				code: `move r0 1\nmove r1 1\nbeqal r0 r1 4\nmove r2 1\nmove r3 1`,
@@ -700,7 +700,7 @@ export class BnezalInstruction extends makeUnarySet(UnaryBranchAndLinkInstructio
 export class BapzalInstruction extends makeUnarySet(UnaryBranchAndLinkInstruction, un.ap0) {}
 export class BnazalInstruction extends makeUnarySet(UnaryBranchAndLinkInstruction, un.na0) {}
 
-// ===== Relative device branches (с тестами) =====
+// ===== Relative device branches (with tests) =====
 export class BrdseInstruction extends RelativeDeviceBranchInstruction {
 	static override tests(): InstructionTestData[] {
 		if (typeof isProd !== "undefined" && isProd) {
@@ -742,7 +742,7 @@ export class BrdnsInstruction extends RelativeDeviceBranchInstruction {
 	}
 }
 
-// Абсолютные ветки устройств с AL
+// Absolute device branches with AL
 export class BdsealInstruction extends DeviceBranchAndLinkInstruction {
 	public predicateDeviceSet(isSet: boolean): boolean {
 		return isSet;
@@ -753,19 +753,19 @@ export class BdnsalInstruction extends DeviceBranchAndLinkInstruction {
 		return !isSet;
 	}
 }
-// ===== Абсолютные ветвления (Unary) =====
+// ===== Absolute branches (Unary) =====
 export class BltzInstruction extends makeUnarySet(UnaryBranchInstruction, un.lt0) {}
 export class BgezInstruction extends makeUnarySet(UnaryBranchInstruction, un.ge0) {}
 export class BlezInstruction extends makeUnarySet(UnaryBranchInstruction, un.le0) {}
 export class BgtzInstruction extends makeUnarySet(UnaryBranchInstruction, un.gt0) {}
 
-// ===== Абсолютные ветвления с сохранением адреса (Unary AL) =====
+// ===== Absolute branches that save the return address (Unary AL) =====
 export class BltzalInstruction extends makeUnarySet(UnaryBranchAndLinkInstruction, un.lt0) {}
 export class BgezalInstruction extends makeUnarySet(UnaryBranchAndLinkInstruction, un.ge0) {}
 export class BlezalInstruction extends makeUnarySet(UnaryBranchAndLinkInstruction, un.le0) {}
 export class BgtzalInstruction extends makeUnarySet(UnaryBranchAndLinkInstruction, un.gt0) {}
 
-// ===== Относительные ветвления (Relative Unary) =====
+// ===== Relative branches (Relative Unary) =====
 export class BrltzInstruction extends makeUnarySet(RelativeUnaryBranchInstruction, un.lt0) {}
 export class BrgezInstruction extends makeUnarySet(RelativeUnaryBranchInstruction, un.ge0) {}
 export class BrlezInstruction extends makeUnarySet(RelativeUnaryBranchInstruction, un.le0) {}
@@ -787,7 +787,7 @@ export class SelectInstruction extends Instruction {
 		const b = this.getArgumentValue<number>("b");
 		const c = this.getArgumentValue<number>("c");
 
-		// Выбираем b если a не ноль, иначе c
+		// Select b if a is non-zero, otherwise c
 		const value = a !== 0 ? b : c;
 		this.context.setRegister(result, value);
 	}
@@ -799,19 +799,19 @@ export class SelectInstruction extends Instruction {
 		return [
 			{
 				code: "select r2 1 10 20",
-				expected: [expectReg(2, 10)], // a=1 (не ноль) → выбираем b=10
+				expected: [expectReg(2, 10)], // a=1 (non-zero) → select b=10
 			},
 			{
 				code: "select r2 0 10 20",
-				expected: [expectReg(2, 20)], // a=0 → выбираем c=20
+				expected: [expectReg(2, 20)], // a=0 → select c=20
 			},
 			{
 				code: "select r3 -5 100 200",
-				expected: [expectReg(3, 100)], // a=-5 (не ноль) → выбираем b=100
+				expected: [expectReg(3, 100)], // a=-5 (non-zero) → select b=100
 			},
 			{
 				code: "select r4 0.0001 50 60",
-				expected: [expectReg(4, 50)], // a=0.0001 (не ноль) → выбираем b=50
+				expected: [expectReg(4, 50)], // a=0.0001 (non-zero) → select b=50
 			},
 		];
 	}

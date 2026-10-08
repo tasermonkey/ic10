@@ -2,7 +2,7 @@ import type { InstructionLine } from "../Lines/InstructionLine.ts";
 import { ArgumentCalculators } from "./Helpers/ArgumentCalculators.ts";
 import { Instruction, type InstructionArgument, type InstructionTestData } from "./Helpers/Instruction.ts";
 
-// Базовый класс для условных переходов
+// Base class for conditional jumps
 abstract class ConditionalJumpInstruction extends Instruction {
 	override argumentList(): InstructionArgument[] {
 		return [ArgumentCalculators.anyNumber(), ArgumentCalculators.anyNumber(), ArgumentCalculators.jumpTarget()];

@@ -48,10 +48,10 @@ export abstract class Line {
 	}
 
 	/**
-	 * Инициализирует генератор случайных чисел с учетом приоритета источников:
-	 * 1. Явно переданный randomSeed
-	 * 2. Значение из комментария в формате "seed:ЧИСЛО"
-	 * 3. Позиция линии как fallback-значение
+	 * Initializes the random number generator using the following source priority:
+	 * 1. Explicitly passed randomSeed
+	 * 2. Value from a comment in the format "seed:NUMBER"
+	 * 3. Line position as a fallback value
 	 */
 	private initializeRandomGenerator(randomSeed?: number): Random {
 		if (typeof randomSeed !== "undefined") {
@@ -67,8 +67,8 @@ export abstract class Line {
 	}
 
 	/**
-	 * Извлекает значение сида из комментария используя регулярное выражение.
-	 * Возвращает null если значение не найдено или невалидно.
+	 * Extracts the seed value from the comment using a regular expression.
+	 * Returns null if the value is not found or invalid.
 	 */
 	private extractSeedFromComment(comment: string): number | null {
 		for (const match of this.commnetFunctions) {
@@ -88,12 +88,12 @@ export abstract class Line {
 	}
 
 	/**
-	 * запуск строки
+	 * runs the line
 	 */
 	abstract run(): void | Promise<void>;
 
 	/**
-	 * действие после запуска строки. Обычно перевод каретки на следующий шаг
+	 * action after running the line. Usually advances the cursor to the next step
 	 */
 	abstract end(): void;
 

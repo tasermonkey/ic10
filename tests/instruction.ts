@@ -12,43 +12,43 @@ async function interactiveSelect() {
 	});
 
 	if (entries.length === 0) {
-		console.error("Нет инструкций с тестами.");
+		console.error("No instructions have tests.");
 		process.exit(1);
 	}
 
 	const rl = createInterface({ input: process.stdin, output: process.stdout });
 
-	console.log("Доступные инструкции:");
+	console.log("Available instructions:");
 	entries.forEach(([name], i) => {
 		console.log(`${i}: ${name}`);
 	});
-	const ansInstr = await rl.question("Выберите инструкцию (номер или имя): ");
+	const ansInstr = await rl.question("Select an instruction (number or name): ");
 
 	const instrIndex = Number.isNaN(Number(ansInstr))
 		? entries.findIndex(([n]) => n === ansInstr)
 		: parseInt(ansInstr, 10);
 	if (instrIndex < 0 || instrIndex >= entries.length) {
-		console.error("Некорректный выбор инструкции.");
+		console.error("Invalid instruction selection.");
 		process.exit(1);
 	}
 
 	const [instrName, instr] = entries[instrIndex];
 	const tests = (instr as InstructionLike).tests?.() ?? [];
 	if (tests.length === 0) {
-		console.error("У выбранной инструкции нет тестов.");
+		console.error("The selected instruction has no tests.");
 		process.exit(1);
 	}
 
-	console.log(`Тесты для ${instrName}:`);
+	console.log(`Tests for ${instrName}:`);
 	tests.forEach((t, i) => {
 		console.log(`${i}: ${t.title ?? `#${i}`}`);
 	});
-	const ansTest = await rl.question("Выберите тест (номер): ");
+	const ansTest = await rl.question("Select a test (number): ");
 	const testIndex = parseInt(ansTest, 10);
 	rl.close();
 
 	if (Number.isNaN(testIndex) || testIndex < 0 || testIndex >= tests.length) {
-		console.error("Некорректный выбор теста.");
+		console.error("Invalid test selection.");
 		process.exit(1);
 	}
 
@@ -58,18 +58,18 @@ async function interactiveSelect() {
 function selectByArgs(instrNameArg: string, testIndexArg?: string) {
 	const entry = Object.entries(instructions).find(([n]) => n === instrNameArg);
 	if (!entry) {
-		console.error(`Инструкция "${instrNameArg}" не найдена.`);
+		console.error(`Instruction "${instrNameArg}" not found.`);
 		process.exit(1);
 	}
 	const [instrName, instr] = entry;
 	const tests = (instr as InstructionLike).tests?.() ?? [];
 	if (tests.length === 0) {
-		console.error(`У инструкции "${instrName}" нет тестов.`);
+		console.error(`Instruction "${instrName}" has no tests.`);
 		process.exit(1);
 	}
 	const testIndex = testIndexArg ? parseInt(testIndexArg, 10) : 0;
 	if (Number.isNaN(testIndex) || testIndex < 0 || testIndex >= tests.length) {
-		console.error(`Некорректный индекс теста: ${testIndexArg}`);
+		console.error(`Invalid test index: ${testIndexArg}`);
 		process.exit(1);
 	}
 	return { instrName, test: tests[testIndex], testIndex };
@@ -81,8 +81,8 @@ async function main() {
 
 	const { instrName, test, testIndex } = selection;
 
-	console.log(`Инструкция: ${instrName}`);
-	console.log(`Тест: ${test.title ?? `#${testIndex}`}`);
+	console.log(`Instruction: ${instrName}`);
+	console.log(`Test: ${test.title ?? `#${testIndex}`}`);
 	console.log("IC10 code:\n", test.code);
 
 	const runner = createRunner(test.code);
@@ -100,13 +100,13 @@ async function main() {
 	console.warn(runner.realContext.errors);
 	console.error(runner.realContext.errors);
 	const registers = runner.realContext.chip.registers;
-	console.log("Состояние регистров (r0..r15):");
+	console.log("Register state (r0..r15):");
 	for (let i = 0; i < 16; i++) {
 		console.log(`r${i}:`, registers.get(i));
 	}
 
 	if (test.expected?.length) {
-		console.log("Проверка ожидаемых значений:");
+		console.log("Checking expected values:");
 		for (const exp of test.expected) {
 			logExpectation(runner, exp);
 		}

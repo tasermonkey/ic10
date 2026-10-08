@@ -15,7 +15,7 @@ export async function generateLangIndex({
 	outputFile = "index.ts",
 	alias = "@/Languages",
 }: GenerateLangIndexOptions): Promise<void> {
-	// Находим все JSON файлы в директории
+	// Find all JSON files in the directory
 	const files = await glob("*.json", {
 		cwd: langDir,
 	});
@@ -31,7 +31,7 @@ export async function generateLangIndex({
 		const filename = path.basename(file, ".json");
 		const importName = t.identifier(filename);
 
-		// Создаем импорт: import en from "../src/Languages/en.json" with { type: "json" }
+		// Create the import: import en from "../src/Languages/en.json" with { type: "json" }
 		const importDeclaration = t.importDeclaration(
 			[t.importDefaultSpecifier(importName)],
 			t.stringLiteral(`${alias}/${filename}.json`),
@@ -39,7 +39,7 @@ export async function generateLangIndex({
 
 		imports.push(importDeclaration);
 
-		// Создаем свойство для объекта: en: { translation: en }
+		// Create the object property: en: { translation: en }
 		properties.push(
 			t.objectProperty(
 				t.identifier(filename),
@@ -48,7 +48,7 @@ export async function generateLangIndex({
 		);
 	});
 
-	// Создаем export const Languages = { ... }
+	// Create export const Languages = { ... }
 	const exportDeclaration = t.exportNamedDeclaration(
 		t.variableDeclaration("const", [t.variableDeclarator(t.identifier("Languages"), t.objectExpression(properties))]),
 	);
@@ -56,7 +56,7 @@ export async function generateLangIndex({
 	const program = t.program([...imports, exportDeclaration]);
 	const { code } = generate(program as any);
 
-	// Создаем директорию если нужно
+	// Create the directory if needed
 	const outputDir = path.dirname(outputFile);
 	if (!fs.existsSync(outputDir)) {
 		fs.mkdirSync(outputDir, { recursive: true });
@@ -65,7 +65,7 @@ export async function generateLangIndex({
 	fs.writeFileSync(outputFile, `${code}\n`);
 }
 
-// Пример использования
+// Example usage
 generateLangIndex({
 	langDir: path.join(path.dirname(import.meta.dirname), "src", "Languages"),
 	outputFile: path.join(path.dirname(import.meta.dirname), "src", "Languages", "index.ts"),

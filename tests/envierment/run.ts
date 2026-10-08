@@ -6,12 +6,12 @@ import i18n from "../../src/Languages/lang.ts";
 
 await i18n
 	.init({
-		lng: "ru", // язык по умолчанию
+		lng: "en", // default language
 		fallbackLng: "en",
 		debug: false,
 		resources: Languages,
 	})
-	.then(() => console.log("🟦🟦 Язык загружен 🟦🟦"));
+	.then(() => console.log("🟦🟦 Language loaded 🟦🟦"));
 
 const f = await readFile(`${import.meta.dirname}/test.ic.json`, "utf8");
 

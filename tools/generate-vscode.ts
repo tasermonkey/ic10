@@ -20,7 +20,7 @@ interface ErrorStats {
 }
 
 async function main() {
-	console.log("Начинаем обновление launch.json...\n");
+	console.log("Starting launch.json update...\n");
 
 	const allowed: string[] = [];
 	const errors: ErrorStats = {
@@ -31,20 +31,20 @@ async function main() {
 		emptyArray: [],
 	};
 
-	// Сортируем ключи инструкций для детерминированного поведения
+	// Sort instruction keys for deterministic behavior
 	const sortedInstructionKeys = Object.keys(instructions).sort();
 
-	// Проходим по всем инструкциям в отсортированном порядке
+	// Iterate over all instructions in sorted order
 	for (const key of sortedInstructionKeys) {
 		const instruction = (instructions as any)[key];
 
-		// Проверяем наличие инструкции
+		// Check that the instruction exists
 		if (!instruction) {
 			errors.noInstruction.push(key);
 			continue;
 		}
 
-		// Проверяем наличие метода tests
+		// Check that the tests method exists
 		if (typeof (instruction as Instruction).tests !== "function") {
 			errors.noTestsMethod.push(key);
 			continue;
@@ -52,14 +52,14 @@ async function main() {
 
 		let testResults: unknown;
 		try {
-			// Пытаемся получить тесты
+			// Try to get the tests
 			testResults = (instruction as Instruction).tests!();
 		} catch (_error) {
 			errors.testsThrew.push(key);
 			continue;
 		}
 
-		// Проверяем что результат - непустой массив
+		// Check that the result is a non-empty array
 		if (!Array.isArray(testResults)) {
 			errors.notArray.push(key);
 			continue;
@@ -73,43 +73,43 @@ async function main() {
 		allowed.push(key);
 	}
 
-	// Сортируем массив allowed для детерминированного вывода
+	// Sort the allowed array for deterministic output
 	allowed.sort();
 
-	// Сортируем все массивы ошибок для детерминированного вывода
+	// Sort all error arrays for deterministic output
 	errors.noInstruction.sort();
 	errors.noTestsMethod.sort();
 	errors.testsThrew.sort();
 	errors.notArray.sort();
 	errors.emptyArray.sort();
 
-	// Выводим статистику
-	console.log(`✅ Добавлено инструкций: ${allowed.length}`);
+	// Print statistics
+	console.log(`✅ Instructions added: ${allowed.length}`);
 
-	// Выводим ошибки только если они есть
+	// Print errors only if there are any
 	if (errors.noInstruction.length > 0) {
-		console.log(`❌ Пропущено (нет инструкции): ${errors.noInstruction.length}`);
+		console.log(`❌ Skipped (no instruction): ${errors.noInstruction.length}`);
 	}
 
 	if (errors.noTestsMethod.length > 0) {
-		console.log(`❌ Пропущено (нет метода tests): ${errors.noTestsMethod.length}`);
+		console.log(`❌ Skipped (no tests method): ${errors.noTestsMethod.length}`);
 	}
 
 	if (errors.testsThrew.length > 0) {
-		console.log(`❌ Пропущено (ошибка в tests()): ${errors.testsThrew.length}`);
+		console.log(`❌ Skipped (error in tests()): ${errors.testsThrew.length}`);
 	}
 
 	if (errors.notArray.length > 0) {
-		console.log(`❌ Пропущено (не массив): ${errors.notArray.length}`);
+		console.log(`❌ Skipped (not an array): ${errors.notArray.length}`);
 	}
 
 	if (errors.emptyArray.length > 0) {
-		console.log(`❌ Пропущено (пустой массив): ${errors.emptyArray.length}`);
+		console.log(`❌ Skipped (empty array): ${errors.emptyArray.length}`);
 	}
 
-	// Подробный вывод по запросу (можно закомментировать если не нужен)
+	// Detailed output on request (can be commented out if not needed)
 	if (process.env.DEBUG) {
-		console.log("\nДетальная информация (только в DEBUG режиме):");
+		console.log("\nDetailed information (DEBUG mode only):");
 		for (const [category, items] of Object.entries(errors)) {
 			if (items.length > 0) {
 				console.log(`\n${category}: ${items.join(", ")}`);
@@ -117,37 +117,37 @@ async function main() {
 		}
 	}
 
-	// Обновляем launch.json
+	// Update launch.json
 	const launchPath = path.join(path.dirname(import.meta.dirname), ".vscode/launch.json");
 
 	try {
 		const content = await fs.readFile(launchPath, "utf-8");
 		const data = JSON5.parse(content);
 
-		// Находим input с id "instrName"
+		// Find the input with id "instrName"
 		const inputs = Array.isArray(data?.inputs) ? data.inputs : [];
 		const instrInput = inputs.find((i: any) => i?.id === "instrName");
 
 		if (!instrInput) {
-			console.warn("⚠️  Поле instrName не найдено в launch.json");
+			console.warn("⚠️  instrName field not found in launch.json");
 			return;
 		}
 
-		// Обновляем опции (уже отсортированные)
+		// Update the options (already sorted)
 		instrInput.options = allowed;
 
-		// Сохраняем изменения
+		// Save changes
 		const updatedContent = JSON.stringify(data, null, 2);
 		await fs.writeFile(launchPath, updatedContent, "utf-8");
 
-		console.log("\n✅ launch.json успешно обновлен");
+		console.log("\n✅ launch.json updated successfully");
 	} catch (error) {
-		console.error("❌ Ошибка при работе с launch.json:", error);
+		console.error("❌ Error while processing launch.json:", error);
 		throw error;
 	}
 }
 
 main().catch((err) => {
-	console.error("💥 Критическая ошибка:", err);
+	console.error("💥 Fatal error:", err);
 	process.exit(1);
 });

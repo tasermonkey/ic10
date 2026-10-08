@@ -79,7 +79,7 @@ export class DefineInstruction extends Instruction {
 					const t = argument.text;
 					if (this.context.hasDefines(t)) {
 						const old = this.context.getDefines(t)!;
-						// если значение это строка значит это alias и его можно переопределить
+						// if the value is a string, it is an alias and can be redefined
 						this.addError(
 							new RuntimeIc10Error({
 								message: i18n.t("error.constant_already_defined", { constant: t }),

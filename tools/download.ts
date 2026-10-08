@@ -7,7 +7,7 @@ import JSON5 from "json5";
 
 console.log("🚀 Generating download...");
 
-// Проверяем наличие флага --missing в аргументах
+// Check whether the --missing flag is present in the arguments
 const missingMode = process.argv.includes("--missing");
 
 export async function downloadWithProgress(url: string, varName: string) {
@@ -51,21 +51,21 @@ export function saveAsTsFile(json: any, outPath: string, varName: string, type =
 		.replace(/["']-Infinity["']/g, "-Infinity");
 
 	fs.writeFileSync(outPath, tsContent);
-	console.log(`Файл ${outPath} успешно создан!`);
+	console.log(`File ${outPath} created successfully!`);
 }
 
 async function downloadConsts() {
 	const outPath = "src/Defines/consts.ts";
 
 	if (missingMode && fs.existsSync(outPath)) {
-		console.log(`Файл ${outPath} уже существует, пропускаем...`);
+		console.log(`File ${outPath} already exists, skipping...`);
 		return;
 	}
 
 	const data = await downloadWithProgress("https://assets.ic10.dev/consts.json", "CONSTS");
 	const json = JSON5.parse(data);
 
-	// Функция для рекурсивной сортировки объекта по ключам
+	// Function to recursively sort an object by its keys
 	function sortObjectKeys(obj: any): any {
 		if (typeof obj !== "object" || obj === null) return obj;
 
@@ -82,10 +82,10 @@ async function downloadConsts() {
 		return sorted;
 	}
 
-	// Создаем группированный объект
+	// Create the grouped object
 	const grouped: any = {};
 
-	// Сначала сортируем исходный JSON
+	// First, sort the source JSON
 	const sortedJson = sortObjectKeys(json);
 
 	for (const key in sortedJson) {
@@ -100,10 +100,10 @@ async function downloadConsts() {
 		}
 	}
 
-	// Сортируем группированный объект
+	// Sort the grouped object
 	const sortedGrouped = sortObjectKeys(grouped);
 
-	// Сохраняем оба объекта в один файл
+	// Save both objects to a single file
 	const tsContent =
 		`export const CONSTS = ${JSON5.stringify(sortedJson, null, 2)} as const;\n` +
 		`export const GROUPED_CONSTS = ${JSON5.stringify(sortedGrouped, null, 2)} as const;\n` +
@@ -116,14 +116,14 @@ async function downloadConsts() {
 			.replace(/["']Infinity["']/g, "Infinity")
 			.replace(/["']-Infinity["']/g, "-Infinity"),
 	);
-	console.log(`Файл ${outPath} успешно создан!`);
+	console.log(`File ${outPath} created successfully!`);
 }
 
 async function downloadInstructions() {
 	const outPath = "src/Defines/instructions.ts";
 
 	if (missingMode && fs.existsSync(outPath)) {
-		console.log(`Файл ${outPath} уже существует, пропускаем...`);
+		console.log(`File ${outPath} already exists, skipping...`);
 		return;
 	}
 
@@ -136,7 +136,7 @@ async function downloadReagents() {
 	const outPath = "src/Defines/reagents.ts";
 
 	if (missingMode && fs.existsSync(outPath)) {
-		console.log(`Файл ${outPath} уже существует, пропускаем...`);
+		console.log(`File ${outPath} already exists, skipping...`);
 		return;
 	}
 
@@ -149,7 +149,7 @@ async function downloadItems() {
 	const outPath = "src/Defines/items.ts";
 
 	if (missingMode && fs.existsSync(outPath)) {
-		console.log(`Файл ${outPath} уже существует, пропускаем...`);
+		console.log(`File ${outPath} already exists, skipping...`);
 		return;
 	}
 
@@ -162,14 +162,14 @@ async function downloadDevices() {
 	const dataPath = "src/Defines/devices.ts";
 
 	if (missingMode && fs.existsSync(dataPath)) {
-		console.log(`Файлы устройств уже существуют, пропускаем...`);
+		console.log(`Device files already exist, skipping...`);
 		return;
 	}
 
-	// Загружаем устройства
+	// Load devices
 	const output = await downloadWithProgress("https://assets.ic10.dev/languages/EN/devices.json", "DEVICES");
 
-	// Загружаем теги
+	// Load tags
 	const tagsOutput = await downloadWithProgress("https://assets.ic10.dev/tags.json", "TAGS");
 	const responseData = JSON5.parse(output);
 	const tagsData = JSON5.parse(tagsOutput);
@@ -180,22 +180,22 @@ async function downloadDevices() {
 			items[item.id] = item;
 		});
 
-	// Генерация AST для файла TypeScript
+	// Generate the AST for the TypeScript file
 	const ast = generateDevicesAST(items, responseData, tagsData);
 	const { code } = generate(ast as any);
 
 	fs.writeFileSync(dataPath, code);
-	console.log(`Файл ${dataPath} успешно создан!`);
+	console.log(`File ${dataPath} created successfully!`);
 }
 
 function generateDevicesAST(items: Record<string, any>, responseData: any, tagsData: any) {
-	// Создаем массив объявлений для файла
+	// Create the array of declarations for the file
 	const declarations: t.Statement[] = [];
 
-	// 1. Добавляем переменную DEVICES с правильным типом
+	// 1. Add the DEVICES variable with the correct type
 	const devicesVariable = t.variableDeclaration("const", [
 		t.variableDeclarator(
-			// t.identifier("DEVICES"), // ← было так
+			// t.identifier("DEVICES"), // ← previously
 			Object.assign(t.identifier("DEVICES"), {
 				typeAnnotation: t.tsTypeAnnotation(t.tsTypeReference(t.identifier("DevicesType"))),
 			}),
@@ -204,11 +204,11 @@ function generateDevicesAST(items: Record<string, any>, responseData: any, tagsD
 	]);
 	declarations.push(t.exportNamedDeclaration(devicesVariable));
 
-	// 2. Добавляем экспорт по умолчанию
+	// 2. Add the default export
 	const defaultExport = t.exportDefaultDeclaration(t.identifier("DEVICES"));
 	declarations.push(defaultExport);
 
-	// 3. Генерируем типы на основе responseData
+	// 3. Generate types based on responseData
 	declarations.push(...generateTypesFromResponseData(responseData, tagsData));
 
 	return t.program(declarations);
@@ -218,17 +218,17 @@ function generateTypesFromResponseData(responseData: any, tagsData: any): t.Stat
 	const statements: t.Statement[] = [];
 	const devices = responseData.data;
 
-	// Собираем уникальные значения для connections и mods
+	// Collect unique values for connections and mods
 	const { uniqueConnections, uniqueMods } = collectUniqueValues(devices);
 
-	// 1. Генерируем отдельные типы для каждого ключа DeviceType
+	// 1. Generate separate types for each DeviceType key
 	statements.push(...generateDevicePropertyTypes(devices, tagsData, uniqueConnections, uniqueMods));
 
 	// 2. DeviceType interface
 	const deviceInterface = generateDeviceInterface(devices, tagsData);
 	statements.push(deviceInterface);
 
-	// 3. DevicesType - правильная индексная сигнатура
+	// 3. DevicesType - correct index signature
 	const devicesType = t.exportNamedDeclaration(
 		t.tsTypeAliasDeclaration(
 			t.identifier("DevicesType"),
@@ -244,13 +244,13 @@ function generateTypesFromResponseData(responseData: any, tagsData: any): t.Stat
 	return statements;
 }
 
-// Функция для сбора уникальных значений connections и mods
+// Function to collect unique connections and mods values
 function collectUniqueValues(devices: any[]): { uniqueConnections: string[]; uniqueMods: string[] } {
 	const connectionsSet = new Set<string>();
 	const modsSet = new Set<string>();
 
 	devices.forEach((device) => {
-		// Собираем уникальные connections
+		// Collect unique connections
 		if (device.connections && Array.isArray(device.connections)) {
 			device.connections.forEach((connection: string) => {
 				if (connection && typeof connection === "string") {
@@ -259,7 +259,7 @@ function collectUniqueValues(devices: any[]): { uniqueConnections: string[]; uni
 			});
 		}
 
-		// Собираем уникальные mods
+		// Collect unique mods
 		if (device.mods && Array.isArray(device.mods)) {
 			device.mods.forEach((mod: string) => {
 				if (mod && typeof mod === "string") {
@@ -284,7 +284,7 @@ function generateDevicePropertyTypes(
 	const statements: t.Statement[] = [];
 	const propertySamples: Record<string, any> = {};
 
-	// Собираем все возможные ключи и их примеры значений из всех устройств
+	// Collect all possible keys and their example values from all devices
 	devices.forEach((device) => {
 		if (device && typeof device === "object") {
 			Object.keys(device).forEach((key) => {
@@ -295,21 +295,21 @@ function generateDevicePropertyTypes(
 		}
 	});
 
-	// Создаем отдельные export type для каждого свойства
+	// Create a separate export type for each property
 	Object.entries(propertySamples).forEach(([key, sampleValue]) => {
 		const typeName = `${key.charAt(0).toUpperCase() + key.slice(1)}Type`;
 
-		// Специальная обработка для tags
+		// Special handling for tags
 		if (key === "tags" && Array.isArray(tagsData)) {
 			const typeAnnotation = generateTagsType(tagsData);
 			statements.push(t.exportNamedDeclaration(t.tsTypeAliasDeclaration(t.identifier(typeName), null, typeAnnotation)));
 		}
-		// Специальная обработка для connections
+		// Special handling for connections
 		else if (key === "connections" && uniqueConnections.length > 0) {
 			const typeAnnotation = generateUnionArrayType(uniqueConnections);
 			statements.push(t.exportNamedDeclaration(t.tsTypeAliasDeclaration(t.identifier(typeName), null, typeAnnotation)));
 		}
-		// Специальная обработка для mods
+		// Special handling for mods
 		else if (key === "mods" && uniqueMods.length > 0) {
 			const typeAnnotation = generateUnionArrayType(uniqueMods);
 			statements.push(t.exportNamedDeclaration(t.tsTypeAliasDeclaration(t.identifier(typeName), null, typeAnnotation)));
@@ -326,7 +326,7 @@ function generateDeviceInterface(devices: any[], tagsData: any): t.Statement {
 	const properties: t.TSPropertySignature[] = [];
 	const propertySamples: Record<string, any> = {};
 
-	// Собираем все возможные ключи из всех устройств
+	// Collect all possible keys from all devices
 	devices.forEach((device) => {
 		if (device && typeof device === "object") {
 			Object.keys(device).forEach((key) => {
@@ -337,7 +337,7 @@ function generateDeviceInterface(devices: any[], tagsData: any): t.Statement {
 		}
 	});
 
-	// Создаем свойства интерфейса, используя сгенерированные типы
+	// Create the interface properties using the generated types
 	Object.keys(propertySamples).forEach((key) => {
 		const typeName = `${key.charAt(0).toUpperCase() + key.slice(1)}Type`;
 
@@ -351,21 +351,21 @@ function generateDeviceInterface(devices: any[], tagsData: any): t.Statement {
 	);
 }
 
-// Функция для генерации union типа из массива строк
+// Function to generate a union type from an array of strings
 function generateUnionArrayType(values: string[]): t.TSType {
 	const literalTypes = values.map((value) => t.tsLiteralType(t.stringLiteral(value)));
 	const unionType = t.tsUnionType(literalTypes);
 	return t.tsArrayType(unionType);
 }
 
-// Специальная функция для генерации типа тегов
+// Special function to generate the tags type
 function generateTagsType(tagsData: string[]): t.TSType {
-	// Создаем union type из всех значений тегов
+	// Create a union type from all tag values
 	const literalTypes = tagsData.map((tag) => t.tsLiteralType(t.stringLiteral(tag)));
 
 	const unionType = t.tsUnionType(literalTypes);
 
-	// Создаем массив этого union type
+	// Create an array of this union type
 	return t.tsArrayType(unionType);
 }
 
@@ -377,7 +377,7 @@ function isEmpty(value: any): boolean {
 	return false;
 }
 
-// Вспомогательная функция для определения типа на основе значения
+// Helper function to determine a type from a value
 function getTypeAnnotationForValue(value: any, allowNull: boolean = false): t.TSType {
 	const baseType = getBaseTypeAnnotation(value, 0);
 
@@ -397,7 +397,7 @@ function getBaseTypeAnnotation(value: any, depth: number = 0): t.TSType {
 			return t.tsArrayType(t.tsAnyKeyword());
 		}
 
-		// Собираем уникальные типы элементов
+		// Collect unique element types
 		const elementTypes = new Set<string>();
 		let elementSample: any = null;
 
@@ -414,16 +414,16 @@ function getBaseTypeAnnotation(value: any, depth: number = 0): t.TSType {
 			return t.tsArrayType(t.tsAnyKeyword());
 		}
 
-		// Если все элементы одного типа, используем его
+		// If all elements are of the same type, use it
 		if (elementTypes.size === 1) {
 			return t.tsArrayType(elementSample);
 		}
 
-		// Для множества типов создаем объединение, но убираем дубликаты
+		// For multiple types, create a union but remove duplicates
 		const uniqueTypes = Array.from(elementTypes)
 			.map((key) => parseTypeKey(key, depth))
 			.reduce((acc, type) => {
-				// Убираем дубликаты на основе ключей типов
+				// Remove duplicates based on type keys
 				const typeKey = generateTypeKey(type);
 				if (!acc.some((existing) => generateTypeKey(existing) === typeKey)) {
 					acc.push(type);
@@ -441,17 +441,17 @@ function getBaseTypeAnnotation(value: any, depth: number = 0): t.TSType {
 	} else if (typeof value === "boolean") {
 		return t.tsBooleanKeyword();
 	} else if (typeof value === "object") {
-		// Если достигли максимальной глубины рекурсии, возвращаем any
+		// If the maximum recursion depth is reached, return any
 		if (depth >= 3) {
 			return t.tsAnyKeyword();
 		}
 
-		// Генерируем интерфейс для объекта
+		// Generate an interface for the object
 		const properties: t.TSPropertySignature[] = [];
 		const allKeys = new Set<string>();
 		const keySamples: Record<string, any> = {};
 
-		// Собираем все ключи и их примеры значений
+		// Collect all keys and their example values
 		if (Array.isArray(value)) {
 			value.forEach((item) => {
 				if (item && typeof item === "object") {
@@ -472,7 +472,7 @@ function getBaseTypeAnnotation(value: any, depth: number = 0): t.TSType {
 			});
 		}
 
-		// Для каждого ключа определяем тип
+		// Determine the type for each key
 		allKeys.forEach((key) => {
 			const sampleValue = keySamples[key];
 			if (sampleValue != null) {
@@ -489,7 +489,7 @@ function getBaseTypeAnnotation(value: any, depth: number = 0): t.TSType {
 	return t.tsAnyKeyword();
 }
 
-// Генерирует уникальный ключ для типа (для устранения дубликатов)
+// Generates a unique key for a type (to eliminate duplicates)
 function generateTypeKey(type: t.TSType): string {
 	switch (type.type) {
 		case "TSStringKeyword":
@@ -522,7 +522,7 @@ function generateTypeKey(type: t.TSType): string {
 	}
 }
 
-// Парсит ключ обратно в тип (упрощенная версия)
+// Parses a key back into a type (simplified version)
 function parseTypeKey(key: string, depth: number): t.TSType {
 	if (key === "string") return t.tsStringKeyword();
 	if (key === "number") return t.tsNumberKeyword();
@@ -543,7 +543,7 @@ function parseTypeKey(key: string, depth: number): t.TSType {
 	}
 
 	if (key.startsWith("object<")) {
-		// Для объектов возвращаем упрощенный тип
+		// For objects, return a simplified type
 		return t.tsAnyKeyword();
 	}
 

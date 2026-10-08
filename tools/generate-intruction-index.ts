@@ -13,44 +13,44 @@ console.log("🚀 Generating intstructions...");
 const SOURCE_DIR = path.resolve(import.meta.dirname, "../src/Ic10/Instruction");
 const INDEX_PATH = path.join(SOURCE_DIR, "index.ts");
 
-// Функция для проверки, является ли класс абстрактным
+// Function to check whether a class is abstract
 function isAbstractClass(classNode: t.ClassDeclaration): boolean {
 	return classNode.abstract === true;
 }
 
-// Функция для генерации имени инструкции из имени класса
+// Function to generate the instruction name from the class name
 function generateInstructionName(className: string): string {
-	// Удаляем суффикс "Instruction" если он есть
+	// Remove the "Instruction" suffix if present
 	const withoutSuffix = className.replace(/Instruction$/, "");
 
-	// Преобразуем PascalCase в snake_case (или сохраняем аббревиатуры)
+	// Convert PascalCase to snake_case (or keep abbreviations)
 	return withoutSuffix
 		.replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2")
 		.replace(/([a-z\d])([A-Z])/g, "$1_$2")
 		.toLowerCase();
 }
 
-// Расширенная функция для проверки наследования от Instruction
+// Extended function to check inheritance from Instruction
 function extendsInstruction(classNode: t.ClassDeclaration): boolean {
 	if (!classNode.superClass) return false;
 
-	// Рекурсивная функция для проверки наследования через сложные выражения
+	// Recursive function to check inheritance through complex expressions
 	function checkSuperClass(superClass: t.Node): boolean {
-		// Прямое наследование: class A extends Instruction
+		// Direct inheritance: class A extends Instruction
 		if (t.isIdentifier(superClass)) {
 			return superClass.name === "Instruction";
 		}
 
-		// Через MemberExpression: class A extends Base.Instruction
+		// Via MemberExpression: class A extends Base.Instruction
 		if (t.isMemberExpression(superClass)) {
 			if (t.isIdentifier(superClass.property)) {
 				return superClass.property.name === "Instruction";
 			}
 		}
 
-		// Через CallExpression: class A extends makeBinarySet(...)
+		// Via CallExpression: class A extends makeBinarySet(...)
 		if (t.isCallExpression(superClass)) {
-			// Проверяем аргументы call expression на наличие Instruction
+			// Check the call expression arguments for Instruction
 			return superClass.arguments.some((arg) => {
 				if (t.isIdentifier(arg)) {
 					return arg.name.includes("Instruction");
@@ -68,9 +68,9 @@ function extendsInstruction(classNode: t.ClassDeclaration): boolean {
 	return checkSuperClass(classNode.superClass);
 }
 
-// Альтернативный подход: проверяем по имени файла или другим признакам
+// Alternative approach: check by file name or other indicators
 function shouldIncludeClass(className: string, filePath: string): boolean {
-	// Исключаем абстрактные классы по имени
+	// Exclude abstract classes by name
 	const abstractClassNames = [
 		"Instruction",
 		"AbstractInstruction",
@@ -84,20 +84,20 @@ function shouldIncludeClass(className: string, filePath: string): boolean {
 		return false;
 	}
 
-	// Включаем только классы, заканчивающиеся на Instruction (но не абстрактные)
+	// Include only classes ending in Instruction (but not abstract ones)
 	return className.endsWith("Instruction") && !abstractClassNames.includes(className);
 }
 
 async function generateInstructionsIndex() {
 	let files = await glob([`${SOURCE_DIR}/**/*.ts`, `!${INDEX_PATH}`]);
 
-	// Сортируем файлы для детерминированного порядка обработки
+	// Sort files for a deterministic processing order
 	files = files.sort((a, b) => a.localeCompare(b));
 
 	const imports: string[] = [];
 	const instructionMap: Map<string, string> = new Map(); // instructionName -> className
 
-	// Собираем все классы, наследующие от Instruction
+	// Collect all classes that inherit from Instruction
 	for (const file of files) {
 		const content = fs.readFileSync(file, "utf-8");
 
@@ -109,7 +109,7 @@ async function generateInstructionsIndex() {
 
 			const fileClasses: Array<{ name: string; node: t.ClassDeclaration; filePath: string }> = [];
 
-			// Сначала собираем все классы в файле
+			// First collect all classes in the file
 			traverse(ast as any, {
 				ClassDeclaration(path) {
 					const className = path.node.id?.name;
@@ -123,35 +123,35 @@ async function generateInstructionsIndex() {
 				},
 			});
 
-			// Сортируем классы в файле по имени для детерминированного порядка
+			// Sort the classes in the file by name for a deterministic order
 			fileClasses.sort((a, b) => a.name.localeCompare(b.name));
 
-			// Проверяем наследование от Instruction и формируем импорты
+			// Check inheritance from Instruction and build the imports
 			if (fileClasses.length > 0) {
 				const relativePath = path.relative(SOURCE_DIR, file).replace(/\.ts$/, "").replace("\\", "/");
-				// Формируем путь в формате @/src/Ic10/Instruction/...
+				// Build the path in the format @/src/Ic10/Instruction/...
 				const importPath = `@/Ic10/Instruction/${relativePath}`;
 
-				// Используем комбинированный подход для фильтрации
+				// Use a combined approach for filtering
 				const classNames = fileClasses
 					.filter(({ name, node, filePath }) => {
-						// Исключаем абстрактные классы
+						// Exclude abstract classes
 						if (isAbstractClass(node)) return false;
 
-						// Проверяем наследование сложными способами
+						// Check inheritance using more complex methods
 						if (extendsInstruction(node)) return true;
 
-						// Дополнительная проверка по имени
+						// Additional check by name
 						return shouldIncludeClass(name, filePath);
 					})
 					.map(({ name }) => name);
 
 				if (classNames.length > 0) {
-					// Сортируем имена классов перед добавлением в импорт
+					// Sort class names before adding them to the import
 					const sortedClassNames = classNames.sort((a, b) => a.localeCompare(b));
 					imports.push(`import { ${sortedClassNames.join(", ")} } from "${importPath}";`);
 
-					// Добавляем инструкции в карту
+					// Add the instructions to the map
 					sortedClassNames.forEach((className) => {
 						const instructionName = generateInstructionName(className);
 						instructionMap.set(instructionName, className);
@@ -163,11 +163,11 @@ async function generateInstructionsIndex() {
 		}
 	}
 
-	// Сортируем импорты и инструкции для детерминированного результата
+	// Sort imports and instructions for a deterministic result
 	imports.sort((a, b) => a.localeCompare(b));
 	const sortedInstructions = Array.from(instructionMap.entries()).sort(([a], [b]) => a.localeCompare(b));
 
-	// Формируем содержимое файла через строки (проще и надежнее)
+	// Build the file contents from strings (simpler and more reliable)
 	const instructionsObject = sortedInstructions.map(([key, className]) => `  ${key}: ${className},`).join("\n");
 
 	const content = `// Auto-generated file - DO NOT EDIT MANUALLY
@@ -189,5 +189,5 @@ ${instructionsObject}
 	console.log(`Generated ${INDEX_PATH} with ${instructionMap.size} instructions`);
 }
 
-// Запуск
+// Run
 generateInstructionsIndex().catch(console.error);

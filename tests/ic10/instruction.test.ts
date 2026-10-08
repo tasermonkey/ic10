@@ -5,8 +5,8 @@ import type { InstructionTestData } from "../../src/Ic10/Instruction/Helpers/Ins
 import { instructions } from "../../src/Ic10/Instruction/index.ts";
 import { createRunner, expectExpectation, type InstructionLike, runInstructionTest } from "../helpers.ts";
 
-describe("Проверка каждой инструкции", () => {
-	// Собираем все тесты синхронно
+describe("Check every instruction", () => {
+	// Collect all tests synchronously
 	const testCases: [string, InstructionLike, InstructionTestData][] = [];
 
 	Object.entries(instructions).forEach(([key, instruction]) => {
@@ -21,12 +21,12 @@ describe("Проверка каждой инструкции", () => {
 		});
 	});
 
-	// Запускаем тесты последовательно
+	// Run the tests sequentially
 	for (const [testName, _instruction, testData] of testCases) {
 		test(testName, async () => {
 			Random.resetGlobalRandom(0);
-			// console.time(`🚀 Запуск теста: ${testName}`);
-			// Предыдущие тесты использовали длину регистра 18 — сохраним это поведение
+			// console.time(`🚀 Running test: ${testName}`);
+			// Previous tests used a register length of 18 — keep that behavior
 			const runner = createRunner(testData.code, { register_length: 18 });
 			try {
 				await runInstructionTest(runner, testData);
@@ -40,11 +40,11 @@ describe("Проверка каждой инструкции", () => {
 				// whole run early and hid every later test.)
 				throw e;
 			}
-			// Унифицированные проверки
+			// Unified checks
 			for (const exp of testData.expected) {
 				expectExpectation(runner, exp, expect);
 			}
-			// console.timeEnd(`🚀 Запуск теста: ${testName}`);
+			// console.timeEnd(`🚀 Running test: ${testName}`);
 		});
 	}
 });

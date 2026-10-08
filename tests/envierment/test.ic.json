@@ -3,10 +3,10 @@
 	"version": 1,
 	"project": {
 		"version": "0.0.1-beta",
-		"author": "Долюоеб",
-		"name": "Говно",
-		"description": "Маму ебал",
-		"tags": ["poo", "pee"]
+		"author": "Test Author",
+		"name": "Test project",
+		"description": "Fixture for the environment runner",
+		"tags": ["foo", "bar"]
 	},
 	"chips": [
 		{
