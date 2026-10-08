@@ -2,6 +2,7 @@ import { Random } from "@stationeers-ic/exact-ic10-math";
 import { EventEmitter } from "eventemitter3";
 import type { Housing } from "../Core/Housing.ts";
 import i18n from "../Languages/lang.ts";
+import type { SuspendRequest } from "./Context/Context.ts";
 import { ContextSwitcher, type contextNames } from "./Context/ContextSwitcher.ts";
 import { RealContext } from "./Context/RealContext.ts";
 import { SandboxContext } from "./Context/SandboxContext.ts";
@@ -29,6 +30,8 @@ export interface Ic10RunnerEvents {
 	runEnd: () => void;
 	step: (lineIndex: number, line: Line) => void;
 	stepEnd: (lineIndex: number, line: Line) => void;
+	/** The line just executed asked to suspend the chip (`yield` or `sleep`). */
+	suspend: (request: SuspendRequest, lineIndex: number) => void;
 
 	// Context events
 	contextSwitch: (fromContext: string, toContext: string) => void;
@@ -56,6 +59,7 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 	public lines: Line[] = [];
 	private readonly jumpLimit: number;
 	private executionStopped: boolean = false;
+	private $suspend: SuspendRequest | null = null;
 	public readonly randomSeed?: number;
 	public readonly random!: Random;
 
@@ -122,8 +126,18 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 		return this;
 	}
 
+	/**
+	 * The suspend requested by the line the last `step()` executed (`yield` or `sleep`), or null.
+	 * The emulator never waits; a scheduler driving `step()` should end the chip's tick on a yield,
+	 * or skip it for `seconds` of game time on a sleep.
+	 */
+	public get suspend(): SuspendRequest | null {
+		return this.$suspend;
+	}
+
 	public async step(): Promise<boolean> {
 		const currentLineIndex = this.context.getNextLineIndex();
+		this.$suspend = null;
 
 		if (this.executionStopped) {
 			return false;
@@ -167,6 +181,7 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 		this.emit("lineExecute", line);
 
 		this.context.setExecuteLine(line);
+		this.context.takeSuspend(); // drop anything stale, so only this line's request is reported
 		await line.runCommentBeforeRun();
 		// Execute the current line
 		if (line instanceof InstructionLine) {
@@ -174,10 +189,12 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 		}
 		await line.runCommentAfterRun();
 		line.end();
+		this.$suspend = this.context.takeSuspend();
 
 		// Step end event
 		this.emit("stepEnd", currentLineIndex, line);
 		this.emit("lineEnd", line);
+		if (this.$suspend) this.emit("suspend", this.$suspend, currentLineIndex);
 
 		this.context.collectErrors();
 		if (this.context.criticalError !== false) {

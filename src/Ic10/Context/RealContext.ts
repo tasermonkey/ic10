@@ -638,13 +638,13 @@ export class RealContext extends DevicesReagentBase {
 		return typeof codeLength === "number" && codeLength > 0;
 	}
 
-	async sleep(seconds: number) {
-		return new Promise<void>((resolve) => {
-			setTimeout(resolve, seconds * 1000);
-		});
+	sleep(seconds: number): void {
+		this.requestSuspend({ kind: "sleep", seconds });
 	}
 
-	yield(): void {}
+	yield(): void {
+		this.requestSuspend({ kind: "yield" });
+	}
 
 	hcf() {
 		this.addError(

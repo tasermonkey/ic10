@@ -151,10 +151,19 @@ export interface IBaseContext {
 	/** Add an error */
 	addError(error: Ic10Error): this;
 
-	sleep(seconds: number): Promise<void>;
+	/** Request a suspend of `seconds` of game time. Doesn't wait: the driver of the runner does. */
+	sleep(seconds: number): void;
+	/** Request a suspend until the next game tick. Doesn't wait: the driver of the runner does. */
 	yield(): void;
 	hcf(): void;
 }
+
+/**
+ * A request, made by `yield` or `sleep`, to suspend the chip after the current line. The runner exposes
+ * it as `Ic10Runner.suspend` after each step; whoever drives the runner (e.g. a game-tick scheduler)
+ * decides what it means. No real time passes inside the emulator.
+ */
+export type SuspendRequest = { kind: "yield" } | { kind: "sleep"; seconds: number };
 
 export interface IDevicesByIdContext {
 	isConnectDeviceById(id: number): boolean;
@@ -227,8 +236,22 @@ export abstract class Context
 		this.name = name;
 		this.$housing = housing;
 	}
-	abstract sleep(seconds: number): Promise<void>;
+	abstract sleep(seconds: number): void;
 	abstract yield(): void;
+
+	/** Suspend requested by the line being executed, if any. */
+	private $pendingSuspend: SuspendRequest | null = null;
+
+	protected requestSuspend(request: SuspendRequest): void {
+		this.$pendingSuspend = request;
+	}
+
+	/** Return the pending suspend request (if any) and clear it. */
+	takeSuspend(): SuspendRequest | null {
+		const request = this.$pendingSuspend;
+		this.$pendingSuspend = null;
+		return request;
+	}
 	abstract hcf(): void;
 
 	get executeLine(): Line {
