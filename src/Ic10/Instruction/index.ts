@@ -78,7 +78,7 @@ import {
 	SnazInstruction,
 	SneInstruction,
 	SnezInstruction,
-} from "@/Ic10/Instruction/Condition";
+} from "./Condition.ts";
 import {
 	BdnvlInstruction,
 	BdnvsInstruction,
@@ -103,8 +103,8 @@ import {
 	SdInstruction,
 	SInstruction,
 	SsInstruction,
-} from "@/Ic10/Instruction/Device";
-import { JalInstruction, JInstruction, jrInstruction } from "@/Ic10/Instruction/Jump";
+} from "./Device.ts";
+import { JalInstruction, JInstruction, jrInstruction } from "./Jump.ts";
 import {
 	AbsInstruction,
 	AcosInstruction,
@@ -146,17 +146,12 @@ import {
 	TanInstruction,
 	TruncInstruction,
 	XorInstruction,
-} from "@/Ic10/Instruction/Math";
-import { AliasInstruction } from "@/Ic10/Instruction/Misc/AliasInstruction";
-import { DefineInstruction } from "@/Ic10/Instruction/Misc/DefineInstruction";
-import { MoveInstruction } from "@/Ic10/Instruction/Misc/MoveInstruction";
-import { HcfInstruction, SleepInstruction, YieldInstruction } from "@/Ic10/Instruction/Misc/OtherInstruction";
-import {
-	PeekInstruction,
-	PokeInstruction,
-	PopInstruction,
-	PushInstruction,
-} from "@/Ic10/Instruction/Misc/StackInstruction";
+} from "./Math.ts";
+import { AliasInstruction } from "./Misc/AliasInstruction.ts";
+import { DefineInstruction } from "./Misc/DefineInstruction.ts";
+import { MoveInstruction } from "./Misc/MoveInstruction.ts";
+import { HcfInstruction, SleepInstruction, YieldInstruction } from "./Misc/OtherInstruction.ts";
+import { PeekInstruction, PokeInstruction, PopInstruction, PushInstruction } from "./Misc/StackInstruction.ts";
 
 export type InstructionName = keyof typeof instructions;
 

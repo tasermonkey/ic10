@@ -1,35 +1,20 @@
 import path from "node:path";
 import { defineConfig } from "vite";
 
-export default defineConfig({
-	resolve: {
-		alias: {
-			"@": path.resolve(__dirname, "src"),
-			"@tests": path.resolve(__dirname, "tests"),
-			"@tools": path.resolve(__dirname, "tools"),
-		},
-	},
+// Builds the CommonJS and UMD bundles only. The ESM build (dist/index.js and friends) is emitted
+// per file by `tsc -p tsconfig.node.json`, which also writes the type declarations.
+export default defineConfig(({ mode }) => ({
 	build: {
 		minify: true,
 		sourcemap: false,
+		emptyOutDir: false,
 		lib: {
-			entry: path.resolve(__dirname, "src/index.ts"),
+			entry: path.resolve(import.meta.dirname, "src/index.ts"),
 			name: "ic10",
-			formats: ["es", "cjs", "umd"],
-			fileName: (format) => {
-				switch (format) {
-					case "umd":
-						return "ic10.umd.js";
-					case "cjs":
-						return "ic10.cjs";
-					case "es":
-						return "index.js";
-				}
-				return "ic10.js";
-			},
+			formats: ["cjs", "umd"],
+			fileName: (format) => (format === "umd" ? "ic10.umd.js" : "ic10.cjs"),
 		},
 		rollupOptions: {
-			external: [/^@tests\//, /^@tools\//],
 			output: {
 				globals: {
 					ic10: "ic10",
@@ -37,17 +22,8 @@ export default defineConfig({
 			},
 		},
 	},
-	plugins: [
-		// dts({
-		// 	entryRoot: "src",
-		// 	outDir: "dist",
-		// 	exclude: ["tests/**/*", "tools/**/*", "node_modules/**/*", "vite.config.ts"],
-		// 	rollupTypes: true,
-		// 	insertTypesEntry: true,
-		// }),
-	],
 	define: {
-		__VITE_ENV: JSON.stringify(process.env.NODE_ENV || "production"),
-		isProd: process.env.NODE_ENV === "production",
+		__VITE_ENV: JSON.stringify(mode),
+		isProd: mode === "production",
 	},
-});
+}));

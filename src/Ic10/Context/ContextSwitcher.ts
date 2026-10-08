@@ -1,6 +1,6 @@
-import type { Context } from "@/Ic10/Context/Context";
-import type { Ic10Error } from "@/Ic10/Errors/Errors";
-import i18n from "@/Languages/lang";
+import i18n from "../../Languages/lang.ts";
+import type { Ic10Error } from "../Errors/Errors.ts";
+import type { Context } from "./Context.ts";
 
 export type contextNames = "real" | "sandbox";
 export type contextList<T extends string | number | symbol = contextNames> = {

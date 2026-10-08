@@ -1,6 +1,6 @@
-import { trimZerosFromEnd } from "@/helpers";
-import { ErrorSeverity, Ic10Error } from "@/Ic10/Errors/Errors";
-import i18n from "@/Languages/lang";
+import { trimZerosFromEnd } from "../helpers.ts";
+import { ErrorSeverity, Ic10Error } from "../Ic10/Errors/Errors.ts";
+import i18n from "../Languages/lang.ts";
 
 export interface StackInterface {
 	get(index: number): number;
@@ -16,7 +16,11 @@ export interface StackInterface {
 export class Stack implements StackInterface {
 	protected readonly $stack: Map<number, number> = new Map();
 
-	constructor(public readonly $stack_length: number = 512) {}
+	public readonly $stack_length: number;
+
+	constructor($stack_length: number = 512) {
+		this.$stack_length = $stack_length;
+	}
 
 	public get(index: number): number {
 		if (index >= this.$stack_length) {

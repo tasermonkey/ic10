@@ -1,8 +1,8 @@
-import { Chip } from "@/Core/Chip";
-import { Network } from "@/Core/Network";
-import { Ic10Runner } from "@/Ic10/Ic10Runner";
-import type { InstructionTestData, InstructionTestExpected } from "@/Ic10/Instruction/Helpers/Instruction";
-import { Ic10Error, StructureCircuitHousing } from "@/index";
+import { Chip } from "../src/Core/Chip.ts";
+import { Network } from "../src/Core/Network.ts";
+import { Ic10Runner } from "../src/Ic10/Ic10Runner.ts";
+import type { InstructionTestData, InstructionTestExpected } from "../src/Ic10/Instruction/Helpers/Instruction.ts";
+import { Ic10Error, StructureCircuitHousing } from "../src/index.ts";
 
 export type CreateRunnerOptions = {
 	register_length: number;

@@ -1,10 +1,10 @@
-import { Devices, LogicBatchMethod, LogicReagentMode, LogicSlot, Logics, Reagents } from "@/Defines/data";
-import type { Context } from "@/Ic10/Context/Context";
-import { ErrorSeverity, TypeIc10Error } from "@/Ic10/Errors/Errors";
-import { getDevicePin, getRegister, parseArgumentAnyNumber } from "@/Ic10/Helpers/ArgumentParse";
-import type { Argument } from "@/Ic10/Instruction/Helpers/Argument";
-import type { InstructionArgument } from "@/Ic10/Instruction/Helpers/Instruction";
-import i18n from "@/Languages/lang";
+import { Devices, LogicBatchMethod, LogicReagentMode, LogicSlot, Logics, Reagents } from "../../../Defines/data.ts";
+import i18n from "../../../Languages/lang.ts";
+import type { Context } from "../../Context/Context.ts";
+import { ErrorSeverity, TypeIc10Error } from "../../Errors/Errors.ts";
+import { getDevicePin, getRegister, parseArgumentAnyNumber } from "../../Helpers/ArgumentParse.ts";
+import type { Argument } from "./Argument.ts";
+import type { InstructionArgument } from "./Instruction.ts";
 
 // Вспомогательные функции для обработки ошибок и проверок
 const ErrorHandlers = {

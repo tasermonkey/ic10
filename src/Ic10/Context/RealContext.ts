@@ -1,7 +1,10 @@
 // RealContext.ts
-import type { Device } from "@/Core/Device";
-import type { StackInterface } from "@/Core/Stack";
-import { LogicBatchMethod, LogicReagentMode } from "@/Defines/data";
+import type { Device } from "../../Core/Device.ts";
+import type { StackInterface } from "../../Core/Stack.ts";
+import { LogicBatchMethod, LogicReagentMode } from "../../Defines/data.ts";
+import i18n from "../../Languages/lang.ts";
+import { DebugInfo, ErrorSeverity, RuntimeIc10Error } from "../Errors/Errors.ts";
+import type { Define } from "../Instruction/Helpers/Define.ts";
 import {
 	Context,
 	type IDefinesContext,
@@ -14,10 +17,7 @@ import {
 	type IExecutionContext,
 	type IMemoryContext,
 	type IStackContext,
-} from "@/Ic10/Context/Context";
-import { DebugInfo, ErrorSeverity, RuntimeIc10Error } from "@/Ic10/Errors/Errors";
-import type { Define } from "@/Ic10/Instruction/Helpers/Define";
-import i18n from "@/Languages/lang";
+} from "./Context.ts";
 
 // =============================================
 // Базовый класс с основной логикой выполнения

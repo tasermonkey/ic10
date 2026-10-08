@@ -1,9 +1,9 @@
-import { ErrorSeverity, FatalIc10Error } from "@/Ic10/Errors/Errors";
-import { type InstructionName, instructions, isInstructionName } from "@/Ic10/Instruction";
-import type { Argument } from "@/Ic10/Instruction/Helpers/Argument";
-import type { Instruction } from "@/Ic10/Instruction/Helpers/Instruction";
-import { CommentLine, type CommentLineConstructorType } from "@/Ic10/Lines/CommentLine";
-import i18n from "@/Languages/lang";
+import i18n from "../../Languages/lang.ts";
+import { ErrorSeverity, FatalIc10Error } from "../Errors/Errors.ts";
+import type { Argument } from "../Instruction/Helpers/Argument.ts";
+import type { Instruction } from "../Instruction/Helpers/Instruction.ts";
+import { type InstructionName, instructions, isInstructionName } from "../Instruction/index.ts";
+import { CommentLine, type CommentLineConstructorType } from "./CommentLine.ts";
 
 export type InstructionLineConstructorType = {
 	instruction: keyof typeof instructions | string;

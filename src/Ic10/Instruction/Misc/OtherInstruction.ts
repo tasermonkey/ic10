@@ -1,5 +1,5 @@
-import { ArgumentCalculators } from "@/Ic10/Instruction/Helpers/ArgumentCalculators";
-import { Instruction, type InstructionArgument } from "@/Ic10/Instruction/Helpers/Instruction";
+import { ArgumentCalculators } from "../Helpers/ArgumentCalculators.ts";
+import { Instruction, type InstructionArgument } from "../Helpers/Instruction.ts";
 
 export class SleepInstruction extends Instruction {
 	public argumentList(): InstructionArgument[] {

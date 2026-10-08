@@ -1,6 +1,6 @@
-import { DeviceScope, type DeviceScopeConstructor } from "@/Core/Device/DeviceScope";
-import { trimZerosFromEnd } from "@/helpers";
-import type { StackInterface } from "../Stack";
+import { trimZerosFromEnd } from "../../helpers.ts";
+import type { StackInterface } from "../Stack.ts";
+import { DeviceScope, type DeviceScopeConstructor } from "./DeviceScope.ts";
 
 export type DeviceMemoryConstructor = {
 	stack_length: number;

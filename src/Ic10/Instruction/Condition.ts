@@ -1,12 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import CONSTS from "@/Defines/consts";
-import { ArgumentCalculators } from "@/Ic10/Instruction/Helpers/ArgumentCalculators";
-import {
-	Instruction,
-	type InstructionArgument,
-	type InstructionTestData,
-} from "@/Ic10/Instruction/Helpers/Instruction";
+import CONSTS from "../../Defines/consts.ts";
+import { ArgumentCalculators } from "./Helpers/ArgumentCalculators.ts";
+import { Instruction, type InstructionArgument, type InstructionTestData } from "./Helpers/Instruction.ts";
 
 // ===== Общие хелперы =====
 const EPS = CONSTS.epsilon * 8;

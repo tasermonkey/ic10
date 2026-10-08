@@ -1,10 +1,6 @@
 // PopInstruction.ts
-import { ArgumentCalculators } from "@/Ic10/Instruction/Helpers/ArgumentCalculators";
-import {
-	Instruction,
-	type InstructionArgument,
-	type InstructionTestData,
-} from "@/Ic10/Instruction/Helpers/Instruction";
+import { ArgumentCalculators } from "../Helpers/ArgumentCalculators.ts";
+import { Instruction, type InstructionArgument, type InstructionTestData } from "../Helpers/Instruction.ts";
 export class PushInstruction extends Instruction {
 	static override tests(): InstructionTestData[] {
 		if (typeof isProd !== "undefined" && isProd) {

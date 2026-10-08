@@ -1,5 +1,5 @@
-import { DeviceScope } from "@/Core/Device/DeviceScope";
-import type { Ic10Error } from "@/Ic10/Errors/Errors";
+import type { Ic10Error } from "../../Ic10/Errors/Errors.ts";
+import { DeviceScope } from "./DeviceScope.ts";
 
 export class DeviceError extends DeviceScope {
 	protected $errors: Map<number, Ic10Error> = new Map();

@@ -1,17 +1,17 @@
 import { v4 as uuidv4 } from "uuid";
-import { DevicePorts } from "@/Core//Device/DevicePorts";
-import { DeviceError } from "@/Core/Device/DeviceError";
-import { DeviceMemory } from "@/Core/Device/DeviceMemory";
-import { DeviceProps } from "@/Core/Device/DeviceProps";
-import { DeviceReagent } from "@/Core/Device/DeviceReagent";
-import { DeviceSlots } from "@/Core/Device/DeviceSlots";
-import type { Network } from "@/Core/Network";
-import type { StackInterface } from "@/Core/Stack";
-import DEVICES, { type LogicsType } from "@/Defines/devices";
-import { HashString } from "@/helpers";
-import { ErrorSeverity, Ic10Error } from "@/Ic10/Errors/Errors";
-import { crc32 } from "@/Ic10/Helpers/functions";
-import i18n from "@/Languages/lang";
+import DEVICES, { type LogicsType } from "../Defines/devices.ts";
+import { HashString } from "../helpers.ts";
+import { ErrorSeverity, Ic10Error } from "../Ic10/Errors/Errors.ts";
+import { crc32 } from "../Ic10/Helpers/functions.ts";
+import i18n from "../Languages/lang.ts";
+import { DeviceError } from "./Device/DeviceError.ts";
+import { DeviceMemory } from "./Device/DeviceMemory.ts";
+import { DevicePorts } from "./Device/DevicePorts.ts";
+import { DeviceProps } from "./Device/DeviceProps.ts";
+import { DeviceReagent } from "./Device/DeviceReagent.ts";
+import { DeviceSlots } from "./Device/DeviceSlots.ts";
+import type { Network } from "./Network.ts";
+import type { StackInterface } from "./Stack.ts";
 
 export type LogicType = NonNullable<LogicsType>[number];
 

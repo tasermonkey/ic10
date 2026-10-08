@@ -1,13 +1,13 @@
 set -e
-bun run generate:index
+npm run generate:index
 git add src/index.ts
 
 # автоматически поправить формат
-bun run format
+npm run format
 # добавить все исправления форматирования в индекс
 git add -A
 
 # проверить формат еще раз и выполнить линты/тесты
-bun run format:check
-bun run lint
-bun run test
+npm run format:check
+npm run lint
+npm run test

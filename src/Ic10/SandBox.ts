@@ -1,7 +1,7 @@
-import { Chip, type ChipConstructorType } from "@/Core/Chip";
-import { Device } from "@/Core/Device";
-import { Housing } from "@/Core/Housing";
-import { Network } from "@/Core/Network";
+import { Chip, type ChipConstructorType } from "../Core/Chip.ts";
+import { Device } from "../Core/Device.ts";
+import { Housing } from "../Core/Housing.ts";
+import { Network } from "../Core/Network.ts";
 
 export class SandBoxHousing extends Housing {
 	constructor(params: ChipConstructorType) {

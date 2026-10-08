@@ -1,17 +1,17 @@
 import { Random } from "@stationeers-ic/exact-ic10-math";
-import EventEmitter from "eventemitter3";
-import type { Housing } from "@/Core/Housing";
-import { ContextSwitcher, type contextNames } from "@/Ic10/Context/ContextSwitcher";
-import { RealContext } from "@/Ic10/Context/RealContext";
-import { SandboxContext } from "@/Ic10/Context/SandboxContext";
-import { ErrorSeverity, FatalIc10Error, type Ic10Error, RuntimeIc10Error } from "@/Ic10/Errors/Errors";
-import { Argument } from "@/Ic10/Instruction/Helpers/Argument";
-import { CommentLine } from "@/Ic10/Lines/CommentLine";
-import { EmptyLine } from "@/Ic10/Lines/EmptyLine";
-import { InstructionLine } from "@/Ic10/Lines/InstructionLine";
-import { LabelLine } from "@/Ic10/Lines/LabelLine";
-import type { Line } from "@/Ic10/Lines/Line";
-import i18n from "@/Languages/lang";
+import { EventEmitter } from "eventemitter3";
+import type { Housing } from "../Core/Housing.ts";
+import i18n from "../Languages/lang.ts";
+import { ContextSwitcher, type contextNames } from "./Context/ContextSwitcher.ts";
+import { RealContext } from "./Context/RealContext.ts";
+import { SandboxContext } from "./Context/SandboxContext.ts";
+import { ErrorSeverity, FatalIc10Error, type Ic10Error, RuntimeIc10Error } from "./Errors/Errors.ts";
+import { Argument } from "./Instruction/Helpers/Argument.ts";
+import { CommentLine } from "./Lines/CommentLine.ts";
+import { EmptyLine } from "./Lines/EmptyLine.ts";
+import { InstructionLine } from "./Lines/InstructionLine.ts";
+import { LabelLine } from "./Lines/LabelLine.ts";
+import type { Line } from "./Lines/Line.ts";
 
 export const RegExpLabelLine = /((?<label>\w+):)\s*(?<comment>#.*)?/im;
 export const RegExpInstructionLine = /^(?<instruction>\w+)(?:\s+(?<arguments>.+?))?(?:\s*#(?<comment>.*))?$/im;
@@ -282,7 +282,7 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 
 		while (i < len) {
 			// Пропускаем пробелы
-			while (i < len && /\s/.test(<string>input[i])) i++;
+			while (i < len && /\s/.test(input[i] as string)) i++;
 			if (i >= len) break;
 
 			const argStart = i;
@@ -317,7 +317,7 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 
 			// Обычный аргумент до пробела
 			let argEnd = i;
-			while (argEnd < len && !/\s/.test(<string>input[argEnd])) argEnd++;
+			while (argEnd < len && !/\s/.test(input[argEnd] as string)) argEnd++;
 			result.push(
 				new Argument({
 					start: offset + argStart,

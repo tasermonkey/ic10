@@ -1,10 +1,10 @@
 // Тип конструктора для ошибок
 
-import type { Device } from "@/Core/Device";
-import type { Context } from "@/Ic10/Context/Context";
-import { crc32 } from "@/Ic10/Helpers/functions";
-import type { Argument } from "@/Ic10/Instruction/Helpers/Argument";
-import type { Line } from "@/Ic10/Lines/Line";
+import type { Device } from "../../Core/Device.ts";
+import type { Context } from "../Context/Context.ts";
+import { crc32 } from "../Helpers/functions.ts";
+import type { Argument } from "../Instruction/Helpers/Argument.ts";
+import type { Line } from "../Lines/Line.ts";
 
 export type GameLangErrorConstructorType = {
 	message: string;
@@ -17,12 +17,14 @@ export type GameLangErrorConstructorType = {
 	originalText?: string;
 };
 
-export enum ErrorSeverity {
-	Weak = "weak", // Ошибка, которая не влияет на работу программы
-	Warning = "warning", // Ошибка, которая может привести к ошибкам в работе программы например не оптимизированный код
-	Strong = "strong", // Ошибка не позволяющая работать программы
-	Critical = "critical", // Ошибка в работе интерпретатора
-}
+// A const object instead of an enum, so Node's type stripping can run this file directly.
+export const ErrorSeverity = {
+	Weak: "weak", // Ошибка, которая не влияет на работу программы
+	Warning: "warning", // Ошибка, которая может привести к ошибкам в работе программы например не оптимизированный код
+	Strong: "strong", // Ошибка не позволяющая работать программы
+	Critical: "critical", // Ошибка в работе интерпретатора
+} as const;
+export type ErrorSeverity = (typeof ErrorSeverity)[keyof typeof ErrorSeverity];
 
 // Базовый класс для всех ошибок игрового языка
 export class Ic10Error extends Error {

@@ -14,9 +14,9 @@ import {
 	string,
 	union,
 } from "valibot";
-import { GROUPED_CONSTS } from "@/Defines/consts";
-import { type ItemName, Items, type ReagentName, Reagents } from "@/Defines/data";
-import { DeviceClassesByBase, DevicesByPrefabName } from "@/Devices";
+import { GROUPED_CONSTS } from "../Defines/consts.ts";
+import { type ItemName, Items, type ReagentName, Reagents } from "../Defines/data.ts";
+import { DeviceClassesByBase, DevicesByPrefabName } from "../Devices/index.ts";
 
 function picklist<T extends Literal>(values: T[]) {
 	return union(values.map((value) => literal(value)));

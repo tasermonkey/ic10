@@ -1,7 +1,19 @@
 import { spawn } from "node:child_process";
 import { watch } from "node:fs";
-import { dirname, join, relative } from "node:path";
-import { Glob } from "bun";
+import { dirname, join, matchesGlob, relative } from "node:path";
+
+// Same `.match()` API as Bun's Glob, backed by Node's path.matchesGlob.
+class Glob {
+	private readonly pattern: string;
+
+	constructor(pattern: string) {
+		this.pattern = pattern;
+	}
+
+	match(path: string): boolean {
+		return matchesGlob(path.replaceAll("\\", "/"), this.pattern);
+	}
+}
 
 console.log("🚀 Whatching ...");
 
@@ -16,7 +28,7 @@ const CONFIG: {
 	ignoreFiles: Glob[];
 } = {
 	// Путь к отслеживаемой папке
-	watchPath: join(dirname(import.meta.dir), "src"),
+	watchPath: join(dirname(import.meta.dirname), "src"),
 
 	// Задержка для debounce (мс)
 	debounceDelay: 1500,
@@ -26,19 +38,19 @@ const CONFIG: {
 	scripts: [
 		{
 			pattern: new Glob("Ic10/Instruction/**"),
-			command: "bun run generate:intruction && bun run generate:vscode",
+			command: "npm run generate:intruction && npm run generate:vscode",
 		},
 		{
 			pattern: new Glob("Defines/**"),
-			command: "bun run generate:device",
+			command: "npm run generate:device",
 		},
 		{
 			pattern: new Glob("Schemas/**"),
-			command: "bun run generate:schema",
+			command: "npm run generate:schema",
 		},
 		{
 			pattern: new Glob("**"),
-			command: "bun run generate:index",
+			command: "npm run generate:index",
 		},
 	],
 

@@ -1,13 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parse } from "@babel/parser";
-import traverse from "@babel/traverse";
+import babelTraverse from "@babel/traverse";
 import * as t from "@babel/types";
 import { glob } from "glob";
 
+// @babel/traverse is CommonJS: under Node ESM the default import is the module object.
+const traverse = ((babelTraverse as any).default ?? babelTraverse) as typeof babelTraverse.default;
+
 console.log("🚀 Generating intstructions...");
 
-const SOURCE_DIR = path.resolve(__dirname, "../src/Ic10/Instruction");
+const SOURCE_DIR = path.resolve(import.meta.dirname, "../src/Ic10/Instruction");
 const INDEX_PATH = path.join(SOURCE_DIR, "index.ts");
 
 // Функция для проверки, является ли класс абстрактным

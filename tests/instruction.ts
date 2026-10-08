@@ -1,8 +1,8 @@
 import * as process from "node:process";
 import { createInterface } from "node:readline/promises";
-import { createRunner, type InstructionLike, logExpectation, runInstructionTest } from "@tests/helpers";
-import { Ic10Error } from "@/Ic10/Errors/Errors";
-import { instructions } from "@/Ic10/Instruction";
+import { Ic10Error } from "../src/Ic10/Errors/Errors.ts";
+import { instructions } from "../src/Ic10/Instruction/index.ts";
+import { createRunner, type InstructionLike, logExpectation, runInstructionTest } from "./helpers.ts";
 
 async function interactiveSelect() {
 	const entries = Object.entries(instructions).filter(([_, instr]) => {

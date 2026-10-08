@@ -3,20 +3,21 @@
 		"outDir": "./dist/",
 		"rootDir": "./src/",
 		"declaration": true,
-		"module": "ESNext",
-		"paths": {
-			"@/*": ["./src/*"],
-			"@tests/*": ["./tests/*"],
-			"@tools/*": ["./tools/*"]
-		},
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"rewriteRelativeImportExtensions": true,
+		"erasableSyntaxOnly": true,
+		"verbatimModuleSyntax": true,
+		"resolveJsonModule": true,
 		"lib": ["ESNext", "DOM"],
+		"types": ["node"],
 		"target": "ESNext",
 		"allowJs": false,
 		"skipLibCheck": true,
 		"strictNullChecks": false,
 		"noImplicitAny": false,
-		"useUnknownInCatchVariables": false,
-		"moduleResolution": "bundler"
+		"useUnknownInCatchVariables": false
 	},
-	"exclude": ["dist", "tests", "tools", "node_modules", "src/Defines", "src/Devices", "src/Schemas", "vite.config.ts"]
+	"include": ["src"],
+	"exclude": ["dist", "tests", "tools", "node_modules"]
 }

@@ -1,4 +1,4 @@
-import { Line, type LineConstructorType } from "@/Ic10/Lines/Line";
+import { Line, type LineConstructorType } from "./Line.ts";
 
 export type CommentLineConstructorType = LineConstructorType;
 

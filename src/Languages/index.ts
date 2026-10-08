@@ -1,24 +1,24 @@
-import cs from "@/Languages/cs.json";
-import da from "@/Languages/da.json";
-import de from "@/Languages/de.json";
-import en from "@/Languages/en.json";
-import es from "@/Languages/es.json";
-import fi from "@/Languages/fi.json";
-import fr from "@/Languages/fr.json";
-import hu from "@/Languages/hu.json";
-import it from "@/Languages/it.json";
-import kn from "@/Languages/kn.json";
-import ko from "@/Languages/ko.json";
-import nl from "@/Languages/nl.json";
-import pb from "@/Languages/pb.json";
-import pl from "@/Languages/pl.json";
-import pt from "@/Languages/pt.json";
-import ro from "@/Languages/ro.json";
-import ru from "@/Languages/ru.json";
-import sk from "@/Languages/sk.json";
-import tr from "@/Languages/tr.json";
-import tw from "@/Languages/tw.json";
-import zh_Hans from "@/Languages/zh_Hans.json";
+import cs from "./cs.json" with { type: "json" };
+import da from "./da.json" with { type: "json" };
+import de from "./de.json" with { type: "json" };
+import en from "./en.json" with { type: "json" };
+import es from "./es.json" with { type: "json" };
+import fi from "./fi.json" with { type: "json" };
+import fr from "./fr.json" with { type: "json" };
+import hu from "./hu.json" with { type: "json" };
+import it from "./it.json" with { type: "json" };
+import kn from "./kn.json" with { type: "json" };
+import ko from "./ko.json" with { type: "json" };
+import nl from "./nl.json" with { type: "json" };
+import pb from "./pb.json" with { type: "json" };
+import pl from "./pl.json" with { type: "json" };
+import pt from "./pt.json" with { type: "json" };
+import ro from "./ro.json" with { type: "json" };
+import ru from "./ru.json" with { type: "json" };
+import sk from "./sk.json" with { type: "json" };
+import tr from "./tr.json" with { type: "json" };
+import tw from "./tw.json" with { type: "json" };
+import zh_Hans from "./zh_Hans.json" with { type: "json" };
 export const Languages = {
 	zh_Hans: {
 		translation: zh_Hans,

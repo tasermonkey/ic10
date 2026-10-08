@@ -1,15 +1,14 @@
 import * as v from "valibot";
-import { Chip } from "@/Core/Chip";
-import type { Device } from "@/Core/Device";
-import type { PortType } from "@/Core/Device/DevicePorts";
-import { ItemEntity } from "@/Core/Device/DeviceSlots";
-import { Housing } from "@/Core/Housing";
-import { Network } from "@/Core/Network";
-import { type ItemHash, type ItemName, Items, Logics, Reagents } from "@/Defines/data";
-import { DeviceClassesByBase, DevicesByPrefabName } from "@/Devices";
-import type { Builer } from "@/Envierment/Builder";
-import { Ic10Runner } from "@/Ic10/Ic10Runner";
-import i18n from "@/Languages/lang";
+import { Chip } from "../Core/Chip.ts";
+import type { PortType } from "../Core/Device/DevicePorts.ts";
+import { ItemEntity } from "../Core/Device/DeviceSlots.ts";
+import type { Device } from "../Core/Device.ts";
+import { Housing } from "../Core/Housing.ts";
+import { Network } from "../Core/Network.ts";
+import { type ItemHash, type ItemName, Items, Logics, Reagents } from "../Defines/data.ts";
+import { DeviceClassesByBase, DevicesByPrefabName } from "../Devices/index.ts";
+import { Ic10Runner } from "../Ic10/Ic10Runner.ts";
+import i18n from "../Languages/lang.ts";
 import {
 	type ChipSchema,
 	type DeviceSchema,
@@ -22,7 +21,8 @@ import {
 	type ReagentSchema,
 	type RegisterSchema,
 	type SlotSchema,
-} from "@/Schemas/EnvSchema";
+} from "../Schemas/EnvSchema.ts";
+import type { Builer } from "./Builder.ts";
 
 /**
  * Параметры конструктора парсера
@@ -76,7 +76,11 @@ type HousingClass = DeviceClassesByBaseHousingType[HousingName] extends Construc
 // SERIALIZER - Дополненная версия с поддержкой слотов и реагентов
 // ============================================================================
 class SerializerV1 {
-	constructor(private readonly builer: Builer) {}
+	private readonly builer: Builer;
+
+	constructor(builer: Builer) {
+		this.builer = builer;
+	}
 
 	private debug = false;
 
@@ -346,7 +350,11 @@ class SerializerV1 {
 // ============================================================================
 
 class DeserializerV1 {
-	constructor(private readonly builer: Builer) {}
+	private readonly builer: Builer;
+
+	constructor(builer: Builer) {
+		this.builer = builer;
+	}
 
 	public parse(data: EnvSchema): void {
 		data = v.parse(EnvSchema, data);

@@ -1,10 +1,6 @@
-import { ArgumentCalculators } from "@/Ic10/Instruction/Helpers/ArgumentCalculators";
-import {
-	Instruction,
-	type InstructionArgument,
-	type InstructionTestData,
-} from "@/Ic10/Instruction/Helpers/Instruction";
-import type { InstructionLine } from "../Lines/InstructionLine";
+import type { InstructionLine } from "../Lines/InstructionLine.ts";
+import { ArgumentCalculators } from "./Helpers/ArgumentCalculators.ts";
+import { Instruction, type InstructionArgument, type InstructionTestData } from "./Helpers/Instruction.ts";
 
 // Базовый класс для условных переходов
 abstract class ConditionalJumpInstruction extends Instruction {

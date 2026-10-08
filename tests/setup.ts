@@ -1,6 +1,6 @@
-import { beforeAll } from "bun:test";
-import { Languages } from "@/Languages";
-import i18n from "@/Languages/lang";
+import { beforeAll } from "vitest";
+import { Languages } from "../src/Languages/index.ts";
+import i18n from "../src/Languages/lang.ts";
 
 beforeAll(async () => {
 	await i18n

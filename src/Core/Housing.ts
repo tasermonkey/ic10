@@ -1,9 +1,9 @@
-import type { Chip } from "@/Core/Chip";
-import { Device, type DeviceConstructor } from "@/Core/Device";
-import { Ic10Error } from "@/Ic10/Errors/Errors";
-import type { Ic10Runner } from "@/Ic10/Ic10Runner";
-import i18n from "@/Languages/lang";
-import type { StackInterface } from "./Stack";
+import { Ic10Error } from "../Ic10/Errors/Errors.ts";
+import type { Ic10Runner } from "../Ic10/Ic10Runner.ts";
+import i18n from "../Languages/lang.ts";
+import type { Chip } from "./Chip.ts";
+import { Device, type DeviceConstructor } from "./Device.ts";
+import type { StackInterface } from "./Stack.ts";
 
 export type SocketDeviceConstructor = {
 	chip?: Chip;

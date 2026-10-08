@@ -1,10 +1,10 @@
-import { describe, expect, test } from "bun:test";
-import { Chip } from "@/Core/Chip";
-import type { Housing } from "@/Core/Housing";
-import { Network } from "@/Core/Network";
-import { Builer } from "@/Envierment/Builder";
-import { ParserV1 } from "@/Envierment/ParserV1";
-import type { EnvSchema } from "@/Schemas/EnvSchema";
+import { describe, expect, test } from "vitest";
+import { Chip } from "../src/Core/Chip.ts";
+import type { Housing } from "../src/Core/Housing.ts";
+import { Network } from "../src/Core/Network.ts";
+import { Builer } from "../src/Envierment/Builder.ts";
+import { ParserV1 } from "../src/Envierment/ParserV1.ts";
+import type { EnvSchema } from "../src/Schemas/EnvSchema.ts";
 
 describe("Builer", () => {
 	test("creates empty builder", () => {

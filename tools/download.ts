@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import generate from "@babel/generator";
+import { generate } from "@babel/generator";
 import * as t from "@babel/types";
 import axios from "axios";
 import cliProgress from "cli-progress";

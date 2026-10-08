@@ -1,5 +1,5 @@
-import { DeviceScope } from "@/Core/Device/DeviceScope";
-import { Reagents } from "@/Defines/data";
+import { Reagents } from "../../Defines/data.ts";
+import { DeviceScope } from "./DeviceScope.ts";
 
 export type ReagentIterator = {
 	hash: number;

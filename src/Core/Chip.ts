@@ -1,9 +1,9 @@
-import { ItemEntity } from "@/Core/Device/DeviceSlots";
-import type { Housing } from "@/Core/Housing";
-import { Stack, type StackInterface } from "@/Core/Stack";
-import CONSTS from "@/Defines/consts";
-import type { Ic10Runner } from "@/Ic10/Ic10Runner";
-import { Define } from "@/Ic10/Instruction/Helpers/Define";
+import CONSTS from "../Defines/consts.ts";
+import type { Ic10Runner } from "../Ic10/Ic10Runner.ts";
+import { Define } from "../Ic10/Instruction/Helpers/Define.ts";
+import { ItemEntity } from "./Device/DeviceSlots.ts";
+import type { Housing } from "./Housing.ts";
+import { Stack, type StackInterface } from "./Stack.ts";
 
 export type ChipConstructorType = {
 	id: number;

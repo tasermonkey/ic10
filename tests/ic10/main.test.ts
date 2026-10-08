@@ -1,7 +1,7 @@
-import { describe, expect, test } from "bun:test";
-import { CONSTS, GROUPED_CONSTS } from "@/Defines/consts";
-import { ErrorSeverity } from "@/Ic10/Errors/Errors";
-import { Chip, codeToString, Housing, Ic10Runner, Network, RuntimeIc10Error, stringToCode } from "@/index";
+import { describe, expect, test } from "vitest";
+import { CONSTS, GROUPED_CONSTS } from "../../src/Defines/consts.ts";
+import { ErrorSeverity } from "../../src/Ic10/Errors/Errors.ts";
+import { Chip, codeToString, Housing, Ic10Runner, Network, RuntimeIc10Error, stringToCode } from "../../src/index.ts";
 
 describe("Ic10Runner", () => {
 	let runner: Ic10Runner;
@@ -67,7 +67,7 @@ describe("Ic10Runner", () => {
 			expect(sandboxErrors.length).toBeGreaterThan(0);
 			// Проверяем что есть хотя бы одна критическая ошибка
 			const hasStrongError = sandboxErrors.some((e) => e.severity === ErrorSeverity.Strong);
-			expect(hasStrongError).toBeTrue();
+			expect(hasStrongError).toBe(true);
 		});
 	});
 	describe("Прыжки", () => {

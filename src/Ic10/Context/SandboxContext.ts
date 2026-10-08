@@ -1,5 +1,8 @@
-import type { ChipConstructorType } from "@/Core/Chip";
-import { Stack, type StackInterface } from "@/Core/Stack";
+import type { ChipConstructorType } from "../../Core/Chip.ts";
+import { Stack, type StackInterface } from "../../Core/Stack.ts";
+import { ErrorSeverity, Ic10Error } from "../Errors/Errors.ts";
+import type { Define } from "../Instruction/Helpers/Define.ts";
+import { SandBoxHousing } from "../SandBox.ts";
 import {
 	Context,
 	type ContextConstructor,
@@ -11,10 +14,7 @@ import {
 	type IDevicesSlotContext,
 	type IExecutionContext,
 	type IMemoryContext,
-} from "@/Ic10/Context/Context";
-import { ErrorSeverity, Ic10Error } from "@/Ic10/Errors/Errors";
-import type { Define } from "@/Ic10/Instruction/Helpers/Define";
-import { SandBoxHousing } from "@/Ic10/SandBox";
+} from "./Context.ts";
 
 // =============================================
 // Базовый класс для выполнения в песочнице

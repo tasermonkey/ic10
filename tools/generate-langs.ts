@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import generate from "@babel/generator";
+import { generate } from "@babel/generator";
 import * as t from "@babel/types";
 import { glob } from "glob";
 
@@ -31,7 +31,7 @@ export async function generateLangIndex({
 		const filename = path.basename(file, ".json");
 		const importName = t.identifier(filename);
 
-		// Создаем импорт: import en from "@/Languages/en.json"
+		// Создаем импорт: import en from "../src/Languages/en.json" with { type: "json" }
 		const importDeclaration = t.importDeclaration(
 			[t.importDefaultSpecifier(importName)],
 			t.stringLiteral(`${alias}/${filename}.json`),
@@ -67,7 +67,7 @@ export async function generateLangIndex({
 
 // Пример использования
 generateLangIndex({
-	langDir: path.join(path.dirname(__dirname), "src", "Languages"),
-	outputFile: path.join(path.dirname(__dirname), "src", "Languages", "index.ts"),
+	langDir: path.join(path.dirname(import.meta.dirname), "src", "Languages"),
+	outputFile: path.join(path.dirname(import.meta.dirname), "src", "Languages", "index.ts"),
 	alias: "@/Languages",
 }).catch(console.error);

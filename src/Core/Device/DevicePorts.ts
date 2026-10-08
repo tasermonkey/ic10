@@ -1,7 +1,7 @@
-import { DeviceScope, type DeviceScopeConstructor } from "@/Core/Device/DeviceScope";
-import type { Network, NetworkType } from "@/Core/Network";
-import type { ConnectionsType } from "@/Defines/devices";
-import i18n from "@/Languages/lang";
+import type { ConnectionsType } from "../../Defines/devices.ts";
+import i18n from "../../Languages/lang.ts";
+import type { Network, NetworkType } from "../Network.ts";
+import { DeviceScope, type DeviceScopeConstructor } from "./DeviceScope.ts";
 
 export type PortType = Extract<ConnectionsType[keyof ConnectionsType], string>;
 export type PortEntry = {
@@ -16,6 +16,13 @@ export class DevicePorts extends DeviceScope {
 	private portIndices: Map<PortType, number> = new Map();
 	private portIndexToTypes: Map<number, PortType[]> = new Map();
 	private portNetworks: Map<PortType, Network> = new Map();
+	// Network for devices without a data port in their game data (e.g. the sandbox housing, unknown
+	// prefabs). Without it, `device.network` throws for them even though they were added to one.
+	private fallbackNetwork: Network | undefined;
+
+	public setFallbackNetwork(network: Network): void {
+		this.fallbackNetwork = network;
+	}
 
 	private static expandCompositePort(port: PortType): PortType[] {
 		switch (port) {
@@ -152,6 +159,9 @@ export class DevicePorts extends DeviceScope {
 		}
 		if (this.portNetworks.has(port)) {
 			return this.portNetworks.get(port)!;
+		}
+		if (typeof portOrindex === "undefined" && this.fallbackNetwork) {
+			return this.fallbackNetwork;
 		}
 		throw new Error(
 			i18n.t("error.no_network_for_port", {

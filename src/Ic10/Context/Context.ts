@@ -1,10 +1,10 @@
-import EventEmitter from "eventemitter3";
-import type { Chip } from "@/Core/Chip";
-import type { Housing } from "@/Core/Housing";
-import type { StackInterface } from "@/Core/Stack";
-import { ErrorSeverity, type Ic10Error } from "@/Ic10/Errors/Errors";
-import type { Define } from "@/Ic10/Instruction/Helpers/Define";
-import type { Line } from "@/Ic10/Lines/Line";
+import { EventEmitter } from "eventemitter3";
+import type { Chip } from "../../Core/Chip.ts";
+import type { Housing } from "../../Core/Housing.ts";
+import type { StackInterface } from "../../Core/Stack.ts";
+import { ErrorSeverity, type Ic10Error } from "../Errors/Errors.ts";
+import type { Define } from "../Instruction/Helpers/Define.ts";
+import type { Line } from "../Lines/Line.ts";
 
 export type ContextConstructor = {
 	/** Человекочитаемое имя контекста (для логов/отладки) */

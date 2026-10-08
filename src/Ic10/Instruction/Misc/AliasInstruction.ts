@@ -1,14 +1,14 @@
-import { ErrorSeverity, RuntimeIc10Error, TypeIc10Error } from "@/Ic10/Errors/Errors";
+import i18n from "../../../Languages/lang.ts";
+import { ErrorSeverity, RuntimeIc10Error, TypeIc10Error } from "../../Errors/Errors.ts";
 import {
 	getRegister,
 	recursiveDevice,
 	recursiveRegister,
 	singleDevice,
 	singleRegister,
-} from "@/Ic10/Helpers/ArgumentParse";
-import { Define } from "@/Ic10/Instruction/Helpers/Define";
-import { Instruction, type InstructionArgument } from "@/Ic10/Instruction/Helpers/Instruction";
-import i18n from "@/Languages/lang";
+} from "../../Helpers/ArgumentParse.ts";
+import { Define } from "../Helpers/Define.ts";
+import { Instruction, type InstructionArgument } from "../Helpers/Instruction.ts";
 
 export class AliasInstruction extends Instruction {
 	override argumentList(): InstructionArgument[] {

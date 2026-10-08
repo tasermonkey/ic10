@@ -3,7 +3,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import JSON5 from "json5";
-import { instructions } from "@/Ic10/Instruction";
+import { instructions } from "../src/Ic10/Instruction/index.ts";
 
 console.log("🚀 Generating vscode...");
 
@@ -118,7 +118,7 @@ async function main() {
 	}
 
 	// Обновляем launch.json
-	const launchPath = path.join(path.dirname(__dirname), ".vscode/launch.json");
+	const launchPath = path.join(path.dirname(import.meta.dirname), ".vscode/launch.json");
 
 	try {
 		const content = await fs.readFile(launchPath, "utf-8");

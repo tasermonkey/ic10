@@ -1,8 +1,8 @@
-import { GROUPED_CONSTS } from "@/Defines/consts";
-import DEVICES from "@/Defines/devices";
-import ITEMS from "@/Defines/items";
-import REAGENTS from "@/Defines/reagents";
-import { BiMap } from "@/helpers";
+import { BiMap } from "../helpers.ts";
+import { GROUPED_CONSTS } from "./consts.ts";
+import DEVICES from "./devices.ts";
+import ITEMS from "./items.ts";
+import REAGENTS from "./reagents.ts";
 
 // Типы с readonly для большей точности
 export type LogicConstType = typeof GROUPED_CONSTS.LogicType;

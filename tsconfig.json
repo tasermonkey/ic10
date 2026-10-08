@@ -1,16 +1,17 @@
 {
 	"compilerOptions": {
-		"module": "ESNext",
-		"paths": {
-			"@/*": ["./src/*"],
-			"@tests/*": ["./tests/*"],
-			"@tools/*": ["./tools/*"]
-		},
-		"lib": ["ESNext"],
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
 		"target": "ESNext",
+		"lib": ["ESNext"],
+		"types": ["node"],
+		"allowImportingTsExtensions": true,
+		"erasableSyntaxOnly": true,
+		"verbatimModuleSyntax": true,
+		"resolveJsonModule": true,
+		"noEmit": true,
 		"allowJs": false,
-		"skipLibCheck": true,
-		"moduleResolution": "bundler"
+		"skipLibCheck": true
 	},
 	"exclude": ["dist", "node_modules", "src/Defines", "src/Devices", "src/Schemas"]
 }

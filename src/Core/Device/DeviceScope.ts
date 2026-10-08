@@ -1,4 +1,4 @@
-import type { Device } from "@/Core/Device";
+import type { Device } from "../Device.ts";
 
 export type DeviceScopeConstructor = {
 	device: Device;

@@ -1,7 +1,8 @@
+import { readFile } from "node:fs/promises";
 import { ValiError } from "valibot";
-import { Builer } from "@/Envierment/Builder";
-import { Languages } from "@/Languages";
-import i18n from "@/Languages/lang";
+import { Builer } from "../../src/Envierment/Builder.ts";
+import { Languages } from "../../src/Languages/index.ts";
+import i18n from "../../src/Languages/lang.ts";
 
 await i18n
 	.init({
@@ -12,7 +13,7 @@ await i18n
 	})
 	.then(() => console.log("🟦🟦 Язык загружен 🟦🟦"));
 
-const f = await Bun.file(`${__dirname}/test.ic.json`).text();
+const f = await readFile(`${import.meta.dirname}/test.ic.json`, "utf8");
 
 try {
 	const builder = Builer.from(f);

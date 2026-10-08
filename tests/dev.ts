@@ -1,5 +1,5 @@
-import { createRunner } from "@tests/helpers";
-import { ErrorSeverity } from "@/Ic10/Errors/Errors";
+import { ErrorSeverity } from "../src/Ic10/Errors/Errors.ts";
+import { createRunner } from "./helpers.ts";
 
 const code = `
 

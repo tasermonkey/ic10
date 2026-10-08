@@ -1,9 +1,9 @@
-import type { LogicType } from "@/Core/Device";
-import { DeviceScope, type DeviceScopeConstructor } from "@/Core/Device/DeviceScope";
-import { Logics } from "@/Defines/data";
-import { BiMap } from "@/helpers";
-import { ErrorSeverity, Ic10Error } from "@/Ic10/Errors/Errors";
-import i18n from "@/Languages/lang";
+import { Logics } from "../../Defines/data.ts";
+import { BiMap } from "../../helpers.ts";
+import { ErrorSeverity, Ic10Error } from "../../Ic10/Errors/Errors.ts";
+import i18n from "../../Languages/lang.ts";
+import type { LogicType } from "../Device.ts";
+import { DeviceScope, type DeviceScopeConstructor } from "./DeviceScope.ts";
 
 type prop = number | string;
 

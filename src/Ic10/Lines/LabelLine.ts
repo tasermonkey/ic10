@@ -1,7 +1,7 @@
-import { ErrorSeverity, ReferenceIc10Error } from "@/Ic10/Errors/Errors";
-import { Define } from "@/Ic10/Instruction/Helpers/Define";
-import { CommentLine, type CommentLineConstructorType } from "@/Ic10/Lines/CommentLine";
-import i18n from "@/Languages/lang";
+import i18n from "../../Languages/lang.ts";
+import { ErrorSeverity, ReferenceIc10Error } from "../Errors/Errors.ts";
+import { Define } from "../Instruction/Helpers/Define.ts";
+import { CommentLine, type CommentLineConstructorType } from "./CommentLine.ts";
 
 export type LabelLineConstructorType = {
 	label: string;

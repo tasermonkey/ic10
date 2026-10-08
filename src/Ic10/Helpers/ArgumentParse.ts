@@ -1,8 +1,8 @@
-import CONSTS, { GROUPED_CONSTS } from "@/Defines/consts";
-import type { Context } from "@/Ic10/Context/Context";
-import { TypeIc10Error } from "@/Ic10/Errors/Errors";
-import { crc32, stringToCode } from "@/Ic10/Helpers/functions";
-import type { Argument } from "@/Ic10/Instruction/Helpers/Argument";
+import CONSTS, { GROUPED_CONSTS } from "../../Defines/consts.ts";
+import type { Context } from "../Context/Context.ts";
+import { TypeIc10Error } from "../Errors/Errors.ts";
+import type { Argument } from "../Instruction/Helpers/Argument.ts";
+import { crc32, stringToCode } from "./functions.ts";
 
 // Регулярные выражения для парсинга
 export const singleRegister = /^r(?<reg>\d+)$/;

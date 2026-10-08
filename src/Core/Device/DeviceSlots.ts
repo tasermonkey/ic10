@@ -1,19 +1,19 @@
-import type { Device } from "@/Core/Device";
-import { DeviceScope, type DeviceScopeConstructor } from "@/Core/Device/DeviceScope";
-import { LogicSlot } from "@/Defines/data";
-import type { SlotsType } from "@/Defines/devices";
-import { BiMap } from "@/helpers";
-import { ErrorSeverity, RuntimeIc10Error } from "@/Ic10/Errors/Errors";
-import i18n from "@/Languages/lang";
+import { LogicSlot } from "../../Defines/data.ts";
+import type { SlotsType } from "../../Defines/devices.ts";
+import { BiMap } from "../../helpers.ts";
+import { ErrorSeverity, RuntimeIc10Error } from "../../Ic10/Errors/Errors.ts";
+import i18n from "../../Languages/lang.ts";
+import type { Device } from "../Device.ts";
+import { DeviceScope, type DeviceScopeConstructor } from "./DeviceScope.ts";
 
 export class ItemEntity {
 	private _propertiesRaw: Map<number, number> = new Map();
 	private _count: number = 0;
 
-	constructor(
-		public readonly hash: number,
-		count: number = 1,
-	) {
+	public readonly hash: number;
+
+	constructor(hash: number, count: number = 1) {
+		this.hash = hash;
 		this.count = count;
 	}
 
@@ -64,11 +64,11 @@ export class Slot extends DeviceScope {
 	private ITEM: ItemEntity | null = null;
 	private logicNameToCode = new BiMap<string, number>();
 
-	constructor(
-		device: Device,
-		public slot: NonNullable<SlotsType>[number],
-	) {
+	public slot: NonNullable<SlotsType>[number];
+
+	constructor(device: Device, slot: NonNullable<SlotsType>[number]) {
 		super({ device });
+		this.slot = slot;
 		// Заполняем двунаправленный мэппинг только валидные коды
 		slot.logic.forEach((l) => {
 			if (LogicSlot.hasKey(l)) {

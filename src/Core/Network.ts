@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
-import type { Device } from "@/Core/Device";
-import type { NetworkTypeSchema } from "@/Schemas/EnvSchema";
-import type { PortType } from "./Device/DevicePorts";
+import type { NetworkTypeSchema } from "../Schemas/EnvSchema.ts";
+import type { PortType } from "./Device/DevicePorts.ts";
+import type { Device } from "./Device.ts";
 
 export type NetworkType = NetworkTypeSchema;
 
@@ -39,6 +39,8 @@ export class Network {
 		}
 		if (portIndex >= 0) {
 			device.ports.setNetwork(portIndex, this);
+		} else if (typeof port === "undefined") {
+			device.ports.setFallbackNetwork(this);
 		}
 	}
 

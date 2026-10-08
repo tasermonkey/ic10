@@ -1,11 +1,7 @@
 import icMath from "@stationeers-ic/exact-ic10-math";
-import { ArgumentCalculators } from "@/Ic10/Instruction/Helpers/ArgumentCalculators";
-import {
-	Instruction,
-	type InstructionArgument,
-	type InstructionTestData,
-} from "@/Ic10/Instruction/Helpers/Instruction";
-import i18n from "@/Languages/lang";
+import i18n from "../../Languages/lang.ts";
+import { ArgumentCalculators } from "./Helpers/ArgumentCalculators.ts";
+import { Instruction, type InstructionArgument, type InstructionTestData } from "./Helpers/Instruction.ts";
 
 abstract class BinaryMathInstruction extends Instruction {
 	override argumentList(): InstructionArgument[] {

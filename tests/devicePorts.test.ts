@@ -1,5 +1,5 @@
-import { describe, expect, test } from "bun:test";
-import { DevicePorts, type PortType } from "@/Core/Device/DevicePorts";
+import { describe, expect, test } from "vitest";
+import { DevicePorts, type PortType } from "../src/Core/Device/DevicePorts.ts";
 
 describe("DevicePorts.getPortTypes", () => {
 	test("Data ports return data type", () => {

@@ -1,10 +1,10 @@
-import type { Device } from "@/Core/Device";
-import type { Context } from "@/Ic10/Context/Context";
-import { ArgumentIc10Error, ErrorSeverity, type Ic10Error } from "@/Ic10/Errors/Errors";
-import type { Argument } from "@/Ic10/Instruction/Helpers/Argument";
-import type { InstructionLine } from "@/Ic10/Lines/InstructionLine";
-import type { Line } from "@/Ic10/Lines/Line";
-import i18n from "@/Languages/lang";
+import type { Device } from "../../../Core/Device.ts";
+import i18n from "../../../Languages/lang.ts";
+import type { Context } from "../../Context/Context.ts";
+import { ArgumentIc10Error, ErrorSeverity, type Ic10Error } from "../../Errors/Errors.ts";
+import type { InstructionLine } from "../../Lines/InstructionLine.ts";
+import type { Line } from "../../Lines/Line.ts";
+import type { Argument } from "./Argument.ts";
 
 export type InstructionConstructorType = {
 	/** Контекст исполнения инструкции (доступ к регистрам, устройствам, define и т.д.) */

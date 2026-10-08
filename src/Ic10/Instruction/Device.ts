@@ -1,18 +1,14 @@
-import { ItemEntity } from "@/Core/Device/DeviceSlots";
-import { type LogicBatchMethodType, type LogicConstType, Logics, Reagents } from "@/Defines/data";
-import REAGENTS from "@/Defines/reagents";
-import { StructureAutolathe } from "@/Devices/StructureAutolathe";
-import { StructureConsole } from "@/Devices/StructureConsole";
-import { StructureConsoleLed1x2 } from "@/Devices/StructureConsoleLed1x2";
-import { HashString } from "@/helpers";
-import { ArgumentIc10Error, ErrorSeverity } from "@/Ic10/Errors/Errors";
-import { ArgumentCalculators, type calculateDevicePinOrIdResult } from "@/Ic10/Instruction/Helpers/ArgumentCalculators";
-import {
-	Instruction,
-	type InstructionArgument,
-	type InstructionTestData,
-} from "@/Ic10/Instruction/Helpers/Instruction";
-import i18n from "@/Languages/lang";
+import { ItemEntity } from "../../Core/Device/DeviceSlots.ts";
+import { type LogicBatchMethodType, type LogicConstType, Logics, Reagents } from "../../Defines/data.ts";
+import REAGENTS from "../../Defines/reagents.ts";
+import { StructureAutolathe } from "../../Devices/StructureAutolathe.ts";
+import { StructureConsole } from "../../Devices/StructureConsole.ts";
+import { StructureConsoleLed1x2 } from "../../Devices/StructureConsoleLed1x2.ts";
+import { HashString } from "../../helpers.ts";
+import i18n from "../../Languages/lang.ts";
+import { ArgumentIc10Error, ErrorSeverity } from "../Errors/Errors.ts";
+import { ArgumentCalculators, type calculateDevicePinOrIdResult } from "./Helpers/ArgumentCalculators.ts";
+import { Instruction, type InstructionArgument, type InstructionTestData } from "./Helpers/Instruction.ts";
 
 export class SInstruction extends Instruction {
 	static override tests(): InstructionTestData[] {

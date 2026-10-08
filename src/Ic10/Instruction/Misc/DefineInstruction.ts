@@ -1,12 +1,8 @@
-import { ErrorSeverity, RuntimeIc10Error, TypeIc10Error } from "@/Ic10/Errors/Errors";
-import { parseArgumentAnyNumber } from "@/Ic10/Helpers/ArgumentParse";
-import { Define } from "@/Ic10/Instruction/Helpers/Define";
-import {
-	Instruction,
-	type InstructionArgument,
-	type InstructionTestData,
-} from "@/Ic10/Instruction/Helpers/Instruction";
-import i18n from "@/Languages/lang";
+import i18n from "../../../Languages/lang.ts";
+import { ErrorSeverity, RuntimeIc10Error, TypeIc10Error } from "../../Errors/Errors.ts";
+import { parseArgumentAnyNumber } from "../../Helpers/ArgumentParse.ts";
+import { Define } from "../Helpers/Define.ts";
+import { Instruction, type InstructionArgument, type InstructionTestData } from "../Helpers/Instruction.ts";
 
 export class DefineInstruction extends Instruction {
 	static override tests(): InstructionTestData[] {

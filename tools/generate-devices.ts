@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import generate from "@babel/generator";
+import { generate } from "@babel/generator";
 import * as t from "@babel/types";
 import { toPascalCase } from "js-convert-case";
-import { DEVICES, type DeviceType } from "@/index";
+import { DEVICES, type DeviceType } from "../src/index.ts";
 
 console.log("🚀 Generating devices...");
 const outDir = path.resolve(process.cwd(), "src", "Devices");

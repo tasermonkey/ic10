@@ -1,9 +1,5 @@
-import { ArgumentCalculators } from "@/Ic10/Instruction/Helpers/ArgumentCalculators";
-import {
-	Instruction,
-	type InstructionArgument,
-	type InstructionTestData,
-} from "@/Ic10/Instruction/Helpers/Instruction";
+import { ArgumentCalculators } from "../Helpers/ArgumentCalculators.ts";
+import { Instruction, type InstructionArgument, type InstructionTestData } from "../Helpers/Instruction.ts";
 
 export class MoveInstruction extends Instruction {
 	static override tests(): InstructionTestData[] {

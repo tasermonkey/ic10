@@ -1,11 +1,11 @@
-import parse from "json5/lib/parse";
-import type { Chip } from "@/Core/Chip";
-import type { Device } from "@/Core/Device";
-import type { Network } from "@/Core/Network";
-import { type Parser, ParserV1 } from "@/Envierment/ParserV1";
-import { ErrorSeverity } from "@/Ic10/Errors/Errors";
-import type { Ic10Runner } from "@/Ic10/Ic10Runner";
-import type { EnvSchema, ProjectSchema } from "@/Schemas/EnvSchema";
+import JSON5 from "json5";
+import type { Chip } from "../Core/Chip.ts";
+import type { Device } from "../Core/Device.ts";
+import type { Network } from "../Core/Network.ts";
+import { ErrorSeverity } from "../Ic10/Errors/Errors.ts";
+import type { Ic10Runner } from "../Ic10/Ic10Runner.ts";
+import type { EnvSchema, ProjectSchema } from "../Schemas/EnvSchema.ts";
+import { type Parser, ParserV1 } from "./ParserV1.ts";
 
 export class Builer {
 	private readonly lattestParser = ParserV1;
@@ -33,7 +33,7 @@ export class Builer {
 
 	static from(yml: string): Builer {
 		const BUILDER = new Builer();
-		const data = parse(yml) as EnvSchema;
+		const data = JSON5.parse(yml) as EnvSchema;
 		let Parser: Parser;
 		switch (data.version) {
 			case 1:

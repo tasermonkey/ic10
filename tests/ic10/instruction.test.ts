@@ -1,10 +1,9 @@
-import { describe, expect, test } from "bun:test";
-import * as process from "node:process";
 import { Random } from "@stationeers-ic/exact-ic10-math";
-import { createRunner, expectExpectation, type InstructionLike, runInstructionTest } from "@tests/helpers";
-import { Ic10Error } from "@/Ic10/Errors/Errors";
-import { instructions } from "@/Ic10/Instruction";
-import type { InstructionTestData } from "@/Ic10/Instruction/Helpers/Instruction";
+import { describe, expect, test } from "vitest";
+import { Ic10Error } from "../../src/Ic10/Errors/Errors.ts";
+import type { InstructionTestData } from "../../src/Ic10/Instruction/Helpers/Instruction.ts";
+import { instructions } from "../../src/Ic10/Instruction/index.ts";
+import { createRunner, expectExpectation, type InstructionLike, runInstructionTest } from "../helpers.ts";
 
 describe("Проверка каждой инструкции", () => {
 	// Собираем все тесты синхронно
@@ -37,7 +36,9 @@ describe("Проверка каждой инструкции", () => {
 				} else {
 					console.error(e);
 				}
-				process.exit();
+				// Rethrow so this test fails on its own. (It used to call process.exit(), which ended the
+				// whole run early and hid every later test.)
+				throw e;
 			}
 			// Унифицированные проверки
 			for (const exp of testData.expected) {

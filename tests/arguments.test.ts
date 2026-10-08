@@ -1,5 +1,5 @@
 // argumentParser.test.ts
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import {
 	getConst,
 	getDevicePin,
@@ -17,10 +17,10 @@ import {
 	singleDevice,
 	singleRegister,
 	str,
-} from "@/Ic10/Helpers/ArgumentParse"; // путь к вашему файлу
-import { crc32 } from "@/Ic10/Helpers/functions";
-import { Argument } from "@/Ic10/Instruction/Helpers/Argument";
-import { createRunner } from "./helpers";
+} from "../src/Ic10/Helpers/ArgumentParse.ts"; // путь к вашему файлу
+import { crc32 } from "../src/Ic10/Helpers/functions.ts";
+import { Argument } from "../src/Ic10/Instruction/Helpers/Argument.ts";
+import { createRunner } from "./helpers.ts";
 
 // Mock Context
 const createMockContext = () => {

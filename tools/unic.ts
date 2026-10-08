@@ -1,5 +1,5 @@
 import _ from "lodash";
-import DEVICES from "@/Defines/devices";
+import DEVICES from "../src/Defines/devices.ts";
 
 interface Logic {
 	name: string;

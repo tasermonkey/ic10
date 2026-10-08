@@ -12,7 +12,7 @@
 [![Last Commit](https://img.shields.io/github/last-commit/Stationeers-ic/ic10.svg)](https://github.com/Stationeers-ic/ic10/commits/main)
 [![Translation status](https://weblate.traineratwot.site/widget/ic10/ic10-lib/svg-badge.svg)](https://weblate.traineratwot.site/engage/ic10/)
 [![Stationeers](https://img.shields.io/badge/Stationeers-IC10-blue.svg)](https://store.steampowered.com/app/544550/Stationeers/)
-[![Bun](https://img.shields.io/badge/runtime-Bun-000.svg)](https://bun.sh)
+[![Node](https://img.shields.io/badge/runtime-Node%2024%2B-339933.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/lang-TypeScript-blue.svg)](https://www.typescriptlang.org/)
 
 
@@ -47,26 +47,26 @@ samples/                 # IC10 code examples
 ## 🛠️ Installation & Setup
 
 ### Prerequisites
-- [Bun](https://bun.sh) (required)
+- [Node.js](https://nodejs.org) 24 or later (runs the TypeScript sources and tools directly)
 - IDE with TypeScript support (VSCode recommended)
 
 ### Installation
 ```bash
 git clone <repository-url>
 cd ic10
-bun install
+npm install
 ```
 
 ### Development
 ```bash
 # Run in development mode with file watching
-bun run dev
+npm run dev
 
 # Run tests
-bun test
+npx vitest run
 
 # Full project rebuild
-bun run upgrade
+npm run upgrade
 ```
 
 ## 📋 package.json Scripts
@@ -93,7 +93,7 @@ bun run upgrade
 
 ### 1. Project Initialization
 ```bash
-bun run upgrade
+npm run upgrade
 ```
 
 This script performs:
@@ -104,7 +104,7 @@ This script performs:
 
 ### 2. Development Mode
 ```bash
-bun run dev
+npm run dev
 ```
 
 The `whatch.ts` script monitors changes and automatically:
@@ -122,13 +122,13 @@ The `whatch.ts` script monitors changes and automatically:
 ### 4. Testing
 ```bash
 # Run all tests
-bun test
+npx vitest run
 
 # Run specific test
-bun test tests/ic10/main.test.ts
+npx vitest run tests/ic10/main.test.ts
 
 # Show executed tests
-bun run show
+npm run show
 ```
 
 ## 🎯 Using the Emulator
@@ -208,7 +208,7 @@ The project uses a comprehensive testing system:
 6. Create a Pull Request
 
 ### Code Standards
-- Use `bun run fix` before commit
+- Use `npm run fix` before commit
 - Follow Biome code style
 - Add tests for new functionality
 - Update documentation when necessary
@@ -217,16 +217,16 @@ The project uses a comprehensive testing system:
 
 ```bash
 # Quick project check
-bun run fix
+npm run fix
 
 # Formatting only
-bun run format
+npm run format
 
 # Formatting check
-bun run format:check
+npm run format:check
 
 # Run specific generation script
-bun run generate-device
+npm run generate-device
 ```
 
 <!-- ## 📄 License

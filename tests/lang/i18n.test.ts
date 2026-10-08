@@ -1,6 +1,6 @@
-import { describe, expect, test } from "bun:test";
-import { Languages } from "@/Languages";
-import { i18n } from "@/Languages/lang";
+import { describe, expect, test } from "vitest";
+import { Languages } from "../../src/Languages/index.ts";
+import { i18n } from "../../src/Languages/lang.ts";
 
 describe("переводы ", async () => {
 	await i18n.init({

@@ -1,4 +1,4 @@
-import { crc32 } from "@/Ic10/Helpers/functions";
+import { crc32 } from "./Ic10/Helpers/functions.ts";
 
 export class BiMap<K extends string | number, V extends string | number> {
 	private keyToValue = new Map<K, V>();

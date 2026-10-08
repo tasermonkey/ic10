@@ -1,6 +1,6 @@
-import { describe, expect, test } from "bun:test";
-import INSTRUCTIONS from "@/Defines/instructions";
-import { instructions } from "@/Ic10/Instruction";
+import { describe, expect, test } from "vitest";
+import INSTRUCTIONS from "../../src/Defines/instructions.ts";
+import { instructions } from "../../src/Ic10/Instruction/index.ts";
 
 describe("Выполнено", () => {
 	test("Процент реализованных инструкций", () => {
