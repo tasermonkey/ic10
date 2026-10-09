@@ -152,6 +152,28 @@ describe("jump-and-link return address", () => {
 	});
 });
 
+describe("batch reads with no matching device", () => {
+	const SENSOR = 'HASH("StructureGasSensor")';
+	test.each([
+		["lb", `lb r0 ${SENSOR} Temperature Average`],
+		["lbn", `lbn r0 ${SENSOR} HASH("Outside") Temperature Average`],
+	])("%s Average is NaN, as 0 / 0 is in game", async (_kind, code) => {
+		const runner = await realRunner(code);
+		await runToStop(runner, 10);
+		expect(runner.realContext.getRegister(0)).toBeNaN();
+	});
+
+	test.each([
+		["Sum", 0],
+		["Minimum", 0],
+		["Maximum", Number.NEGATIVE_INFINITY],
+	])("%s is %d", async (mode, expected) => {
+		const runner = await realRunner(`move r0 5\nlb r0 ${SENSOR} Temperature ${mode}`);
+		await runToStop(runner, 10);
+		expect(runner.realContext.getRegister(0)).toBe(expected);
+	});
+});
+
 describe("yield / sleep suspend requests", () => {
 	async function suspends(code: string, steps: number) {
 		const runner = await realRunner(code);

@@ -256,7 +256,12 @@ abstract class DeviceHelpers extends MemoryBase {
 	}
 
 	protected calculateBatchResult(values: number[], mode: number): number {
-		if (values.length === 0) return 0;
+		// No devices: Average is NaN (0 / 0), Maximum is -Infinity, Sum and Minimum are 0, as in game
+		// (per dcramer/stationeers docs/ic10-instructions.md). Scripts use the NaN to spot a missing device.
+		if (values.length === 0) {
+			const method = LogicBatchMethod.hasValue(mode) ? LogicBatchMethod.getByValue(mode) : undefined;
+			return method === "Average" ? Number.NaN : method === "Maximum" ? Number.NEGATIVE_INFINITY : 0;
+		}
 
 		if (!LogicBatchMethod.hasValue(mode)) {
 			this.addError(
