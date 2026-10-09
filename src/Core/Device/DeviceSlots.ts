@@ -93,6 +93,11 @@ export class Slot extends DeviceScope {
 		if (propCode !== undefined) {
 			return this.ITEM.getProp(propCode);
 		}
+		// The game data lists no logic types for some slots that the game does read, such as the
+		// Larre's Target Slot (the plant at its arm), so such a slot reads whatever its item has.
+		if (this.slot.logic.length === 0) {
+			return this.ITEM.getProp(prop);
+		}
 		return 0;
 	}
 

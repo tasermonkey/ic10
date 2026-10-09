@@ -11,8 +11,10 @@ import {
 	Chip,
 	Housing,
 	Ic10Runner,
+	ItemEntity,
 	JUMP_LIMIT_ERROR_CODE,
 	Network,
+	StructureLarreDockHydroponics,
 	type SuspendRequest,
 	ValidateIc10Runner,
 } from "../../src/index.ts";
@@ -171,6 +173,59 @@ describe("batch reads with no matching device", () => {
 		const runner = await realRunner(`move r0 5\nlb r0 ${SENSOR} Temperature ${mode}`);
 		await runToStop(runner, 10);
 		expect(runner.realContext.getRegister(0)).toBe(expected);
+	});
+});
+
+describe("device-set tests on an empty pin", () => {
+	// The lone housing in realRunner has nothing on any pin.
+	test.each([
+		["bdns", "bdns d1 set\nmove r0 2\nj end\nset:\nmove r0 1\nend:"],
+		["bdns via dr", "move r1 1\nbdns dr1 set\nmove r0 2\nj end\nset:\nmove r0 1\nend:"],
+		["brdns", "brdns d1 3\nmove r0 2\nj end\nmove r0 1\nend:"],
+		["bdnsal", "bdnsal d1 set\nj end\nset:\nmove r0 1\nend:"],
+		["sdns", "sdns r0 d1"],
+	])("%s sees the pin as not set, without an error", async (_kind, code) => {
+		const runner = await realRunner(code);
+		await runToStop(runner, 20);
+		expect(runner.realContext.getRegister(0)).toBe(1);
+		expect(runner.context.errors.filter((e) => e.severity === ErrorSeverity.Strong)).toEqual([]);
+	});
+
+	test.each([
+		["bdse", "bdse d1 set\nmove r0 1\nj end\nset:\nmove r0 2\nend:"],
+		["sdse", "sdse r0 d1\nseqz r0 r0"],
+	])("%s doesn't branch or set, without an error", async (_kind, code) => {
+		const runner = await realRunner(code);
+		await runToStop(runner, 20);
+		expect(runner.realContext.getRegister(0)).toBe(1);
+		expect(runner.context.errors.filter((e) => e.severity === ErrorSeverity.Strong)).toEqual([]);
+	});
+
+	test("l on an empty pin is still an error", async () => {
+		const runner = await realRunner("l r0 d1 On");
+		await runToStop(runner, 5);
+		expect(runner.context.errors.some((e) => e.severity === ErrorSeverity.Strong)).toBe(true);
+	});
+});
+
+describe("slots the game data lists no logic types for", () => {
+	test("the Larre's Target Slot (255) reads the plant at the arm", () => {
+		const larre = new StructureLarreDockHydroponics({ id: 1 });
+		const plant = new ItemEntity(1234);
+		plant.setProp("Mature", 1);
+		plant.setProp("Seeding", -1);
+		larre.slots!.getSlot(255)!.putItem(plant);
+		expect(larre.slots!.getSlot(255)!.getProp("Mature")).toBe(1);
+		expect(larre.slots!.getSlot(255)!.getProp("Seeding")).toBe(-1);
+	});
+
+	test("a slot that lists its logic types still reads only those", () => {
+		const larre = new StructureLarreDockHydroponics({ id: 1 });
+		const item = new ItemEntity(1234);
+		item.setProp("Mature", 1);
+		larre.slots!.getSlot(0)!.putItem(item);
+		expect(larre.slots!.getSlot(0)!.getProp("Mature")).toBe(0); // the Arm Slot doesn't list Mature
+		expect(larre.slots!.getSlot(0)!.getProp("Quantity")).toBe(1);
 	});
 });
 

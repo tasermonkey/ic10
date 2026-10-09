@@ -121,6 +121,15 @@ export const ValueCalculators = {
 		return ErrorHandlers.validateDeviceConnection(context, pin, argument);
 	},
 
+	/** A pin that may have nothing on it, for the instructions that test exactly that (sdse, bdns, …). */
+	calculateDevicePinMaybeEmpty: (context: Context, argument: Argument) => {
+		const pin = getDevicePin(context, argument.text);
+		if (pin === false) {
+			return ErrorHandlers.handleError(context, argument, i18n.t("error.invalid_argument_device_pin"));
+		}
+		return pin;
+	},
+
 	calculateDeviceId: (context: Context, argument: Argument): calculateDevicePinOrIdResult => {
 		const value = parseArgumentAnyNumber(context, argument);
 		if (value !== false && context.isConnectDeviceById(value)) {
@@ -265,6 +274,13 @@ export const ArgumentCalculators = {
 		name,
 		...BaseConfigs.device,
 		calculate: (context: Context, argument: Argument) => ValueCalculators.calculateDevicePin(context, argument),
+	}),
+
+	devicePinMaybeEmpty: (name?: string) => ({
+		name,
+		...BaseConfigs.device,
+		calculate: (context: Context, argument: Argument) =>
+			ValueCalculators.calculateDevicePinMaybeEmpty(context, argument),
 	}),
 
 	deviceId: (name?: string) => ({

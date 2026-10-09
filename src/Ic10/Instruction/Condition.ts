@@ -270,7 +270,7 @@ abstract class TernaryBranchAndLinkInstruction extends TernaryBranchInstruction 
 // ===== Devices (unified) =====
 abstract class DeviceSetConditionInstruction extends Instruction {
 	override argumentList(): InstructionArgument[] {
-		return [ArgumentCalculators.registerLink("result"), ArgumentCalculators.devicePin("device")];
+		return [ArgumentCalculators.registerLink("result"), ArgumentCalculators.devicePinMaybeEmpty("device")];
 	}
 	public abstract predicateDeviceSet(isSet: boolean): boolean;
 	override run(): void {
@@ -283,7 +283,7 @@ abstract class DeviceSetConditionInstruction extends Instruction {
 
 abstract class DeviceBranchInstruction extends Instruction {
 	override argumentList(): InstructionArgument[] {
-		return [ArgumentCalculators.devicePin("device"), ArgumentCalculators.anyNumber("line")];
+		return [ArgumentCalculators.devicePinMaybeEmpty("device"), ArgumentCalculators.anyNumber("line")];
 	}
 	public abstract predicateDeviceSet(isSet: boolean): boolean;
 	override run(): void {
@@ -296,7 +296,7 @@ abstract class DeviceBranchInstruction extends Instruction {
 
 abstract class RelativeDeviceBranchInstruction extends Instruction {
 	override argumentList(): InstructionArgument[] {
-		return [ArgumentCalculators.devicePin("device"), ArgumentCalculators.anyNumber("relative")];
+		return [ArgumentCalculators.devicePinMaybeEmpty("device"), ArgumentCalculators.anyNumber("relative")];
 	}
 	public abstract predicateDeviceSet(isSet: boolean): boolean;
 	override run(): void {
@@ -311,7 +311,7 @@ abstract class RelativeDeviceBranchInstruction extends Instruction {
 
 abstract class DeviceBranchAndLinkInstruction extends Instruction {
 	override argumentList(): InstructionArgument[] {
-		return [ArgumentCalculators.devicePin("device"), ArgumentCalculators.anyNumber("line")];
+		return [ArgumentCalculators.devicePinMaybeEmpty("device"), ArgumentCalculators.anyNumber("line")];
 	}
 	public abstract predicateDeviceSet(isSet: boolean): boolean;
 	override run(): void {
