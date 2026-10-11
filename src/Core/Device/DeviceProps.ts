@@ -18,11 +18,26 @@ interface PropIterator
 	[Symbol.iterator](): PropIterator;
 }
 
+/**
+ * Takes over a device's logic as instructions see it: `read`, `write`, `canLoad` and `canStore` go
+ * through the hooks instead of the device's own properties. For a device that stands in for another,
+ * such as a Logic Mirror. `forceRead`, `forceWrite` and iteration still use the device's own values.
+ * Errors belong on this device's `errors`: a chip only collects errors from devices on its network.
+ */
+export interface PropsHooks {
+	canLoad(prop: prop): boolean;
+	canStore(prop: prop): boolean;
+	read(prop: prop): number;
+	write(prop: prop, value: number): void;
+}
+
 export class DeviceProps extends DeviceScope {
 	constructor(props: DeviceScopeConstructor) {
 		super(props);
 		this.initProps();
 	}
+	/** When set, instructions read and write this device's logic through these instead. */
+	public hooks?: PropsHooks;
 	// Raw device properties, stored by numeric code
 	#propertiesRaw: Map<number, number> = new Map();
 	// BiMap linking logic names to codes
@@ -44,13 +59,18 @@ export class DeviceProps extends DeviceScope {
 		this.#propertiesRaw.clear();
 	}
 
+	/**
+	 * Read a logic value as an instruction does. A logic type the device can't read is a strong
+	 * error, as in game, where `l`, `ld` and `lb` throw IncorrectLogicType and the chip halts.
+	 */
 	public read(prop: prop): number {
+		if (this.hooks) return this.hooks.read(prop);
 		const logicCode = this.resolveLogicCode(prop);
 		if (logicCode === undefined) {
 			this.scope.errors.add(
 				new Ic10Error({
 					message: i18n.t("error.device_property_not_found", { hash: this.scope.hash, prop }),
-					severity: ErrorSeverity.Warning,
+					severity: ErrorSeverity.Strong,
 				}),
 			);
 			return 0;
@@ -67,7 +87,7 @@ export class DeviceProps extends DeviceScope {
 						hash: this.scope.hash,
 						logicName,
 					}),
-					severity: ErrorSeverity.Warning,
+					severity: ErrorSeverity.Strong,
 				}),
 			);
 			return 0;
@@ -75,6 +95,10 @@ export class DeviceProps extends DeviceScope {
 	}
 
 	public write(prop: prop, value: number): void {
+		if (this.hooks) {
+			this.hooks.write(prop, value);
+			return;
+		}
 		const logicCode = this.resolveLogicCode(prop);
 		if (logicCode === undefined) {
 			this.scope.errors.add(
@@ -214,12 +238,14 @@ export class DeviceProps extends DeviceScope {
 	}
 
 	public canLoad(prop: prop): boolean {
+		if (this.hooks) return this.hooks.canLoad(prop);
 		const logicCode = this.resolveLogicCode(prop);
 		if (logicCode === undefined) return false;
 		return this.logicMeta.get(logicCode)?.canRead ?? false;
 	}
 
 	public canStore(prop: prop): boolean {
+		if (this.hooks) return this.hooks.canStore(prop);
 		const logicCode = this.resolveLogicCode(prop);
 		if (logicCode === undefined) return false;
 		return this.logicMeta.get(logicCode)?.canWrite ?? false;

@@ -9,11 +9,15 @@ import { ErrorSeverity } from "../../src/Ic10/Errors/Errors.ts";
 import {
 	Builder,
 	Chip,
+	type Device,
 	Housing,
 	Ic10Runner,
 	ItemEntity,
 	JUMP_LIMIT_ERROR_CODE,
 	Network,
+	type PropsHooks,
+	StructureAutolathe,
+	StructureGasSensor,
 	StructureLarreDockHydroponics,
 	type SuspendRequest,
 	ValidateIc10Runner,
@@ -61,6 +65,21 @@ async function realRunner(code: string) {
 	runner.init();
 	return runner;
 }
+
+/** As {@link realRunner}, with `device` on the housing's network and on d0. */
+async function runnerWith(code: string, device: (network: Network) => Device) {
+	const network = new Network();
+	const chip = new Chip({ id: 0, ic10Code: code, register_length: 18, stack_length: 512 });
+	const housing = new Housing({ hash: 125, network, chip });
+	housing.connectDevices(0, device(network));
+	const runner = new Ic10Runner({ housing });
+	await runner.run(); // sandbox pass
+	runner.switchContext("real");
+	runner.init();
+	return runner;
+}
+
+const strong = (runner: Ic10Runner) => runner.context.errors.filter((e) => e.severity === ErrorSeverity.Strong);
 
 /** Step until the chip stops (or `max` steps); returns the number of steps that returned true. */
 async function runToStop(runner: Ic10Runner, max = 10_000) {
@@ -226,6 +245,82 @@ describe("slots the game data lists no logic types for", () => {
 		larre.slots!.getSlot(0)!.putItem(item);
 		expect(larre.slots!.getSlot(0)!.getProp("Mature")).toBe(0); // the Arm Slot doesn't list Mature
 		expect(larre.slots!.getSlot(0)!.getProp("Quantity")).toBe(1);
+	});
+});
+
+describe("reading a logic type the device can't read", () => {
+	// In game l, ld and lb throw IncorrectLogicType and the chip halts.
+	const sensor = (network: Network) => new StructureGasSensor({ id: 7, network });
+	const autolathe = (network: Network) => new StructureAutolathe({ id: 7, network });
+
+	test.each([
+		["l of a logic type it lacks", "l r0 d0 Setting", sensor],
+		["ld of a logic type it lacks", "ld r0 7 Setting", sensor],
+		["lb when a matching device lacks it", 'lb r0 HASH("StructureGasSensor") Setting Sum', sensor],
+		["l of a write-only logic type", "l r0 d0 ClearMemory", autolathe],
+	])("%s is a strong error", async (_kind, code, device) => {
+		const runner = await runnerWith(code, device);
+		await runToStop(runner, 5);
+		expect(strong(runner)).not.toEqual([]);
+	});
+
+	test.each([
+		["l of a readable logic type", "l r0 d0 Temperature", sensor],
+		["s of a write-only logic type", "s d0 ClearMemory 1", autolathe],
+	])("%s is not", async (_kind, code, device) => {
+		const runner = await runnerWith(code, device);
+		await runToStop(runner, 5);
+		expect(strong(runner)).toEqual([]);
+	});
+});
+
+describe("props hooks", () => {
+	function hooked(network: Network, calls: unknown[][]) {
+		const device = new StructureGasSensor({ id: 7, network });
+		const hooks: PropsHooks = {
+			canLoad: (prop) => prop !== 1, // logic type 1 (Power) is "missing"
+			canStore: () => true,
+			read: (prop) => {
+				calls.push(["read", prop]);
+				return 42;
+			},
+			write: (prop, value) => {
+				calls.push(["write", prop, value]);
+			},
+		};
+		device.props!.hooks = hooks;
+		device.props!.forceWrite("Temperature", 300);
+		return device;
+	}
+
+	test("l, ld and lb read through the hooks", async () => {
+		const calls: unknown[][] = [];
+		const runner = await runnerWith(
+			'l r0 d0 Temperature\nld r1 7 Temperature\nlb r2 HASH("StructureGasSensor") Temperature Sum',
+			(network) => hooked(network, calls),
+		);
+		await runToStop(runner, 5);
+		expect([0, 1, 2].map((r) => runner.realContext.getRegister(r))).toEqual([42, 42, 42]);
+		expect(calls).toHaveLength(3);
+	});
+
+	test("s writes through the hooks, even a logic type the device itself lacks", async () => {
+		const calls: unknown[][] = [];
+		const runner = await runnerWith("s d0 Setting 5", (network) => hooked(network, calls));
+		await runToStop(runner, 5);
+		expect(calls.filter((c) => c[0] === "write")).toEqual([["write", 12, 5]]); // Setting is 12
+		expect(strong(runner)).toEqual([]);
+	});
+
+	test("bdnvl asks the hooks whether the logic type can be read", async () => {
+		const runner = await runnerWith("bdnvl d0 Power 3\nmove r0 1\nj 4\nmove r0 2", (network) => hooked(network, []));
+		await runToStop(runner, 5);
+		expect(runner.realContext.getRegister(0)).toBe(2);
+	});
+
+	test("forceRead still sees the device's own values", () => {
+		const device = hooked(new Network(), []);
+		expect(device.props!.forceRead("Temperature")).toBe(300);
 	});
 });
 

@@ -331,7 +331,8 @@ abstract class DevicesByPinBase extends DeviceHelpers implements IDevicesByPinCo
 
 	override setDeviceParameterByPin(pin: number, prop: number, value: number): void {
 		const device = this.getDeviceByPin(pin);
-		const oldValue = this.getDeviceParameter(device, prop);
+		// Only for the event: a write-only logic type isn't an error to write, so don't read it.
+		const oldValue = device?.props?.canLoad(prop) ? this.getDeviceParameter(device, prop) : 0;
 		this.setDeviceParameter(device, prop, value);
 		this.emit("deviceParameterWrite", pin, prop, oldValue, value);
 	}
