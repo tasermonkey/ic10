@@ -581,17 +581,20 @@ describe("labels, jumps, numbers and -Infinity follow the game (G30-G33, G35)", 
 		expect(runner.realContext.getNextLineIndex()).toBe(1);
 	});
 
-	test("a malformed hex number is an error and is not written (G33)", async () => {
-		const runner = await runCode("move r0 $ZZ");
+	// The game raises IncorrectVariable for each of these (in game: $ZZ, %2 and 12abc, 2026-10-12).
+	test.each(["$ZZ", "%2", "12abc"])("a malformed number (%s) is an error and is not written (G33)", async (literal) => {
+		const runner = await runCode(`move r0 7\nmove r0 ${literal}\nmove r1 5`);
 		expect(strong(runner)).toHaveLength(1);
-		expect(runner.realContext.getRegister(0)).toBe(0);
-		expect(await strongErrors("move r0 $ZZ")).not.toEqual([]);
+		expect(runner.realContext.getRegister(0)).toBe(7);
+		expect(await strongErrors(`move r0 ${literal}`)).not.toEqual([]);
 	});
 
-	test("a label with an instruction on the same line is not silently accepted (G35)", async () => {
+	test("a label with an instruction on the same line refuses the whole script (G35)", async () => {
+		// The game refuses the script to compile (UnrecognisedInstruction), so no line runs, not even the later move.
 		const runner = await runCode("top: add r0 r0 1\nmove r1 1");
-		expect(strong(runner)).not.toEqual([]);
+		expect(runner.context.criticalError && runner.context.criticalError.code).toBe("UnrecognisedInstruction");
 		expect(runner.realContext.getRegister(0)).toBe(0);
+		expect(runner.realContext.getRegister(1)).toBe(0);
 	});
 });
 

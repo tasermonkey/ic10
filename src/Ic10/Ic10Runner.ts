@@ -64,6 +64,8 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 	public lines: Line[] = [];
 	private readonly jumpLimit: number;
 	private executionStopped: boolean = false;
+	/** Set when a line can't be compiled. The game refuses the whole script then; nothing runs (G35). */
+	private compileFailed: boolean = false;
 	private $suspend: SuspendRequest | null = null;
 	public readonly randomSeed?: number;
 	public readonly random!: Random;
@@ -145,6 +147,13 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 		this.$suspend = null;
 
 		if (this.executionStopped) {
+			return false;
+		}
+
+		// A script that doesn't compile never runs: the game refuses it (UnrecognisedInstruction, G35).
+		if (this.compileFailed) {
+			this.executionStopped = true;
+			this.emit("stop");
 			return false;
 		}
 
@@ -298,10 +307,12 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 							label: labelMatches.groups?.label,
 						});
 					}
+					this.compileFailed = true;
 					this.addError(
 						new FatalIc10Error({
 							message: i18n.t("error.unknown_line"),
-							severity: ErrorSeverity.Strong,
+							code: "UnrecognisedInstruction",
+							severity: ErrorSeverity.Critical,
 							context: this.context,
 							line: position,
 							start: 0,

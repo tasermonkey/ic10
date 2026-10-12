@@ -60,8 +60,9 @@ export function parseArgumentAnyNumber(context: Context, argument: Argument): nu
  * Parses a plain number
  */
 function parseSimpleNumber(text: string): number | false {
-	const value = parseFloat(text);
-	return !Number.isNaN(value) ? value : false;
+	// The whole text must be a number. parseFloat read `12abc` as 12, and the game rejects it (G33).
+	if (!/^[+-]?((\d+\.?\d*|\.\d+)([eE][+-]?\d+)?|Infinity)$/.test(text)) return false;
+	return parseFloat(text);
 }
 
 /**
@@ -77,7 +78,9 @@ export function parseHex(text: string): number | false {
  * Parses a binary number (starts with %)
  */
 export function parseBin(text: string): number | false {
-	return text.startsWith("%") ? parseInt(text.slice(1), 2) : false;
+	// Binary digits only. parseInt read `%2` as NaN with no error; the game raises IncorrectVariable (G33).
+	if (!/^%[01]+$/.test(text)) return false;
+	return parseInt(text.slice(1), 2);
 }
 
 /**
