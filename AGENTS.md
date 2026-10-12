@@ -4,9 +4,12 @@
 
 IC10 emulator and development toolkit for the game Stationeers. TypeScript library for Node 24+ (native type stripping), tested with Vitest, bundled with Vite.
 
-This is a fork of Stationeers-ic/ic10 (branch `node-esm`) that backs the `ic10-test` testing framework in
-[tasermonkey/chipdata-workspace](https://github.com/tasermonkey/chipdata-workspace). Changes here serve that framework;
-see "About this fork" in README.md. Nothing is sent upstream.
+This is a fork of Stationeers-ic/ic10, published to npm as `@tasermonkey/ic10`, that backs the `ic10-test` testing
+framework in [tasermonkey/chipdata-workspace](https://github.com/tasermonkey/chipdata-workspace). Changes here serve
+that framework; see "Changes from upstream" in README.md and the NOTICE file.
+
+Branches: `main` is the fork's line of development. `upstream` mirrors Stationeers-ic/ic10 `main` (git remote
+`stationeers`); to take upstream changes, fast-forward `upstream` from `stationeers/main` and merge it into `main`.
 
 ## Quick Start
 
