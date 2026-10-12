@@ -3,7 +3,7 @@ import type { Device } from "../../Core/Device.ts";
 import type { StackInterface } from "../../Core/Stack.ts";
 import { LogicBatchMethod, LogicReagentMode } from "../../Defines/data.ts";
 import i18n from "../../Languages/lang.ts";
-import { DebugInfo, ErrorSeverity, RuntimeIc10Error } from "../Errors/Errors.ts";
+import { DebugInfo, ErrorSeverity, Ic10Error, RuntimeIc10Error } from "../Errors/Errors.ts";
 import type { Define } from "../Instruction/Helpers/Define.ts";
 import {
 	Context,
@@ -188,15 +188,23 @@ abstract class DeviceHelpers extends MemoryBase {
 		});
 	}
 
+	/** A device without memory: the game raises MemoryNotReadable (or MemoryNotWriteable) and halts the chip. */
+	protected memoryError(message: "memory_not_readable" | "memory_not_writeable"): Ic10Error {
+		return new Ic10Error({ message: i18n.t(`error.${message}`), severity: ErrorSeverity.Strong });
+	}
+
 	protected clearDeviceStack(device: Device | undefined): void {
+		if (device && !device.hasMemory) throw this.memoryError("memory_not_readable");
 		device?.memory?.reset();
 	}
 
 	protected getDeviceStack(device: Device | undefined, index: number): number {
+		if (device && !device.hasMemory) throw this.memoryError("memory_not_readable");
 		return device?.memory?.get(index) ?? 0;
 	}
 
 	protected setDeviceStack(device: Device | undefined, index: number, value: number): void {
+		if (device && !device.hasMemory) throw this.memoryError("memory_not_writeable");
 		device?.memory?.set(index, value);
 	}
 
@@ -351,7 +359,8 @@ abstract class DevicesByPinBase extends DeviceHelpers implements IDevicesByPinCo
 
 	override setDeviceStackByPin(pin: number, index: number, value: number): void {
 		const device = this.getDeviceByPin(pin);
-		const oldValue = this.getDeviceStack(device, index);
+		// Read the old value only for the event; a device without memory must say NotWriteable, not NotReadable.
+		const oldValue = device?.hasMemory ? this.getDeviceStack(device, index) : 0;
 		this.setDeviceStack(device, index, value);
 		this.emit("deviceStackWrite", pin, index, oldValue, value);
 	}
@@ -395,9 +404,9 @@ abstract class StackBase extends DevicesByPinBase implements IStackContext {
 	override pop(): number {
 		const spRegister = this.getSpRegister();
 		const index = this.getRegister(spRegister) - 1;
-		if (index < 0) return 0;
-		const value = this.stack().get(index);
+		// The game lowers sp before it reads, so a failed pop leaves sp one lower (a StackUnderFlow below 0).
 		this.setRegister(spRegister, index);
+		const value = this.stack().get(index);
 		this.emit("stackPop", value);
 		return value;
 	}
@@ -405,7 +414,7 @@ abstract class StackBase extends DevicesByPinBase implements IStackContext {
 	override peek(): number {
 		const spRegister = this.getSpRegister();
 		const index = this.getRegister(spRegister) - 1;
-		if (index < 0) return 0;
+		// peek never moves sp; below 0 it is a StackUnderFlow, as in the game.
 		const value = this.stack().get(index);
 		this.emit("stackPeek", value);
 		return value;

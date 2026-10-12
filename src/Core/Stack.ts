@@ -22,23 +22,23 @@ export class Stack implements StackInterface {
 		this.$stack_length = $stack_length;
 	}
 
-	public get(index: number): number {
-		if (index >= this.$stack_length) {
-			throw new Ic10Error({
-				message: i18n.t("error.stack_access_out_of_bounds", { index }),
-				severity: ErrorSeverity.Strong,
-			});
+	/** Throws the game's StackUnderFlow below 0 and StackOverFlow at or above the capacity. */
+	protected checkIndex(index: number): void {
+		if (index < 0) {
+			throw new Ic10Error({ message: i18n.t("error.stack_underflow"), severity: ErrorSeverity.Strong });
 		}
+		if (index >= this.$stack_length) {
+			throw new Ic10Error({ message: i18n.t("error.stack_overflow"), severity: ErrorSeverity.Strong });
+		}
+	}
+
+	public get(index: number): number {
+		this.checkIndex(index);
 		return this.$stack.get(index) ?? 0;
 	}
 
 	public set(index: number, value: number): void {
-		if (this.$stack.size >= this.$stack_length) {
-			throw new Ic10Error({
-				message: i18n.t("error.stack_overflow"),
-				severity: ErrorSeverity.Strong,
-			});
-		}
+		this.checkIndex(index);
 		this.$stack.set(index, value);
 	}
 
@@ -59,13 +59,12 @@ export class Stack implements StackInterface {
 	}
 
 	public pop(): number {
-		if (this.$stack.size > 0) {
-			const value = this.$stack.get(this.$stack.size - 1)!;
-			this.$stack.delete(this.$stack.size - 1);
-			return value;
-		} else {
-			return 0;
+		if (this.$stack.size <= 0) {
+			throw new Ic10Error({ message: i18n.t("error.stack_underflow"), severity: ErrorSeverity.Strong });
 		}
+		const value = this.$stack.get(this.$stack.size - 1)!;
+		this.$stack.delete(this.$stack.size - 1);
+		return value;
 	}
 
 	public reset(): void {

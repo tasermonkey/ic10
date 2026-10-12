@@ -74,11 +74,8 @@ export class PopInstruction extends Instruction {
 					{ type: "register", register: 2, value: 20 },
 				],
 			},
-			{
-				title: "empty stack",
-				code: "pop r0",
-				expected: [{ type: "register", register: 0, value: 0 }],
-			},
+			// Change notice (chipdata fork, 2026-10-12): the "empty stack" case expected 0. The game raises
+			// StackUnderFlow instead, so it is tested in tests/ic10/fork-fixes.test.ts.
 			{
 				title: "from register",
 				code: "move r3 42\npush r3\npop r4",
@@ -116,11 +113,8 @@ export class PeekInstruction extends Instruction {
 					{ type: "register", register: 1, value: 20 },
 				],
 			},
-			{
-				title: "empty stack",
-				code: "peek r0",
-				expected: [{ type: "register", register: 0, value: 0 }],
-			},
+			// Change notice (chipdata fork, 2026-10-12): the "empty stack" case expected 0. The game raises
+			// StackUnderFlow instead, so it is tested in tests/ic10/fork-fixes.test.ts.
 			{
 				title: "after pop",
 				code: "push 30\npush 40\npop r0\npeek r1",

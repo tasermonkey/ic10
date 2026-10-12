@@ -423,3 +423,71 @@ describe("i18n", () => {
 		expect(out.trim()).toBe("You can't use pin in this instruction");
 	});
 });
+
+/** The housing's stack pointer is r16 (sp) with the default register_length of 18. */
+const SP = 16;
+
+describe("stack and device memory follow the game (G24, G25)", () => {
+	test.each([
+		["pop on an empty stack", "StackUnderFlow", -1, "pop r0"],
+		["peek on an empty stack", "StackUnderFlow", 0, "peek r0"],
+		["poke below 0", "StackUnderFlow", 0, "poke -1 1"],
+		["poke past the end", "StackOverFlow", 0, "poke 600 1"],
+		["get below 0", "StackUnderFlow", 0, "get r0 db -1"],
+	])("%s halts with %s and leaves sp at %i", async (_kind, message, sp, code) => {
+		const runner = await realRunner(code);
+		await runToStop(runner);
+		expect(runner.isStopped()).toBe(true);
+		expect(runner.context.criticalError && runner.context.criticalError.message).toContain(message);
+		expect(runner.realContext.getRegister(SP)).toBe(sp);
+	});
+
+	test("a stack error says the game retries the line instead of halting", async () => {
+		const runner = await realRunner("pop r0");
+		await runToStop(runner);
+		expect(runner.context.criticalError && runner.context.criticalError.message).toMatch(
+			/fork: halts here\. In game the chip keeps retrying this line/,
+		);
+	});
+
+	test("pop lowers sp before the underflow, as in the game", async () => {
+		const runner = await realRunner("pop r0");
+		await runToStop(runner);
+		expect(runner.realContext.getRegister(SP)).toBe(-1);
+		expect(runner.realContext.getRegister(0)).toBe(0);
+	});
+
+	test("a full stack overflows at 512 and sp stays at 512", async () => {
+		const runner = await realRunner("loop:\npush 1\nj loop");
+		await runToStop(runner);
+		expect(runner.context.criticalError && runner.context.criticalError.message).toContain("StackOverFlow");
+		expect(runner.realContext.getRegister(SP)).toBe(512);
+	});
+
+	test("peek and pop still read the top entry on a stack that has one", async () => {
+		const runner = await realRunner("push 7\npeek r0\npop r1");
+		await runToStop(runner);
+		expect(runner.context.criticalError).toBe(false);
+		expect(runner.realContext.getRegister(0)).toBe(7);
+		expect(runner.realContext.getRegister(1)).toBe(7);
+	});
+
+	test("get from a device without memory halts with MemoryNotReadable and writes nothing", async () => {
+		const runner = await runnerWith("move r0 42\nget r0 d0 0", (network) => new StructureGasSensor({ id: 7, network }));
+		await runToStop(runner);
+		expect(runner.context.criticalError && runner.context.criticalError.message).toBe("MemoryNotReadable");
+		expect(runner.realContext.getRegister(0)).toBe(42);
+	});
+
+	test("put to a device without memory halts with MemoryNotWriteable", async () => {
+		const runner = await runnerWith("put d0 0 1", (network) => new StructureGasSensor({ id: 7, network }));
+		await runToStop(runner);
+		expect(runner.context.criticalError && runner.context.criticalError.message).toBe("MemoryNotWriteable");
+	});
+
+	test("clr on a device without memory halts with MemoryNotReadable", async () => {
+		const runner = await runnerWith("clr d0", (network) => new StructureGasSensor({ id: 7, network }));
+		await runToStop(runner);
+		expect(runner.context.criticalError && runner.context.criticalError.message).toBe("MemoryNotReadable");
+	});
+});
