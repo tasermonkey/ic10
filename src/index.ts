@@ -21,6 +21,7 @@ export * from "./Defines/devices.ts";
 export * from "./Defines/instructions.ts";
 export * from "./Defines/items.ts";
 export * from "./Defines/reagents.ts";
+export * from "./Defines/recipes.ts";
 export * from "./Devices/H2combustor.ts";
 export * from "./Devices/ItemAdvancedTablet.ts";
 export * from "./Devices/ItemAngleGrinder.ts";

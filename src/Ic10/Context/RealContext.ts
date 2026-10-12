@@ -1,7 +1,8 @@
 // RealContext.ts
 import type { Device } from "../../Core/Device.ts";
 import type { StackInterface } from "../../Core/Stack.ts";
-import { LogicBatchMethod, LogicReagentMode } from "../../Defines/data.ts";
+import { LogicBatchMethod, LogicReagentMode, Reagents } from "../../Defines/data.ts";
+import { RECIPES } from "../../Defines/recipes.ts";
 import i18n from "../../Languages/lang.ts";
 import { DebugInfo, ErrorSeverity, Ic10Error, RuntimeIc10Error } from "../Errors/Errors.ts";
 import type { Define } from "../Instruction/Helpers/Define.ts";
@@ -610,13 +611,10 @@ abstract class DevicesReagentBase extends DevicesSlotBase implements IDevicesRea
 			case "Contents":
 				return device.reagents?.get(reagent) ?? 0;
 			case "Recipe":
-				//TODO: implement
-				this.logUnimplementedMode("Recipe");
-				return 0;
+				return this.recipeAmount(device, reagent);
 			case "Required":
-				//TODO: implement
-				this.logUnimplementedMode("Required");
-				return 0;
+				// What the recipe still lacks, never below 0 (the game's Recipe.GetMissingReagents).
+				return Math.max(0, this.recipeAmount(device, reagent) - (device.reagents?.get(reagent) ?? 0));
 			case "TotalContents":
 				return this.getTotalContents(device);
 			default:
@@ -624,14 +622,22 @@ abstract class DevicesReagentBase extends DevicesSlotBase implements IDevicesRea
 		}
 	}
 
-	private logUnimplementedMode(mode: string): void {
-		this.addError(
-			new RuntimeIc10Error({
-				message: i18n.t("error.unimplemented_mode", { mode }),
-				line: this.getNextLineIndex(),
-				severity: ErrorSeverity.Warning,
-			}),
-		);
+	/**
+	 * How much of a reagent the recipe a fabricator is set to takes, for `lr` Recipe and Required (G26). Only
+	 * fabricators have recipes (in the game's code, devices implementing IRequireReagent); any other device raises
+	 * IncorrectReagentDevice, as a Furnace does in game. The recipe is the one whose item matches the device's
+	 * RecipeHash; with none set, the game uses its first product's, taken here in the export's order (unchecked).
+	 * A reagent the recipe doesn't use reads 0.
+	 */
+	private recipeAmount(device: Device, reagent: number): number {
+		const recipes = RECIPES[device.prefabName?.value ?? ""];
+		if (!recipes) {
+			throw new Ic10Error({ message: i18n.t("error.incorrect_reagent_device"), severity: ErrorSeverity.Strong });
+		}
+		const selected = device.props?.forceRead("RecipeHash") ?? 0;
+		const recipe = recipes.find((r) => r.item === selected) ?? recipes[0];
+		const name = Reagents.getByKey(reagent as never);
+		return (name && recipe?.reagents[name]) || 0;
 	}
 
 	private getTotalContents(device: Device): number {

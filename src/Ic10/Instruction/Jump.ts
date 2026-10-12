@@ -216,7 +216,9 @@ export class jrInstruction extends Instruction {
 	}
 
 	public end(this: InstructionLine): boolean {
-		return true;
+		// Stay on this line only when jr jumped. A bad argument (jr Nope) used to return true here, so the
+		// same line re-ran forever with the jump limit never firing. The game halts on it (IncorrectVariable).
+		return this.context.getJumpsCount() !== this.jumpsBeforeRun;
 	}
 }
 

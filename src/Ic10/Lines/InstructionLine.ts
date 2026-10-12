@@ -32,7 +32,7 @@ export class InstructionLine extends CommentLine {
 	}
 
 	/** Jumps made before this line ran, so end() can tell a jump from none (G32). */
-	private jumpsBeforeRun = 0;
+	public jumpsBeforeRun = 0;
 
 	override run(): void | Promise<void> {
 		this.jumpsBeforeRun = this.context.getJumpsCount();

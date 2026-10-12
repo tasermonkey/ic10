@@ -90,6 +90,7 @@
 		"shift_underflow":"ShiftUnderflow",
 		"shift_overflow":"ShiftOverflow",
 		"payload_overflow":"PayloadOverflow",
+		"incorrect_reagent_device":"IncorrectReagentDevice",
 		"unimplemented_mode":"This action {{mode}} is not implemented :(",
 		"unknown_instruction":"Unknown instruction: {{instruction}}",
 		"unknown_line":"Unknown line",

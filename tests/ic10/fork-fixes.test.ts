@@ -18,6 +18,7 @@ import {
 	type PropsHooks,
 	Reagents,
 	StructureAutolathe,
+	StructureFurnace,
 	StructureGasSensor,
 	StructureLarreDockHydroponics,
 	type SuspendRequest,
@@ -567,6 +568,13 @@ describe("labels, jumps, numbers and -Infinity follow the game (G30-G33, G35)", 
 		expect(runner.realContext.getRegister(7)).toBe(2);
 	});
 
+	test("jr with a bad argument records a strong error and does not re-run its line (G31)", async () => {
+		// In game `jr Nope` halts with IncorrectVariable at that line (2026-10-12). The fork used to re-run it forever.
+		const runner = await runCode("jr Nope\nmove r7 5");
+		expect(strong(runner)).toHaveLength(1);
+		expect(runner.realContext.getRegister(7)).toBe(5);
+	});
+
 	test("a jump to its own line spins on it (G32)", async () => {
 		const runner = await realRunner("move r0 0\nj 1\nmove r0 1");
 		await runToStop(runner, 10);
@@ -682,5 +690,52 @@ describe("hcf, ss, rmap (G34 and G26)", () => {
 		expect(runner.context.criticalError).toBe(false);
 		expect(runner.realContext.getRegister(0)).not.toBe(0);
 		expect(runner.realContext.getRegister(1)).toBe(0);
+	});
+});
+
+describe("lr Recipe and Required follow the game (G26)", () => {
+	// In game (2026-10-12): an Autolathe set to the EVA suit (1677018918: Iron 5, Copper 5), empty, then with 2
+	// iron, then with 8; and a Furnace and an Advanced Furnace, which raise IncorrectReagentDevice.
+	const IRON = Reagents.getByValue("Iron")!;
+	const lathe = (iron: number) => (network: Network) => {
+		const device = new StructureAutolathe({ id: 7, network });
+		if (iron) device.reagents!.set(IRON, iron);
+		return device;
+	};
+	const code = [
+		"s d0 RecipeHash 1677018918",
+		'lr r0 d0 Recipe HASH("Iron")',
+		'lr r1 d0 Recipe HASH("Copper")',
+		'lr r2 d0 Recipe HASH("Gold")',
+		'lr r3 d0 Required HASH("Iron")',
+		'lr r5 d0 Contents HASH("Iron")',
+	].join("\n");
+	const registers = async (iron: number) => {
+		const runner = await runnerWith(code, lathe(iron));
+		await runToStop(runner);
+		expect(runner.context.criticalError).toBe(false);
+		return [0, 1, 2, 3, 5].map((r) => runner.realContext.getRegister(r));
+	};
+
+	test("Recipe reads the selected recipe; a reagent it doesn't use reads 0", async () => {
+		expect(await registers(0)).toEqual([5, 5, 0, 5, 0]);
+	});
+
+	test("Required is what the recipe still lacks", async () => {
+		expect(await registers(2)).toEqual([5, 5, 0, 3, 2]);
+	});
+
+	test("Required is 0, not negative, when the device holds more than the recipe takes", async () => {
+		expect(await registers(8)).toEqual([5, 5, 0, 0, 8]);
+	});
+
+	test("a device that isn't a fabricator raises IncorrectReagentDevice and writes nothing", async () => {
+		const runner = await runnerWith(
+			'move r7 -1\nlr r7 d0 Recipe HASH("Iron")',
+			(network) => new StructureFurnace({ id: 7, network }),
+		);
+		await runToStop(runner);
+		expect(runner.context.criticalError && runner.context.criticalError.message).toBe("IncorrectReagentDevice");
+		expect(runner.realContext.getRegister(7)).toBe(-1);
 	});
 });
