@@ -1,0 +1,25 @@
+@tasermonkey/ic10
+A modified version of the IC10 emulator from Stationeers-ic/ic10
+(https://github.com/Stationeers-ic/ic10), copyright its authors and contributors.
+
+This program is free software: you can redistribute it and/or modify it under the terms of the
+GNU Affero General Public License version 3, as published by the Free Software Foundation. See
+LICENSE for the full text.
+
+Modifications
+-------------
+
+Modified by James Stapleton (https://github.com/tasermonkey), October 2026 onwards. The fork
+branches from upstream commit 85c35a5 (package version 0.3.7). Every change since then is in this
+repository's git history (`git log 85c35a5..`). In summary:
+
+- Runs on Node 24 and npm as native ES modules, without Bun; tests moved to Vitest. Imports were
+  rewritten to relative paths with .ts extensions (tools/codemod-esm.ts).
+- Engine fixes: ld/sd by reference ID, `define X 0`, the sandbox "no network for port" error,
+  yield/sleep requesting a suspend instead of waiting in real time.
+- Instruction behaviour changed to match the game (audit findings G13-G35): errors halt the chip,
+  jal and branch-and-link set ra, batch reads over no devices, stack and device memory, slot
+  reads, lr, jr, defines and malformed literals.
+- Renamed misspelt identifiers and files, translated comments and messages to English, and
+  documented the environment schema.
+- Published under the npm name @tasermonkey/ic10, versioned separately from upstream.

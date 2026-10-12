@@ -147,30 +147,28 @@ export abstract class Instruction {
 	 * On mismatch, registers an error and stops execution. An argument that can't be used stops it
 	 * too (`ArgumentAbort`, its error already recorded), and the line ends as usual.
 	 */
+	// One method, not a private helper: the instruction mixins (Condition.ts) export anonymous
+	// classes, and declaration emit can't describe a private member on those (TS4094).
 	public execute(): void | Promise<void> {
 		try {
-			const result = this.runChecked();
+			const rules = this.argumentList();
+			if (this.args.length !== rules.length) {
+				this.context.addError(
+					new ArgumentIc10Error({
+						message: i18n.t("error.invalid_argument_count", {
+							actual: this.args.length,
+							expected: rules.length,
+						}),
+						severity: ErrorSeverity.Strong,
+					}).setLine(this.line),
+				);
+				return;
+			}
+			const result = this.run();
 			return result instanceof Promise ? result.catch(ignoreAbort) : result;
 		} catch (thrown) {
 			ignoreAbort(thrown);
 		}
-	}
-
-	private runChecked(): void | Promise<void> {
-		const rules = this.argumentList();
-		if (this.args.length !== rules.length) {
-			this.context.addError(
-				new ArgumentIc10Error({
-					message: i18n.t("error.invalid_argument_count", {
-						actual: this.args.length,
-						expected: rules.length,
-					}),
-					severity: ErrorSeverity.Strong,
-				}).setLine(this.line),
-			);
-			return;
-		}
-		return this.run();
 	}
 
 	/**

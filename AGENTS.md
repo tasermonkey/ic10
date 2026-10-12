@@ -37,8 +37,9 @@ npx vitest run
   (`erasableSyntaxOnly` in tsconfig enforces this).
 - Generators still emit `@/…` imports; `npm run codemod` (`tools/codemod-esm.ts`) rewrites them and
   runs automatically after every `generate:*` script. `npm run codemod:check` verifies in CI.
-- `tools/fix-esm-deps.ts` (postinstall) patches extensionless imports in
-  `@stationeers-ic/exact-ic10-math`'s published build.
+- `tools/fix-esm-deps.ts` (`prepare`, so local installs only) patches extensionless imports in
+  `@stationeers-ic/exact-ic10-math`'s published build. The published ESM bundle inlines that
+  package instead, so consumers never need the patch.
 
 ### Auto-Generated Files (DO NOT EDIT)
 

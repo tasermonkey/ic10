@@ -1,11 +1,29 @@
 {
-	"name": "@stationeers-ic/ic10",
+	"name": "@tasermonkey/ic10",
 	"type": "module",
 	"publishConfig": {
 		"access": "public"
 	},
-	"version": "0.3.7",
-	"description": "",
+	"version": "1.0.0",
+	"description": "Stationeers IC10 emulator: a modified fork of @stationeers-ic/ic10 for Node 24 ESM, with game-matching instruction fixes",
+	"license": "AGPL-3.0-only",
+	"contributors": [
+		"Stationeers-ic team and contributors (https://github.com/Stationeers-ic/ic10)",
+		"James Stapleton (https://github.com/tasermonkey)"
+	],
+	"homepage": "https://github.com/tasermonkey/ic10#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tasermonkey/ic10.git"
+	},
+	"bugs": {
+		"url": "https://github.com/tasermonkey/ic10/issues"
+	},
+	"keywords": [
+		"stationeers",
+		"ic10",
+		"emulator"
+	],
 	"main": "./dist/ic10.cjs",
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -24,11 +42,11 @@
 		"./package.json": "./package.json"
 	},
 	"files": [
-		"dist"
+		"dist",
+		"NOTICE"
 	],
 	"scripts": {
-		"prepare": "husky || exit 0",
-		"postinstall": "node tools/fix-esm-deps.ts",
+		"prepare": "node tools/fix-esm-deps.ts && (husky || exit 0)",
 		"codemod": "node tools/codemod-esm.ts",
 		"codemod:check": "node tools/codemod-esm.ts --check",
 		"generate:index": "node tools/generate-index.ts && npm run codemod && npm run fix",

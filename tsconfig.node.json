@@ -3,6 +3,7 @@
 		"outDir": "./dist/",
 		"rootDir": "./src/",
 		"declaration": true,
+		"emitDeclarationOnly": true,
 		"module": "nodenext",
 		"moduleResolution": "nodenext",
 		"rewriteRelativeImportExtensions": true,

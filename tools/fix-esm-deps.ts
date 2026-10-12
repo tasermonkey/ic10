@@ -3,7 +3,9 @@
  * (`from "./functions"`), which Node's ESM loader and TypeScript's `nodenext` resolution reject.
  * Adds the `.js` extension in their `dist/*.js` and `dist/*.d.ts` files.
  *
- * Runs as `postinstall`. Idempotent. Remove once the packages publish valid ESM.
+ * Runs as `prepare`, so only in this checkout: a consumer's install never runs it, and the published
+ * bundle inlines the package instead (vite.config.ts). Idempotent. Remove once the packages
+ * publish valid ESM.
  * Affected: @stationeers-ic/exact-ic10-math (1.1.1).
  */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";

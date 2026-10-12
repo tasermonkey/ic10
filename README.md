@@ -1,41 +1,42 @@
-# IC10 Emulator & Development Toolkit
+# IC10 Emulator (`@tasermonkey/ic10`)
 
-[![npm version](https://img.shields.io/npm/v/@stationeers-ic/ic10.svg)](https://www.npmjs.com/package/@stationeers-ic/ic10)
-[![npm downloads](https://img.shields.io/npm/dm/@stationeers-ic/ic10.svg)](https://www.npmjs.com/package/@stationeers-ic/ic10)
-[![npm bundle size](https://badgen.net/bundlephobia/min/@stationeers-ic/ic10)](https://www.npmjs.com/package/@stationeers-ic/ic10)
-[![GitHub stars](https://img.shields.io/github/stars/Stationeers-ic/ic10.svg)](https://github.com/Stationeers-ic/ic10/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/Stationeers-ic/ic10.svg)](https://github.com/Stationeers-ic/ic10/network/members)
-[![GitHub issues](https://img.shields.io/github/issues/Stationeers-ic/ic10.svg)](https://github.com/Stationeers-ic/ic10/issues)
-[![GitHub license](https://img.shields.io/github/license/Stationeers-ic/ic10.svg)](https://github.com/Stationeers-ic/ic10/blob/master/LICENSE)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/Stationeers-ic/ic10/publish.yml)](https://github.com/Stationeers-ic/ic10/actions)
-<!-- [![Coverage](https://img.shields.io/codecov/c/github/Stationeers-ic/ic10.svg)](https://codecov.io/gh/Stationeers-ic/ic10) -->
-[![Last Commit](https://img.shields.io/github/last-commit/Stationeers-ic/ic10.svg)](https://github.com/Stationeers-ic/ic10/commits/main)
-[![Translation status](https://weblate.traineratwot.site/widget/ic10/ic10-lib/svg-badge.svg)](https://weblate.traineratwot.site/engage/ic10/)
+> **This is a modified fork of [Stationeers-ic/ic10](https://github.com/Stationeers-ic/ic10)**, the IC10
+> emulator by the Stationeers-ic team and its contributors. All credit for the emulator itself
+> goes to them. This fork is published to npm as **`@tasermonkey/ic10`**; the original is
+> [`@stationeers-ic/ic10`](https://www.npmjs.com/package/@stationeers-ic/ic10). Like the original, it
+> is licensed under the [GNU AGPL-3.0](LICENSE). [NOTICE](NOTICE) lists what changed and when.
+>
+> The fork exists to power [IC10 Bench](https://github.com/tasermonkey/ic10-bench), a testing
+> framework for IC10 scripts: Vitest tests that build an emulated game world (devices, networks,
+> property values), run a script against it tick by tick, and check registers and device state.
+> Questions about this fork go to [its issues](https://github.com/tasermonkey/ic10/issues), not upstream's.
+
+[![npm version](https://img.shields.io/npm/v/@tasermonkey/ic10.svg)](https://www.npmjs.com/package/@tasermonkey/ic10)
+[![GitHub issues](https://img.shields.io/github/issues/tasermonkey/ic10.svg)](https://github.com/tasermonkey/ic10/issues)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/tasermonkey/ic10/ci.yml)](https://github.com/tasermonkey/ic10/actions)
+[![Upstream](https://img.shields.io/badge/upstream-Stationeers--ic%2Fic10-lightgrey.svg)](https://github.com/Stationeers-ic/ic10)
 [![Stationeers](https://img.shields.io/badge/Stationeers-IC10-blue.svg)](https://store.steampowered.com/app/544550/Stationeers/)
 [![Node](https://img.shields.io/badge/runtime-Node%2024%2B-339933.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/lang-TypeScript-blue.svg)](https://www.typescriptlang.org/)
 
-> ## About this fork
->
-> This is a fork of [Stationeers-ic/ic10](https://github.com/Stationeers-ic/ic10), maintained on the
-> `node-esm` branch. It exists to power a **testing framework for IC10 scripts**: Vitest tests that
-> build an emulated game world (devices, networks, property values), run a script against it tick
-> by tick, and assert on registers and device state. The framework (`ic10-test`) lives in
-> [tasermonkey/chipdata-workspace](https://github.com/tasermonkey/chipdata-workspace), which uses
-> this fork as a git submodule; its `TEST_FRAMEWORK_PLAN.md` explains the design.
->
-> Changes from upstream, all made for that purpose:
->
-> - **Node 24 + npm, real ESM.** No Bun. Sources run directly on Node (type stripping), tests use
->   Vitest, and imports are relative with `.ts` extensions (see `tools/codemod-esm.ts`).
-> - **Engine fixes** the tests depend on: `ld`/`sd` by reference ID (including IDs in defines),
->   `define X 0`, the sandbox "no network for port" error, and `yield`/`sleep` reporting a suspend
->   request instead of waiting in real time (which also fixes `sleep`'s double ×1000).
-> - **Readability:** typo fixes (`Builder`, `Environment`, `watch.ts`, …), English comments and
->   messages, and documented environment-schema fields.
->
-> Changes aren't sent upstream; game-data updates come from regenerating with the fork's own tools.
-> The license stays AGPL-3.0. The npm and CI badges below describe the upstream project.
+## Changes from upstream
+
+- **Node 24 + npm, real ESM.** No Bun. Sources run directly on Node (type stripping), tests use
+  Vitest, and imports are relative with `.ts` extensions (see `tools/codemod-esm.ts`).
+- **Engine fixes** the tests depend on: `ld`/`sd` by reference ID (including IDs in defines),
+  `define X 0`, the sandbox "no network for port" error, and `yield`/`sleep` reporting a suspend
+  request instead of waiting in real time (which also fixes `sleep`'s double ×1000).
+- **Matching the game.** Instruction behaviour checked against the game and its DLL: errors halt
+  the chip instead of escaping `step()`, `jal`/branch-and-link store the next line in `ra`, batch
+  reads over no devices, stack and device memory, slot reads, `lr`, `jr`, defines, and malformed
+  literals (audit findings G13–G35).
+- **Readability:** typo fixes (`Builder`, `Environment`, `watch.ts`, …), English comments and
+  messages, and documented environment-schema fields.
+
+Game-data updates come from regenerating with the fork's own tools (`npm run upgrade`).
+
+## About the original project
 
 This project is an IC10 emulator (programming language for the game Stationeers) with a complete toolkit for development, testing, and code generation.
 
