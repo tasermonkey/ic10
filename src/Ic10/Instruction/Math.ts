@@ -1,7 +1,46 @@
 import icMath from "@stationeers-ic/exact-ic10-math";
 import i18n from "../../Languages/lang.ts";
+import { ArgumentAbort, ErrorSeverity, TypeIc10Error } from "../Errors/Errors.ts";
 import { ArgumentCalculators } from "./Helpers/ArgumentCalculators.ts";
 import { Instruction, type InstructionArgument, type InstructionTestData } from "./Helpers/Instruction.ts";
+
+/**
+ * The game's bit-field limits (G27), checked in game for ext and ins: a length of 0 or an offset below 0 is
+ * ShiftUnderflow, an offset of 53 or more is ShiftOverflow, and offset + length above 53 is PayloadOverflow.
+ * ins's offset-53 case was not probed in game; it takes the same limit as ext's. Returns the error's
+ * name, or undefined when the field is in range.
+ */
+function bitFieldError(offset: number, length: number): string | undefined {
+	if (length <= 0 || offset < 0) return i18n.t("error.shift_underflow");
+	if (offset >= 53) return i18n.t("error.shift_overflow");
+	if (length > 53 || offset + length > 53) return i18n.t("error.payload_overflow");
+	return undefined;
+}
+
+/**
+ * Records a strong error, then stops the instruction, so the destination register is not written. The game
+ * throws and the chip halts; the harness halts it on the strong error.
+ */
+function abortInstruction(instruction: Instruction, message: string): never {
+	instruction.addError(new TypeIc10Error({ message, severity: ErrorSeverity.Strong }));
+	throw new ArgumentAbort(message);
+}
+
+/**
+ * The game's rotate works on a 54-bit signed value (G28): the count wraps modulo 54, and the result reads back
+ * as a signed 54-bit number. Above about 2^40 the game's own results are a few units off the exact value
+ * (its rounding is not reproduced here). A NaN or infinite operand gives NaN; the game is not probed there.
+ */
+function rotate54(a: number, b: number, left: boolean): number {
+	if (!Number.isFinite(a) || !Number.isFinite(b)) return NaN;
+	const width = 54n;
+	const mask = (1n << width) - 1n;
+	const value = BigInt.asUintN(54, BigInt(Math.trunc(a)));
+	const count = ((BigInt(Math.trunc(b)) % width) + width) % width;
+	const shift = left ? count : (width - count) % width;
+	const rotated = ((value << shift) | (value >> (width - shift))) & mask;
+	return Number(BigInt.asIntN(54, rotated));
+}
 
 abstract class BinaryMathInstruction extends Instruction {
 	override argumentList(): InstructionArgument[] {
@@ -721,7 +760,10 @@ export class ExtInstruction extends Instruction {
 		const start = this.getArgumentValue<number>("start");
 		const length = this.getArgumentValue<number>("length");
 
-		const result = icMath.ext(source, start, length)!;
+		const error = bitFieldError(start, length);
+		if (error) abortInstruction(this, error);
+		const result = icMath.ext(source, start, length);
+		if (result === null) abortInstruction(this, i18n.t("error.invalid_argument_number_or_register_or_const"));
 		this.context.setRegister(r, result);
 	}
 }
@@ -742,7 +784,14 @@ export class InsInstruction extends Instruction {
 		const start = this.getArgumentValue<number>("start");
 		const length = this.getArgumentValue<number>("length");
 
-		const result = icMath.ins(r, payload, start, length)!;
+		const error = bitFieldError(start, length);
+		if (error) abortInstruction(this, error);
+		// The base is the register's current value (the wiki's `ins r? field offset length`). The library
+		// reads it as an integer, so a fraction is cut and a non-finite value counts as 0 (not probed in game).
+		const current = this.context.getRegister(r);
+		const base = Number.isFinite(current) ? Math.trunc(current) : 0;
+		const result = icMath.ins(base, start, length, payload);
+		if (result === null) abortInstruction(this, i18n.t("error.invalid_argument_number_or_register_or_const"));
 		this.context.setRegister(r, result);
 	}
 }
@@ -814,7 +863,7 @@ export class RolInstruction extends BinaryMathInstruction {
 			},
 			{
 				code: "rol r2 1 31",
-				expected: [{ type: "register", register: 2, value: -2147483648 }],
+				expected: [{ type: "register", register: 2, value: 2147483648 }],
 			},
 			{
 				code: "rol r3 0 5",
@@ -824,9 +873,7 @@ export class RolInstruction extends BinaryMathInstruction {
 	}
 
 	public operation(a: number, b: number): number {
-		const shift = b & 31;
-		const x = a | 0;
-		return (x << shift) | (x >>> (32 - shift)) | 0;
+		return rotate54(a, b, true);
 	}
 }
 
@@ -841,8 +888,9 @@ export class RorInstruction extends BinaryMathInstruction {
 				expected: [{ type: "register", register: 1, value: 1 }],
 			},
 			{
+				// Change notice (G28): the upstream rol/ror values here assumed a 32-bit rotate. The game rotates 54 bits.
 				code: "ror r2 -2147483648 1",
-				expected: [{ type: "register", register: 2, value: 1073741824 }],
+				expected: [{ type: "register", register: 2, value: 9007198180999168 }],
 			},
 			{
 				code: "ror r3 0 5",
@@ -852,9 +900,7 @@ export class RorInstruction extends BinaryMathInstruction {
 	}
 
 	public operation(a: number, b: number): number {
-		const shift = b & 31;
-		const x = a | 0;
-		return (x >>> shift) | (x << (32 - shift)) | 0;
+		return rotate54(a, b, false);
 	}
 }
 

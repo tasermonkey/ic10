@@ -204,6 +204,12 @@ abstract class SandboxDevicesByIdBase extends SandboxStackBase implements IDevic
 		return 0;
 	}
 	override setDeviceParameterById(id: number, prop: number, value: number): void {}
+	override canLoadDeviceParameterById(id: number, prop: number): boolean {
+		return true;
+	}
+	override canStoreDeviceParameterById(id: number, prop: number): boolean {
+		return true;
+	}
 }
 
 abstract class SandboxDevicesSlotBase extends SandboxDevicesByIdBase implements IDevicesSlotContext {

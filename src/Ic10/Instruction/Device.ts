@@ -271,16 +271,20 @@ export class GetInstruction extends Instruction {
 	}
 
 	override run(): void {
-		const pin = this.getArgumentValue<number>("device");
+		const device = this.getArgumentValue<calculateDevicePinOrIdResult>("device");
 		const address = this.getArgumentValue<number>("address");
-		const value = this.context.getDeviceStackByPin(pin, address);
+		const value =
+			device.pin !== undefined
+				? this.context.getDeviceStackByPin(device.pin, address)
+				: this.context.getDeviceStackById(device.id!, address);
 		this.context.setRegister(this.getArgumentValue<number>("result"), value);
 	}
 
 	public argumentList(): InstructionArgument[] {
 		return [
 			ArgumentCalculators.registerLink("result"),
-			ArgumentCalculators.devicePin("device"),
+			// A pin, or a register or ID holding one (as `l` and `s` take), G23.
+			ArgumentCalculators.devicePinOrIdConnected("device"),
 			ArgumentCalculators.anyNumber("address"),
 		];
 	}
@@ -306,15 +310,19 @@ export class PutInstruction extends Instruction {
 	}
 
 	public run(): void | Promise<void> {
-		const pin = this.getArgumentValue<number>("device");
+		const device = this.getArgumentValue<calculateDevicePinOrIdResult>("device");
 		const address = this.getArgumentValue<number>("address");
 		const value = this.getArgumentValue<number>("value");
-		this.context.setDeviceStackByPin(pin, address, value);
+		if (device.pin !== undefined) {
+			this.context.setDeviceStackByPin(device.pin, address, value);
+		} else {
+			this.context.setDeviceStackById(device.id!, address, value);
+		}
 	}
 
 	public argumentList(): InstructionArgument[] {
 		return [
-			ArgumentCalculators.devicePin("device"),
+			ArgumentCalculators.devicePinOrIdConnected("device"),
 			ArgumentCalculators.anyNumber("address"),
 			ArgumentCalculators.anyNumber("value"),
 		];
@@ -428,7 +436,7 @@ export class BdnvlInstruction extends Instruction {
 
 	override argumentList(): InstructionArgument[] {
 		return [
-			ArgumentCalculators.devicePin("device"),
+			ArgumentCalculators.devicePinOrIdConnected("device"),
 			// A logic type (name or number), as in game. It was read as a plain number, so a name such
 			// as `Power` was rejected and logic type 0 used in its place.
 			ArgumentCalculators.logic("logic"),
@@ -437,11 +445,15 @@ export class BdnvlInstruction extends Instruction {
 	}
 
 	override run(): void {
-		const devicePin = this.getArgumentValue<number>("device");
+		const device = this.getArgumentValue<calculateDevicePinOrIdResult>("device");
 		const logic = this.getArgumentValue<number>("logic");
 		const target = this.getArgumentValue<number>("target");
 		// Branch if the device is NOT valid for a load of this logic type (it used to branch if it was).
-		if (!this.context.canLoadDeviceParameterByPin(devicePin, logic)) {
+		const valid =
+			device.pin !== undefined
+				? this.context.canLoadDeviceParameterByPin(device.pin, logic)
+				: this.context.canLoadDeviceParameterById(device.id!, logic);
+		if (!valid) {
 			this.context.setNextLineIndex(target);
 		}
 	}
@@ -477,18 +489,22 @@ export class BdnvsInstruction extends Instruction {
 
 	override argumentList(): InstructionArgument[] {
 		return [
-			ArgumentCalculators.devicePin("device"),
+			ArgumentCalculators.devicePinOrIdConnected("device"),
 			ArgumentCalculators.logic("logic"),
 			ArgumentCalculators.jumpTarget("target"),
 		];
 	}
 
 	override run(): void {
-		const devicePin = this.getArgumentValue<number>("device");
+		const device = this.getArgumentValue<calculateDevicePinOrIdResult>("device");
 		const logic = this.getArgumentValue<number>("logic");
 		const target = this.getArgumentValue<number>("target");
 		// Branch if the device is NOT valid for a store of this logic type (it used to branch if it was).
-		if (!this.context.canStoreDeviceParameterByPin(devicePin, logic)) {
+		const valid =
+			device.pin !== undefined
+				? this.context.canStoreDeviceParameterByPin(device.pin, logic)
+				: this.context.canStoreDeviceParameterById(device.id!, logic);
+		if (!valid) {
 			this.context.setNextLineIndex(target);
 		}
 	}
@@ -950,6 +966,8 @@ export class SsInstruction extends Instruction {
 					message: i18n.t("error.channels_not_allowed_in_instruction"),
 				}).setArgument(this.args[1]),
 			);
+			// A pin with a channel is refused and the write is skipped: `ss d0:1` used to record the error and write anyway (G34).
+			return;
 		}
 		if (device.pin !== undefined) {
 			this.context.setDeviceSlotParameterByPin(device.pin!, slot, slotType, value);
@@ -1052,9 +1070,12 @@ export class RmapInstruction extends Instruction {
 		const result = this.getArgumentValue<number>("result");
 		const reagent = this.getArgumentValue<number>("reagentHash");
 
-		const data = Object.entries(REAGENTS).filter(([_, r]) => r.hash === reagent)[1][1];
+		// The first reagent with this hash. It used to take `[1]` of the matches, which crashes with a TypeError
+		// when there is only one (every hash), and when none matches. An unknown hash has already had its weak
+		// error from the argument, so it writes 0.
+		const data = Object.values(REAGENTS).find((r) => r.hash === reagent);
 
-		this.context.setRegister(result, data.items![0]!.hash);
+		this.context.setRegister(result, data?.items?.[0]?.hash ?? 0);
 		this.addError(
 			new ArgumentIc10Error({
 				message: i18n.t("error.bad_impliment"),

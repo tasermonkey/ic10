@@ -170,6 +170,15 @@ export const ValueCalculators = {
 		return { id: value };
 	},
 
+	/** A pin or ID, with a pin checked for a device as `devicePin` does (the pin-only instructions used to check it). */
+	calculateDevicePinOrIdConnected: (context: Context, argument: Argument): calculateDevicePinOrIdResult => {
+		const result = ValueCalculators.calculateDevicePinOrId(context, argument);
+		if (result.pin !== undefined) {
+			ErrorHandlers.validateDeviceConnection(context, result.pin, argument);
+		}
+		return result;
+	},
+
 	calculateLogic: (context: Context, argument: Argument): ReturnType<typeof Logics.getByKey> | 0 => {
 		if (Logics.hasKey(argument.text)) {
 			return Logics.getByKey(argument.text);
@@ -297,6 +306,13 @@ export const ArgumentCalculators = {
 		name,
 		...BaseConfigs.deviceRef,
 		calculate: (context: Context, argument: Argument) => ValueCalculators.calculateDevicePinOrId(context, argument),
+	}),
+
+	devicePinOrIdConnected: (name?: string) => ({
+		name,
+		...BaseConfigs.deviceRef,
+		calculate: (context: Context, argument: Argument) =>
+			ValueCalculators.calculateDevicePinOrIdConnected(context, argument),
 	}),
 
 	logic: (name?: string) => ({

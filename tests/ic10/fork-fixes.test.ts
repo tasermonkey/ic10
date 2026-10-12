@@ -4,7 +4,7 @@
  */
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { ErrorSeverity } from "../../src/Ic10/Errors/Errors.ts";
 import {
 	Builder,
@@ -16,6 +16,7 @@ import {
 	JUMP_LIMIT_ERROR_CODE,
 	Network,
 	type PropsHooks,
+	Reagents,
 	StructureAutolathe,
 	StructureGasSensor,
 	StructureLarreDockHydroponics,
@@ -489,5 +490,194 @@ describe("stack and device memory follow the game (G24, G25)", () => {
 		const runner = await runnerWith("clr d0", (network) => new StructureGasSensor({ id: 7, network }));
 		await runToStop(runner);
 		expect(runner.context.criticalError && runner.context.criticalError.message).toBe("MemoryNotReadable");
+	});
+});
+
+/** Runs `code` to its stop (or 100 steps) on the real context. */
+async function runCode(code: string) {
+	const runner = await realRunner(code);
+	await runToStop(runner, 100);
+	return runner;
+}
+
+/** The game rounds rotates and wide bit fields a few units off the exact value above about 2^40 (G28). */
+const GAME_ROUNDING = 8;
+
+describe("ext / ins bit fields and rotates follow the game (G27, G28)", () => {
+	test("ext reads the wiki's example, and offset 0 is allowed", async () => {
+		expect((await runCode("move r0 $DEADBEEF\next r1 r0 8 16")).realContext.getRegister(1)).toBe(0xadbe);
+		expect((await runCode("ext r1 255 0 4")).realContext.getRegister(1)).toBe(15);
+	});
+
+	test("ins writes the wiki's example into the register's current value", async () => {
+		const runner = await runCode("move r0 $DE0000EF\nmove r1 $ADBE\nins r0 r1 8 16");
+		expect(runner.realContext.getRegister(0)).toBe(0xdeadbeef);
+		expect(runner.context.errors.filter((e) => e.severity === ErrorSeverity.Strong)).toEqual([]);
+	});
+
+	test.each([
+		["ext, length 0", "ext r1 255 4 0", "ShiftUnderflow"],
+		["ext, offset 53", "ext r1 255 53 1", "ShiftOverflow"],
+		["ext, length 60", "ext r1 255 4 60", "PayloadOverflow"],
+		["ins, length 0", "ins r1 5 4 0", "ShiftUnderflow"],
+		["ins, offset + length 54", "ins r1 1 51 3", "PayloadOverflow"],
+	])("%s records %s and leaves the register alone", async (_kind, line, name) => {
+		const runner = await runCode(`move r1 9\n${line}\nmove r2 1`);
+		expect(runner.context.errors.filter((e) => e.severity === ErrorSeverity.Strong).map((e) => e.message)).toEqual([
+			name,
+		]);
+		expect(runner.realContext.getRegister(1)).toBe(9);
+	});
+
+	test("ins writes a field at bit 50 (within the game's rounding)", async () => {
+		const runner = await runCode("move r1 0\nins r1 1 50 3");
+		expect(Math.abs(runner.realContext.getRegister(1) - 2 ** 50)).toBeLessThanOrEqual(GAME_ROUNDING);
+	});
+
+	test("rol rotates the 54-bit signed value, so bit 53 is the sign", async () => {
+		expect((await runCode("rol r0 1 31")).realContext.getRegister(0)).toBe(2 ** 31);
+		expect((await runCode("rol r0 1 40")).realContext.getRegister(0)).toBe(2 ** 40);
+		expect((await runCode("rol r0 1 54")).realContext.getRegister(0)).toBe(1);
+		expect((await runCode("rol r0 1 55")).realContext.getRegister(0)).toBe(2);
+		expect((await runCode("rol r0 1 63")).realContext.getRegister(0)).toBe(512);
+		expect(Math.abs((await runCode("rol r0 1 53")).realContext.getRegister(0) + 2 ** 53)).toBeLessThanOrEqual(
+			GAME_ROUNDING,
+		);
+	});
+
+	test("ror rotates right, and the count wraps modulo 54", async () => {
+		expect((await runCode("ror r0 1 1")).realContext.getRegister(0)).toBe(-(2 ** 53));
+		expect(Math.abs((await runCode("ror r0 1 2")).realContext.getRegister(0) - 2 ** 52)).toBeLessThanOrEqual(
+			GAME_ROUNDING,
+		);
+		expect((await runCode("ror r0 1 55")).realContext.getRegister(0)).toBe(-(2 ** 53));
+	});
+});
+
+describe("labels, jumps, numbers and -Infinity follow the game (G30-G33, G35)", () => {
+	test("-Infinity keeps its sign through a register copy (G30)", async () => {
+		const runner = await runCode("move r0 ninf\nmove r1 r0");
+		expect(runner.realContext.getRegister(1)).toBe(-Infinity);
+	});
+
+	test("jr -2 at line index 4 lands on index 2 (G31)", async () => {
+		// Steps 1-4 run lines 0-3; step 5 is the jr; step 6 is the line it lands on (index 2, which writes 2).
+		const runner = await realRunner("move r7 0\nmove r7 1\nmove r7 2\nmove r7 3\njr -2\nmove r9 1");
+		await runToStop(runner, 6);
+		expect(runner.realContext.getRegister(7)).toBe(2);
+	});
+
+	test("a jump to its own line spins on it (G32)", async () => {
+		const runner = await realRunner("move r0 0\nj 1\nmove r0 1");
+		await runToStop(runner, 10);
+		expect(runner.realContext.getRegister(0)).toBe(0);
+		expect(runner.realContext.getNextLineIndex()).toBe(1);
+	});
+
+	test("a branch to its own line spins on it (G32)", async () => {
+		const runner = await realRunner("move r0 0\nbeqz r0 1\nmove r1 1");
+		await runToStop(runner, 10);
+		expect(runner.realContext.getRegister(1)).toBe(0);
+		expect(runner.realContext.getNextLineIndex()).toBe(1);
+	});
+
+	test("a malformed hex number is an error and is not written (G33)", async () => {
+		const runner = await runCode("move r0 $ZZ");
+		expect(strong(runner)).toHaveLength(1);
+		expect(runner.realContext.getRegister(0)).toBe(0);
+		expect(await strongErrors("move r0 $ZZ")).not.toEqual([]);
+	});
+
+	test("a label with an instruction on the same line is not silently accepted (G35)", async () => {
+		const runner = await runCode("top: add r0 r0 1\nmove r1 1");
+		expect(strong(runner)).not.toEqual([]);
+		expect(runner.realContext.getRegister(0)).toBe(0);
+	});
+});
+
+describe("tolerance forms take b, and NaN is never 'not equal' (G21, G22)", () => {
+	test("sapz and snaz take the b operand, and the game's answers hold", async () => {
+		const runner = await runCode("sapz r1 5 1\nsapz r2 5 0.1\nsnaz r3 5 0.1");
+		expect(strong(runner)).toEqual([]);
+		expect(runner.realContext.getRegister(1)).toBe(1);
+		expect(runner.realContext.getRegister(2)).toBe(0);
+		expect(runner.realContext.getRegister(3)).toBe(1);
+	});
+
+	test("bapz takes a, b and the line, and branches when the wiki's test holds", async () => {
+		const branched = await runCode("bapz 5 1 3\nmove r0 1\nj 4\nmove r0 2");
+		expect(branched.realContext.getRegister(0)).toBe(2);
+		const fell = await runCode("bapz 5 0.1 3\nmove r0 1\nj 4\nmove r0 2");
+		expect(fell.realContext.getRegister(0)).toBe(1);
+	});
+
+	test("sna gives 0 for a NaN operand, as the game does", async () => {
+		const runner = await runCode("sna r1 nan 1 0.1");
+		expect(runner.realContext.getRegister(1)).toBe(0);
+	});
+
+	test("bna does not branch on a NaN operand", async () => {
+		const runner = await runCode("bna nan 1 0.1 3\nmove r0 1\nj 4\nmove r0 2");
+		expect(runner.realContext.getRegister(0)).toBe(1);
+	});
+});
+
+describe("get, put, bdnvl and bdnvs take a register holding an ID (G23)", () => {
+	// A gas sensor on d0 with ID 7; r5 holds that ID, so the register names the sensor. (`l ReferenceId`
+	// reads 0 for a sensor in the fork, so the ID is set by hand.)
+	const sensor = (network: Network) => new StructureGasSensor({ id: 7, network });
+
+	test("get reaches the device the register names (a sensor has no memory, so MemoryNotReadable)", async () => {
+		const runner = await runnerWith("move r5 7\nget r1 r5 0", sensor);
+		await runToStop(runner);
+		expect(runner.context.criticalError && runner.context.criticalError.message).toBe("MemoryNotReadable");
+	});
+
+	test("put reaches the device the register names (MemoryNotWriteable)", async () => {
+		const runner = await runnerWith("move r5 7\nput r5 0 1", sensor);
+		await runToStop(runner);
+		expect(runner.context.criticalError && runner.context.criticalError.message).toBe("MemoryNotWriteable");
+	});
+
+	test("bdnvl and bdnvs test the device the register names, as they do a pin", async () => {
+		// The sensor can load Temperature (no branch) and has no Setting (branch).
+		const bdnvl = async (line: string) => {
+			const runner = await runnerWith(`move r5 7\n${line}\nmove r0 1\nj 5\nmove r0 2`, sensor);
+			await runToStop(runner, 10);
+			return runner.realContext.getRegister(0);
+		};
+		expect(await bdnvl("bdnvl r5 Temperature 4")).toBe(1);
+		expect(await bdnvl("bdnvl r5 Setting 4")).toBe(2);
+		expect(await bdnvl("bdnvs r5 Temperature 4")).toBe(2);
+	});
+});
+
+describe("hcf, ss, rmap (G34 and G26)", () => {
+	test("hcf halts the chip, so the next line never runs (G34)", async () => {
+		const runner = await realRunner("move r0 1\nhcf\nmove r0 2");
+		await runToStop(runner);
+		expect(runner.isStopped()).toBe(true);
+		expect(runner.context.criticalError && runner.context.criticalError.message).toBe("hcf");
+		expect(runner.realContext.getRegister(0)).toBe(1);
+	});
+
+	test("ss with a channel on a pin records the error and writes nothing (G34)", async () => {
+		const runner = await runnerWith("ss d0:1 0 Occupied 1", (network) => new StructureGasSensor({ id: 7, network }));
+		const write = vi.spyOn(runner.realContext, "setDeviceSlotParameterByPin");
+		await runToStop(runner);
+		expect(strong(runner)).toHaveLength(1);
+		expect(write).not.toHaveBeenCalled();
+	});
+
+	test("rmap writes the item a reagent maps to, and 0 for a hash with no reagent (G26)", async () => {
+		const copper = Reagents.getByValue("Copper")!;
+		const runner = await runnerWith(
+			`rmap r0 d0 ${copper}\nrmap r1 d0 0`,
+			(network) => new StructureGasSensor({ id: 7, network }),
+		);
+		await runToStop(runner);
+		expect(runner.context.criticalError).toBe(false);
+		expect(runner.realContext.getRegister(0)).not.toBe(0);
+		expect(runner.realContext.getRegister(1)).toBe(0);
 	});
 });

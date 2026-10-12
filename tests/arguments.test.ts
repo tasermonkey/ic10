@@ -41,8 +41,9 @@ describe("jsThing", () => {
 		expect(jsThing(-0)).toBe(0);
 	});
 
-	test("converts -Infinity to Infinity", () => {
-		expect(jsThing(-Infinity)).toBe(Infinity);
+	// Change notice (G30): the upstream test expected -Infinity to become Infinity. The game keeps the sign.
+	test("keeps -Infinity as -Infinity", () => {
+		expect(jsThing(-Infinity)).toBe(-Infinity);
 	});
 
 	test("returns normal numbers unchanged", () => {

@@ -210,15 +210,9 @@ export class jrInstruction extends Instruction {
 
 	override run(): void {
 		const r = this.getArgumentValue<number>(0);
-		if (r === 0) {
-			this.context.setNextLineIndex(this.context.currentLinePosition);
-		}
-		if (r < 0) {
-			const t = Math.abs(r) + 1;
-			this.context.setNextLineIndex(this.context.currentLinePosition - t);
-		} else {
-			this.context.setNextLineIndex(this.context.currentLinePosition + r);
-		}
+		// A relative target: the offset is added to this line, whatever its sign. The old negative branch
+		// added 1 to |r|, so jr -2 landed one line early (G31; the game lands on line 3 for jr -2 at line 5).
+		this.context.setNextLineIndex(this.context.currentLinePosition + r);
 	}
 
 	public end(this: InstructionLine): boolean {

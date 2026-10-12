@@ -14,6 +14,23 @@ function approxEqual(a: number, b: number, c: number): boolean {
 	return Math.abs(a - b) <= tol;
 }
 
+// The wiki's "not approximately equal" is `abs(a - b) > max(...)`, written here directly. Negating
+// approxEqual made a NaN operand count as "not equal"; the game gives false for NaN (G22).
+function approxNotEqual(a: number, b: number, c: number): boolean {
+	const scale = Math.max(Math.abs(a), Math.abs(b));
+	const tol = Math.max(c * scale, EPS);
+	return Math.abs(a - b) > tol;
+}
+
+// sapz/snaz and the branch forms take a second operand b: abs(a) <= max(b * abs(a), eps * 8) (G21).
+// The "not" form is written as a direct comparison too, so NaN is false in both (as in the game).
+function approxZero(a: number, b: number): boolean {
+	return Math.abs(a) <= Math.max(b * Math.abs(a), EPS);
+}
+function notApproxZero(a: number, b: number): boolean {
+	return Math.abs(a) > Math.max(b * Math.abs(a), EPS);
+}
+
 const cmp = {
 	lt: (a: number, b: number) => a < b,
 	gt: (a: number, b: number) => a > b,
@@ -30,8 +47,6 @@ const un = {
 	ge0: (a: number) => a >= 0,
 	eq0: (a: number) => a === 0,
 	ne0: (a: number) => a !== 0,
-	ap0: (a: number) => Math.abs(a) <= EPS,
-	na0: (a: number) => Math.abs(a) > EPS,
 	nan: (a: number) => Number.isNaN(a),
 	nanz: (a: number) => !Number.isNaN(a),
 };
@@ -267,6 +282,67 @@ abstract class TernaryBranchAndLinkInstruction extends TernaryBranchInstruction 
 	}
 }
 
+// Two-operand tolerance forms (G21): the wiki gives sapz r? a b, bapz a b c, brapz a b relative.
+abstract class ToleranceSetConditionInstruction extends Instruction {
+	override argumentList(): InstructionArgument[] {
+		return [
+			ArgumentCalculators.registerLink("result"),
+			ArgumentCalculators.anyNumber("a"),
+			ArgumentCalculators.anyNumber("b"),
+		];
+	}
+	public abstract predicate(a: number, b: number): boolean;
+	override run(): void {
+		const r = this.getArgumentValue<number>("result");
+		const a = this.getArgumentValue<number>("a");
+		const b = this.getArgumentValue<number>("b");
+		this.context.setRegister(r, this.predicate(a, b) ? 1 : 0);
+	}
+}
+
+abstract class ToleranceBranchInstruction extends Instruction {
+	override argumentList(): InstructionArgument[] {
+		return [
+			ArgumentCalculators.anyNumber("a"),
+			ArgumentCalculators.anyNumber("b"),
+			ArgumentCalculators.jumpTarget("line"),
+		];
+	}
+	public abstract predicate(a: number, b: number): boolean;
+	override run(): void {
+		const line = this.getArgumentValue<number>("line");
+		const a = this.getArgumentValue<number>("a");
+		const b = this.getArgumentValue<number>("b");
+		if (this.predicate(a, b)) this.context.setNextLineIndex(line);
+	}
+}
+
+abstract class RelativeToleranceBranchInstruction extends Instruction {
+	override argumentList(): InstructionArgument[] {
+		return [
+			ArgumentCalculators.anyNumber("a"),
+			ArgumentCalculators.anyNumber("b"),
+			ArgumentCalculators.anyNumber("relative"),
+		];
+	}
+	public abstract predicate(a: number, b: number): boolean;
+	override run(): void {
+		const relative = this.getArgumentValue<number>("relative");
+		const a = this.getArgumentValue<number>("a");
+		const b = this.getArgumentValue<number>("b");
+		if (this.predicate(a, b)) this.context.setNextLineIndex(this.line.position + relative);
+	}
+}
+
+abstract class ToleranceBranchAndLinkInstruction extends ToleranceBranchInstruction {
+	override run(): void {
+		const line = this.getArgumentValue<number>("line");
+		const a = this.getArgumentValue<number>("a");
+		const b = this.getArgumentValue<number>("b");
+		if (this.predicate(a, b)) this.context.setNextLineIndex(line, true);
+	}
+}
+
 // ===== Devices (unified) =====
 abstract class DeviceSetConditionInstruction extends Instruction {
 	override argumentList(): InstructionArgument[] {
@@ -359,6 +435,18 @@ function makeTernarySet<TBase extends abstract new (...args: any[]) => Instructi
 	};
 }
 
+function makeToleranceSet<TBase extends abstract new (...args: any[]) => Instruction>(
+	Base: TBase,
+	pred: (a: number, b: number) => boolean,
+) {
+	//@ts-expect-error HACK to reduce code repetition
+	return class extends Base {
+		public predicate(a: number, b: number): boolean {
+			return pred(a, b);
+		}
+	};
+}
+
 // ===== S* implementations (write 1/0) =====
 export class SltInstruction extends makeBinarySet(BinarySetConditionInstruction, cmp.lt) {
 	static override tests(): InstructionTestData[] {
@@ -439,7 +527,7 @@ export class SapInstruction extends makeTernarySet(TernarySetConditionInstructio
 		]);
 	}
 }
-export class SnaInstruction extends makeTernarySet(TernarySetConditionInstruction, (a, b, c) => !approxEqual(a, b, c)) {
+export class SnaInstruction extends makeTernarySet(TernarySetConditionInstruction, approxNotEqual) {
 	static override tests(): InstructionTestData[] {
 		if (typeof isProd !== "undefined" && isProd) {
 			return [];
@@ -520,25 +608,30 @@ export class SnezInstruction extends makeUnarySet(UnarySetConditionInstruction, 
 }
 
 // |a| comparison against eps*8
-export class SapzInstruction extends makeUnarySet(UnarySetConditionInstruction, un.ap0) {
+// Change notice (G21): sapz and snaz take the b operand. The upstream tests used the one-operand form.
+export class SapzInstruction extends makeToleranceSet(ToleranceSetConditionInstruction, approxZero) {
 	static override tests(): InstructionTestData[] {
 		if (typeof isProd !== "undefined" && isProd) {
 			return [];
 		}
-		return tSetUnary("sapz", [
-			[0, true],
-			[1, false],
+		return tSetBinary("sapz", [
+			[0, 1, true],
+			[1, 0, false],
+			[5, 1, true],
+			[5, 0.1, false],
 		]);
 	}
 }
-export class SnazInstruction extends makeUnarySet(UnarySetConditionInstruction, un.na0) {
+export class SnazInstruction extends makeToleranceSet(ToleranceSetConditionInstruction, notApproxZero) {
 	static override tests(): InstructionTestData[] {
 		if (typeof isProd !== "undefined" && isProd) {
 			return [];
 		}
-		return tSetUnary("snaz", [
-			[1, true],
-			[0, false],
+		return tSetBinary("snaz", [
+			[1, 0, true],
+			[0, 1, false],
+			[5, 1, false],
+			[5, 0.1, true],
 		]);
 	}
 }
@@ -612,13 +705,13 @@ export class BapInstruction extends makeTernarySet(TernaryBranchInstruction, app
 		]);
 	}
 }
-export class BnaInstruction extends makeTernarySet(TernaryBranchInstruction, (a, b, c) => !approxEqual(a, b, c)) {}
+export class BnaInstruction extends makeTernarySet(TernaryBranchInstruction, approxNotEqual) {}
 
 // Absolute branches against zero/NaN
 export class BeqzInstruction extends makeUnarySet(UnaryBranchInstruction, un.eq0) {}
 export class BnezInstruction extends makeUnarySet(UnaryBranchInstruction, un.ne0) {}
-export class BapzInstruction extends makeUnarySet(UnaryBranchInstruction, un.ap0) {}
-export class BnazInstruction extends makeUnarySet(UnaryBranchInstruction, un.na0) {}
+export class BapzInstruction extends makeToleranceSet(ToleranceBranchInstruction, approxZero) {}
+export class BnazInstruction extends makeToleranceSet(ToleranceBranchInstruction, notApproxZero) {}
 export class BnanInstruction extends makeUnarySet(UnaryBranchInstruction, un.nan) {}
 
 // Absolute branches on device
@@ -652,15 +745,12 @@ export class BreqInstruction extends makeBinarySet(RelativeBinaryBranchInstructi
 export class BrneInstruction extends makeBinarySet(RelativeBinaryBranchInstruction, cmp.ne) {}
 
 export class BrapInstruction extends makeTernarySet(RelativeTernaryBranchInstruction, approxEqual) {}
-export class BrnaInstruction extends makeTernarySet(
-	RelativeTernaryBranchInstruction,
-	(a, b, c) => !approxEqual(a, b, c),
-) {}
+export class BrnaInstruction extends makeTernarySet(RelativeTernaryBranchInstruction, approxNotEqual) {}
 
 export class BreqzInstruction extends makeUnarySet(RelativeUnaryBranchInstruction, un.eq0) {}
 export class BrnezInstruction extends makeUnarySet(RelativeUnaryBranchInstruction, un.ne0) {}
-export class BrapzInstruction extends makeUnarySet(RelativeUnaryBranchInstruction, un.ap0) {}
-export class BrnazInstruction extends makeUnarySet(RelativeUnaryBranchInstruction, un.na0) {}
+export class BrapzInstruction extends makeToleranceSet(RelativeToleranceBranchInstruction, approxZero) {}
+export class BrnazInstruction extends makeToleranceSet(RelativeToleranceBranchInstruction, notApproxZero) {}
 export class BrnanInstruction extends makeUnarySet(RelativeUnaryBranchInstruction, un.nan) {}
 
 // ===== Variants that save ra (AL) =====
@@ -690,15 +780,12 @@ export class BeqalInstruction extends makeBinarySet(BinaryBranchAndLinkInstructi
 export class BnealInstruction extends makeBinarySet(BinaryBranchAndLinkInstruction, cmp.ne) {}
 
 export class BapalInstruction extends makeTernarySet(TernaryBranchAndLinkInstruction, approxEqual) {}
-export class BnaalInstruction extends makeTernarySet(
-	TernaryBranchAndLinkInstruction,
-	(a, b, c) => !approxEqual(a, b, c),
-) {}
+export class BnaalInstruction extends makeTernarySet(TernaryBranchAndLinkInstruction, approxNotEqual) {}
 
 export class BeqzalInstruction extends makeUnarySet(UnaryBranchAndLinkInstruction, un.eq0) {}
 export class BnezalInstruction extends makeUnarySet(UnaryBranchAndLinkInstruction, un.ne0) {}
-export class BapzalInstruction extends makeUnarySet(UnaryBranchAndLinkInstruction, un.ap0) {}
-export class BnazalInstruction extends makeUnarySet(UnaryBranchAndLinkInstruction, un.na0) {}
+export class BapzalInstruction extends makeToleranceSet(ToleranceBranchAndLinkInstruction, approxZero) {}
+export class BnazalInstruction extends makeToleranceSet(ToleranceBranchAndLinkInstruction, notApproxZero) {}
 
 // ===== Relative device branches (with tests) =====
 export class BrdseInstruction extends RelativeDeviceBranchInstruction {

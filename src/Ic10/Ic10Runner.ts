@@ -14,7 +14,9 @@ import { InstructionLine } from "./Lines/InstructionLine.ts";
 import { LabelLine } from "./Lines/LabelLine.ts";
 import type { Line } from "./Lines/Line.ts";
 
-export const RegExpLabelLine = /((?<label>\w+):)\s*(?<comment>#.*)?/im;
+// Anchored: an unanchored match read `top: add r0 r0 1` as the label `top` and dropped the add. The game
+// refuses that line (UnrecognisedInstruction, G35), so the fork now reports it as an unknown line.
+export const RegExpLabelLine = /^(?<label>\w+):\s*(?<comment>#.*)?$/im;
 export const RegExpInstructionLine = /^(?<instruction>\w+)(?:\s+(?<arguments>.+?))?(?:\s*#(?<comment>.*))?$/im;
 
 /** `code` of the error raised when a runner exceeds its jump limit (expected for looping scripts). */

@@ -18,8 +18,9 @@ export const str = /^STR\("(?<str>.+)"\)$/;
  * Handles special JavaScript numeric values
  */
 export function jsThing(value: number): number {
+	// -0 becomes 0. -Infinity keeps its sign: the game reads `ninf` back as -Infinity (G30), so the
+	// old mapping to +Infinity was wrong.
 	if (Object.is(value, -0)) return 0;
-	if (Object.is(value, -Infinity)) return Infinity;
 	return value;
 }
 
@@ -67,7 +68,9 @@ function parseSimpleNumber(text: string): number | false {
  * Parses a hexadecimal number (starts with $)
  */
 export function parseHex(text: string): number | false {
-	return text.startsWith("$") ? parseInt(text.slice(1), 16) : false;
+	// Hex digits only. parseInt read `$ZZ` as NaN with no error; the game raises IncorrectVariable (G33).
+	if (!/^\$[0-9a-fA-F]+$/.test(text)) return false;
+	return parseInt(text.slice(1), 16);
 }
 
 /**

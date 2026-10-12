@@ -172,6 +172,8 @@ export interface IDevicesByIdContext {
 	setDeviceStackById(id: number, index: number, value: number): void;
 	getDeviceParameterById(id: number, prop: number): number;
 	setDeviceParameterById(id: number, prop: number, value: number): void;
+	canLoadDeviceParameterById(id: number, prop: number): boolean;
+	canStoreDeviceParameterById(id: number, prop: number): boolean;
 }
 
 export interface IDevicesSlotContext {
@@ -411,6 +413,8 @@ export abstract class Context
 	abstract setDeviceStackById(id: number, index: number, value: number): void;
 	abstract getDeviceParameterById(id: number, prop: number): number;
 	abstract setDeviceParameterById(id: number, prop: number, value: number): void;
+	abstract canLoadDeviceParameterById(id: number, prop: number): boolean;
+	abstract canStoreDeviceParameterById(id: number, prop: number): boolean;
 
 	// =============================================
 	// IDevicesSlotContext implementation

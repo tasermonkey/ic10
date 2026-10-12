@@ -31,13 +31,19 @@ export class InstructionLine extends CommentLine {
 		this.prepare();
 	}
 
+	/** Jumps made before this line ran, so end() can tell a jump from none (G32). */
+	private jumpsBeforeRun = 0;
+
 	override run(): void | Promise<void> {
+		this.jumpsBeforeRun = this.context.getJumpsCount();
 		return this.instruction?.execute();
 	}
 
 	override end(): void {
 		if (!this.instruction?.end.call(this)) {
-			if (this.position === this.context.getNextLineIndex()) {
+			// The pointer alone can't tell a jump from no jump: a jump to this line's own index leaves it here,
+			// so the old check advanced past a `j` that spins on itself. Count the jumps instead.
+			if (this.context.getJumpsCount() === this.jumpsBeforeRun) {
 				this.context.setNextLineIndex();
 			}
 		}

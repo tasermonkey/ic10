@@ -527,6 +527,14 @@ abstract class DevicesByIdBase extends DevicesByHashAndNameBase implements IDevi
 	override setDeviceParameterById(id: number, prop: number, value: number): void {
 		this.setDeviceParameter(this.getDeviceById(id), prop, value);
 	}
+
+	override canLoadDeviceParameterById(id: number, prop: number): boolean {
+		return this.getDeviceById(id)?.props?.canLoad(prop) ?? false;
+	}
+
+	override canStoreDeviceParameterById(id: number, prop: number): boolean {
+		return this.getDeviceById(id)?.props?.canStore(prop) ?? false;
+	}
 }
 
 abstract class DevicesSlotBase extends DevicesByIdBase implements IDevicesSlotContext {
@@ -663,10 +671,11 @@ export class RealContext extends DevicesReagentBase {
 	}
 
 	hcf() {
+		// Critical, so the chip halts: only a critical error stops step(). It was Strong, and the chip ran on (G34).
 		this.addError(
 			new RuntimeIc10Error({
 				message: i18n.t("error.hcf"),
-				severity: ErrorSeverity.Strong,
+				severity: ErrorSeverity.Critical,
 			}),
 		);
 	}
