@@ -222,3 +222,15 @@ export class ReferenceIc10Error extends ArgumentIc10Error {
 		});
 	}
 }
+
+/**
+ * Thrown by an argument that can't be used (a register that isn't one, an unknown logic type), after
+ * its error has been recorded, so the instruction stops there instead of carrying on with 0 in its
+ * place: `move Nope 1` used to write to r0. `Instruction.execute()` catches it; it's not an error itself.
+ */
+export class ArgumentAbort extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "ArgumentAbort";
+	}
+}

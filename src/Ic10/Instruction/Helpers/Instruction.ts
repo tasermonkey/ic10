@@ -1,7 +1,7 @@
 import type { Device } from "../../../Core/Device.ts";
 import i18n from "../../../Languages/lang.ts";
 import type { Context } from "../../Context/Context.ts";
-import { ArgumentIc10Error, ErrorSeverity, type Ic10Error } from "../../Errors/Errors.ts";
+import { ArgumentAbort, ArgumentIc10Error, ErrorSeverity, type Ic10Error } from "../../Errors/Errors.ts";
 import type { InstructionLine } from "../../Lines/InstructionLine.ts";
 import type { Line } from "../../Lines/Line.ts";
 import type { Argument } from "./Argument.ts";
@@ -93,6 +93,11 @@ export type InstructionTestData = {
 	expected: InstructionTestExpected[];
 };
 
+/** Swallow an argument abort (its error is recorded already); rethrow anything else. */
+function ignoreAbort(thrown: unknown): void {
+	if (!(thrown instanceof ArgumentAbort)) throw thrown;
+}
+
 export abstract class Instruction {
 	/** Raw instruction arguments received from the parser */
 	public args: Argument[] = [];
@@ -139,9 +144,19 @@ export abstract class Instruction {
 	 * 1) Gets the argument rules
 	 * 2) Checks that the number of supplied arguments matches the rules
 	 * 3) On success, invokes the run() implementation
-	 * On mismatch, registers an error and stops execution.
+	 * On mismatch, registers an error and stops execution. An argument that can't be used stops it
+	 * too (`ArgumentAbort`, its error already recorded), and the line ends as usual.
 	 */
 	public execute(): void | Promise<void> {
+		try {
+			const result = this.runChecked();
+			return result instanceof Promise ? result.catch(ignoreAbort) : result;
+		} catch (thrown) {
+			ignoreAbort(thrown);
+		}
+	}
+
+	private runChecked(): void | Promise<void> {
 		const rules = this.argumentList();
 		if (this.args.length !== rules.length) {
 			this.context.addError(

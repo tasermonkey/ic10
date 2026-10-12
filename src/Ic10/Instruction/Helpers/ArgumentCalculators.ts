@@ -1,7 +1,7 @@
 import { Devices, LogicBatchMethod, LogicReagentMode, LogicSlot, Logics, Reagents } from "../../../Defines/data.ts";
 import i18n from "../../../Languages/lang.ts";
 import type { Context } from "../../Context/Context.ts";
-import { ErrorSeverity, TypeIc10Error } from "../../Errors/Errors.ts";
+import { ArgumentAbort, ErrorSeverity, TypeIc10Error } from "../../Errors/Errors.ts";
 import { getDevicePin, getRegister, parseArgumentAnyNumber } from "../../Helpers/ArgumentParse.ts";
 import type { Argument } from "./Argument.ts";
 import type { InstructionArgument } from "./Instruction.ts";
@@ -15,6 +15,10 @@ const ErrorHandlers = {
 		severity: ErrorSeverity = ErrorSeverity.Strong,
 	): 0 => {
 		context.addError(new TypeIc10Error({ message, severity }).setArgument(argument));
+		// An argument the game rejects stops the instruction (in game it throws and the chip halts).
+		// Carrying on with 0 in its place wrote to r0, pin 0 or logic type 0. A weak error (an
+		// unknown device hash) still reads as 0.
+		if (severity === ErrorSeverity.Strong || severity === ErrorSeverity.Critical) throw new ArgumentAbort(message);
 		return 0;
 	},
 

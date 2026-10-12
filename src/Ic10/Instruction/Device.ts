@@ -414,12 +414,12 @@ export class BdnvlInstruction extends Instruction {
 				],
 			},
 			{
-				code: "bdnvl db Color 4\n\n\n\n",
+				code: "bdnvl db Color 4\n\n\n\n", // a housing has no Color: branches
 				iterations_count: 2,
 				expected: [
 					{
 						type: "loop",
-						nextLineIndex: 2,
+						nextLineIndex: 5,
 					},
 				],
 			},
@@ -429,7 +429,9 @@ export class BdnvlInstruction extends Instruction {
 	override argumentList(): InstructionArgument[] {
 		return [
 			ArgumentCalculators.devicePin("device"),
-			ArgumentCalculators.anyNumber("logic"),
+			// A logic type (name or number), as in game. It was read as a plain number, so a name such
+			// as `Power` was rejected and logic type 0 used in its place.
+			ArgumentCalculators.logic("logic"),
 			ArgumentCalculators.jumpTarget("target"),
 		];
 	}
@@ -438,7 +440,8 @@ export class BdnvlInstruction extends Instruction {
 		const devicePin = this.getArgumentValue<number>("device");
 		const logic = this.getArgumentValue<number>("logic");
 		const target = this.getArgumentValue<number>("target");
-		if (this.context.canLoadDeviceParameterByPin(devicePin, logic)) {
+		// Branch if the device is NOT valid for a load of this logic type (it used to branch if it was).
+		if (!this.context.canLoadDeviceParameterByPin(devicePin, logic)) {
 			this.context.setNextLineIndex(target);
 		}
 	}
@@ -450,22 +453,22 @@ export class BdnvsInstruction extends Instruction {
 		}
 		return [
 			{
-				code: "bdnvs db Setting 4\n\n\n\n",
-				iterations_count: 2,
-				expected: [
-					{
-						type: "loop",
-						nextLineIndex: 5,
-					},
-				],
-			},
-			{
-				code: "bdnvs db Color 4\n\n\n\n",
+				code: "bdnvs db Setting 4\n\n\n\n", // a housing can store Setting: doesn't branch
 				iterations_count: 2,
 				expected: [
 					{
 						type: "loop",
 						nextLineIndex: 2,
+					},
+				],
+			},
+			{
+				code: "bdnvs db Color 4\n\n\n\n", // a housing has no Color: branches
+				iterations_count: 2,
+				expected: [
+					{
+						type: "loop",
+						nextLineIndex: 5,
 					},
 				],
 			},
@@ -484,7 +487,8 @@ export class BdnvsInstruction extends Instruction {
 		const devicePin = this.getArgumentValue<number>("device");
 		const logic = this.getArgumentValue<number>("logic");
 		const target = this.getArgumentValue<number>("target");
-		if (this.context.canStoreDeviceParameterByPin(devicePin, logic)) {
+		// Branch if the device is NOT valid for a store of this logic type (it used to branch if it was).
+		if (!this.context.canStoreDeviceParameterByPin(devicePin, logic)) {
 			this.context.setNextLineIndex(target);
 		}
 	}

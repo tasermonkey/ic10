@@ -160,6 +160,44 @@ describe("errors never escape step()", () => {
 	});
 });
 
+describe("an argument that can't be used stops the instruction", () => {
+	test.each([
+		["a destination that isn't a register", "move Nope 7"],
+		["a destination that isn't a register, with sources", "move r5 2\nadd Nope r5 1"],
+		["a source that isn't a number or register", "move r0 nope"],
+		["an unknown logic type", "l r0 db Nope"],
+	])("%s leaves r0 alone and records a strong error", async (_kind, code) => {
+		const runner = await realRunner(`move r0 5\n${code}\nmove r1 1`);
+		await runToStop(runner);
+		expect(runner.realContext.getRegister(0)).toBe(5);
+		expect(strong(runner)).toHaveLength(1);
+		expect(runner.realContext.getRegister(1)).toBe(1); // the line ended as usual (the harness halts the chip)
+	});
+
+	test("the sandbox pass reports every such line", async () => {
+		expect(await strongErrors("move Nope 1\nadd Bad r0 1\nmove r0 2")).toHaveLength(2);
+	});
+});
+
+describe("bdnvl / bdnvs", () => {
+	// They took the logic type as a plain number (so a name became 0) and branched when the device WAS
+	// valid; between the two, `bdnvl db Setting` happened to look right.
+	test("branch when the device is NOT valid for that logic type, given by name", async () => {
+		// A gas sensor's logic types are all read-only, and it has no Setting; an autolathe can write On.
+		const sensor = (network: Network) => new StructureGasSensor({ id: 7, network });
+		const lathe = (network: Network) => new StructureAutolathe({ id: 7, network });
+		const branches = async (line: string, device: (network: Network) => Device) => {
+			const runner = await runnerWith(`${line}\nmove r0 1\nj 4\nmove r0 2`, device);
+			await runToStop(runner, 5);
+			return runner.realContext.getRegister(0) === 2;
+		};
+		expect(await branches("bdnvl d0 Temperature 3", sensor)).toBe(false);
+		expect(await branches("bdnvl d0 Setting 3", sensor)).toBe(true);
+		expect(await branches("bdnvs d0 Temperature 3", sensor)).toBe(true);
+		expect(await branches("bdnvs d0 On 3", lathe)).toBe(false);
+	});
+});
+
 describe("jump-and-link return address", () => {
 	test.each([
 		["jal", "jal sub"],
