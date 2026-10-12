@@ -189,6 +189,15 @@ abstract class DeviceHelpers extends MemoryBase {
 		});
 	}
 
+	/**
+	 * A slot read the game refuses (no slots, or no such slot): `ls` raises IncorrectLogicType and `lbs`/`lbns`
+	 * IncorrectLogicSlotType, and the chip halts with the register unwritten (G34). The game also refuses a slot
+	 * type the slot doesn't support (Pressure on a slot that isn't a gas canister); the fork doesn't check that.
+	 */
+	protected slotReadError(message: "incorrect_logic_type" | "incorrect_logic_slot_type"): Ic10Error {
+		return new Ic10Error({ message: i18n.t(`error.${message}`), severity: ErrorSeverity.Strong });
+	}
+
 	/** A device without memory: the game raises MemoryNotReadable (or MemoryNotWriteable) and halts the chip. */
 	protected memoryError(message: "memory_not_readable" | "memory_not_writeable"): Ic10Error {
 		return new Ic10Error({ message: i18n.t(`error.${message}`), severity: ErrorSeverity.Strong });
@@ -226,16 +235,9 @@ abstract class DeviceHelpers extends MemoryBase {
 	): number {
 		if (!device) return 0;
 
-		if (!device.hasSlots) {
-			this.addError(this.createNoSlotsError(identifier, type));
-			return 0;
-		}
-
-		const slotDevice = device.slots?.getSlot(slot);
-		if (!slotDevice) {
-			this.addError(this.createSlotNotFoundError(slot));
-			return 0;
-		}
+		// The game halts here (ls: IncorrectLogicType). The batch reads check their devices first (checkBatchSlots).
+		const slotDevice = device.hasSlots ? device.slots?.getSlot(slot) : undefined;
+		if (!slotDevice) throw this.slotReadError("incorrect_logic_type");
 
 		return slotDevice.getProp(prop);
 	}
@@ -564,8 +566,19 @@ abstract class DevicesSlotBase extends DevicesByIdBase implements IDevicesSlotCo
 
 	override getBatchDeviceSlotParameterByHash(deviceHash: number, slot: number, prop: number, mode: number): number {
 		const devices = this.getDevicesByHash(deviceHash);
+		this.checkBatchSlots(devices, slot);
 		const values = devices.map((device) => this.getDeviceSlotParameter(device, slot, prop, device.hash, "on hash"));
 		return this.calculateBatchResult(values, mode);
+	}
+
+	/**
+	 * lbs/lbns: the game checks every matching device before it reads, and one that can't read the slot halts the
+	 * chip with IncorrectLogicSlotType, so nothing is written (G34).
+	 */
+	protected checkBatchSlots(devices: Device[], slot: number): void {
+		for (const device of devices) {
+			if (!device.hasSlots || !device.slots?.getSlot(slot)) throw this.slotReadError("incorrect_logic_slot_type");
+		}
 	}
 
 	override getBatchDeviceSlotParameterByHashAndName(
@@ -576,6 +589,7 @@ abstract class DevicesSlotBase extends DevicesByIdBase implements IDevicesSlotCo
 		mode: number,
 	): number {
 		const devices = this.getDevicesByHashAndName(deviceHash, deviceName);
+		this.checkBatchSlots(devices, slot);
 		const values = devices.map((device) =>
 			this.getDeviceSlotParameter(device, slot, prop, device.id, "on hash and name"),
 		);

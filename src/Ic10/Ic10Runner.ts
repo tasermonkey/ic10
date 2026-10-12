@@ -123,12 +123,29 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 
 	public init(reset: boolean = true) {
 		this.emit("reset");
+		this.compileFailed = false;
 		this.lines = this.lexer(this.context.getIc10Code());
 		this.executionStopped = false;
 		if (reset) {
 			this.context.reset(); // Add a reset() method to Context
 		}
 		this.lines.filter((l) => l instanceof LabelLine).forEach((l) => l.run());
+		// Defines are set as the script compiles, as in game, so one can be used above its line (G34). A second
+		// define of a name the script already defined is the game's ExtraDefine compile error: the whole script is
+		// refused. Built-in constants don't count (the game keeps them apart from the script's defines).
+		const defined = new Set<string>();
+		for (const line of this.lines) {
+			if (!(line instanceof InstructionLine)) continue;
+			const name = line.instructionName === "define" ? line.args[0]?.text : undefined;
+			if (name !== undefined) {
+				if (defined.has(name)) {
+					this.refuseToCompile(line, i18n.t("error.extra_define"), "ExtraDefine");
+					continue;
+				}
+				defined.add(name);
+			}
+			line.instruction?.compile();
+		}
 		this.emit("contextInit", this.contextSwitcher.name);
 		return this;
 	}
@@ -257,6 +274,23 @@ export class Ic10Runner extends EventEmitter<Ic10RunnerEvents> {
 		this.context.addError(error);
 		this.emit("error", error);
 		return this;
+	}
+
+	/** A compile error: the game refuses the whole script, so no line runs (step() stops at once). */
+	private refuseToCompile(line: Line, message: string, code: string): void {
+		this.compileFailed = true;
+		this.addError(
+			new FatalIc10Error({
+				message,
+				code,
+				severity: ErrorSeverity.Critical,
+				context: this.context,
+				line: line.position,
+				start: 0,
+				length: line.originalText.length,
+				originalText: line.originalText,
+			}),
+		);
 	}
 
 	public lexer(code: string): Line[] {

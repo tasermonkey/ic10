@@ -739,3 +739,47 @@ describe("lr Recipe and Required follow the game (G26)", () => {
 		expect(runner.realContext.getRegister(7)).toBe(-1);
 	});
 });
+
+describe("slot reads of a device with no slots halt, as in the game's code (G34)", () => {
+	// From the game's DLL (ProgrammableChip, 2026-10-12): a device that can't read the slot halts the chip before
+	// the register is written. ls raises IncorrectLogicType; lbs and lbns IncorrectLogicSlotType. A gas sensor has no slots.
+	const SENSOR = 'HASH("StructureGasSensor")';
+	test.each([
+		["ls", "ls r0 d0 0 Occupied", "IncorrectLogicType"],
+		["lbs", `lbs r0 ${SENSOR} 0 Occupied Sum`, "IncorrectLogicSlotType"],
+		["lbns", `lbns r0 ${SENSOR} ${SENSOR} 0 Occupied Sum`, "IncorrectLogicSlotType"],
+	])("%s halts with %s and leaves the register alone", async (_kind, line, name) => {
+		const runner = await runnerWith(`move r0 7\n${line}`, (network) => new StructureGasSensor({ id: 7, network }));
+		await runToStop(runner);
+		expect(runner.context.criticalError && runner.context.criticalError.message).toBe(name);
+		expect(runner.realContext.getRegister(0)).toBe(7);
+	});
+});
+
+describe("define is set when the script compiles, as in the game's code (G34)", () => {
+	test("a define can be used above its own line", async () => {
+		const runner = await runCode("move r0 FOO\ndefine FOO 5");
+		expect(runner.context.errors).toEqual([]);
+		expect(runner.realContext.getRegister(0)).toBe(5);
+	});
+
+	test("running the define line again (a loop) records nothing", async () => {
+		const runner = await realRunner("define FOO 5\nadd r0 r0 FOO\nj 0");
+		await runToStop(runner, 30);
+		expect(runner.context.errors).toEqual([]);
+		expect(runner.realContext.getRegister(0)).toBe(50);
+	});
+
+	test("defining the same name twice refuses the whole script (ExtraDefine)", async () => {
+		// The game's _DEFINE_Operation throws ExtraDefine at compile time, so no line runs.
+		const runner = await runCode("move r0 1\ndefine FOO 5\ndefine FOO 6");
+		expect(runner.context.criticalError && runner.context.criticalError.code).toBe("ExtraDefine");
+		expect(runner.realContext.getRegister(0)).toBe(0);
+	});
+
+	test("defining a built-in constant's name once is not an ExtraDefine", async () => {
+		const runner = await runCode("define pi 3\nmove r0 pi");
+		expect(runner.context.criticalError).toBe(false);
+		expect(runner.realContext.getRegister(0)).toBe(3);
+	});
+});

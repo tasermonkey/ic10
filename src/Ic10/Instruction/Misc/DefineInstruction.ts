@@ -116,7 +116,15 @@ export class DefineInstruction extends Instruction {
 		];
 	}
 
-	override run(): void {
+	/**
+	 * In game a define is set when the script compiles, not when its line runs, so it can be used above its line.
+	 * The line itself does nothing at run time (G34; ProgrammableChip._DEFINE_Operation in the game's code).
+	 */
+	override run(): void {}
+
+	override compile(): void {
+		// A wrong argument count is reported when the line runs (Instruction.execute), as for any instruction.
+		if (this.args.length !== this.argumentList().length) return;
 		const r = this.getArgumentValue<string>("constant");
 		const v = this.getArgumentValue<Define>("value");
 		if (!this.context.hasDefines(r)) {

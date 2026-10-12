@@ -197,6 +197,12 @@ export abstract class Instruction {
 	}
 
 	/**
+	 * Work done when the script compiles, before line 0 runs (`Ic10Runner.init()`). Only `define` has any: the
+	 * game sets defines then, so a define can be used above its own line (G34).
+	 */
+	public compile(): void {}
+
+	/**
 	 * Returns the list of rules for the instruction's arguments:
 	 * - allowed substitutions (alias/const/define/label)
 	 * - the calculate function for computing the value
