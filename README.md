@@ -29,8 +29,10 @@
   request instead of waiting in real time (which also fixes `sleep`'s double ×1000).
 - **Matching the game.** Instruction behaviour checked against the game and its DLL: errors halt
   the chip instead of escaping `step()`, `jal`/branch-and-link store the next line in `ra`, batch
-  reads over no devices, stack and device memory, slot reads, `lr`, `jr`, defines, and malformed
-  literals (audit findings G13–G35).
+  reads over no devices, stack and device memory, slot reads, `lr`, `jr`, defines, malformed
+  literals and the `nan` constant (audit findings G13–G35).
+- **Tests for every condition instruction:** each `s*`, `b*` and `br*` form, its and-link variant,
+  NaN, and the `ap`/`na` tolerances, plus `alias`, `sleep`, `yield` and `hcf`.
 - **Readability:** typo fixes (`Builder`, `Environment`, `watch.ts`, …), English comments and
   messages, and documented environment-schema fields.
 
@@ -74,7 +76,7 @@ samples/                 # IC10 code examples
 
 ### Installation
 ```bash
-git clone <repository-url>
+git clone https://github.com/tasermonkey/ic10.git
 cd ic10
 npm install
 ```

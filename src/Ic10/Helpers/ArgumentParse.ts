@@ -59,8 +59,11 @@ export function parseArgumentAnyNumber(context: Context, argument: Argument): nu
 /**
  * Parses a plain number
  */
-function parseSimpleNumber(text: string): number | false {
+export function parseSimpleNumber(text: string): number | false {
 	// The whole text must be a number. parseFloat read `12abc` as 12, and the game rejects it (G33).
+	// "NaN" and "Infinity" are what a constant's value turns into when it's substituted (the chip
+	// keeps `nan`, `pinf` and `ninf` as defines holding the number). Without NaN, `nan` read as 0.
+	if (text === "NaN") return Number.NaN;
 	if (!/^[+-]?((\d+\.?\d*|\.\d+)([eE][+-]?\d+)?|Infinity)$/.test(text)) return false;
 	return parseFloat(text);
 }

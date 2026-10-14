@@ -4,12 +4,15 @@
 
 IC10 emulator and development toolkit for the game Stationeers. TypeScript library for Node 24+ (native type stripping), tested with Vitest, bundled with Vite.
 
-This is a fork of Stationeers-ic/ic10, published to npm as `@tasermonkey/ic10`, that backs the `ic10-test` testing
-framework in [tasermonkey/chipdata-workspace](https://github.com/tasermonkey/chipdata-workspace). Changes here serve
-that framework; see "Changes from upstream" in README.md and the NOTICE file.
+This is a fork of Stationeers-ic/ic10, published to npm as `@tasermonkey/ic10`, that backs the IC10 Bench testing
+framework (`@tasermonkey/ic10-bench`) in [tasermonkey/ic10-bench](https://github.com/tasermonkey/ic10-bench), where it
+is the `vendor/ic10` submodule. Changes here serve that framework; see "Changes from upstream" in README.md and the
+NOTICE file.
 
-Branches: `main` is the fork's line of development. `upstream` mirrors Stationeers-ic/ic10 `main` (git remote
-`stationeers`); to take upstream changes, fast-forward `upstream` from `stationeers/main` and merge it into `main`.
+Branches: `main` is the fork's line of development. `upstream` mirrors Stationeers-ic/ic10 `main`. A fresh clone
+only has `origin`; to take upstream changes, add the original as a remote
+(`git remote add stationeers https://github.com/Stationeers-ic/ic10.git`), fast-forward `upstream` from
+`stationeers/main`, and merge it into `main`.
 
 ## Quick Start
 
@@ -263,11 +266,14 @@ Each layer adds one interface implementation (interface segregation).
 
 ```json
 {
-    "main": "./dist/ic10.cjs.js",    // CommonJS
+    "main": "./dist/ic10.cjs",        // CommonJS
     "module": "./dist/index.js",      // ESM
     "types": "./dist/index.d.ts"      // TypeScript declarations
 }
 ```
+
+`exports` adds a `source` condition (`./src/index.ts`), which IC10 Bench's workspace resolves to run the
+sources directly.
 
 ## Gotchas
 

@@ -8,9 +8,34 @@ import {
 	singleRegister,
 } from "../../Helpers/ArgumentParse.ts";
 import { Define } from "../Helpers/Define.ts";
-import { Instruction, type InstructionArgument } from "../Helpers/Instruction.ts";
+import { Instruction, type InstructionArgument, type InstructionTestData } from "../Helpers/Instruction.ts";
+
+const expectReg = (register: number, value: number) => ({ type: "register", register, value }) as const;
 
 export class AliasInstruction extends Instruction {
+	static override tests(): InstructionTestData[] {
+		if (typeof isProd !== "undefined" && isProd) {
+			return [];
+		}
+		return [
+			{ title: "a register", code: "alias x r3\nmove x 5", expected: [expectReg(3, 5)] },
+			{
+				title: "rr0 names the register r0 points at when the alias runs",
+				code: "move r0 3\nalias x rr0\nmove r0 4\nmove x 9",
+				expected: [expectReg(3, 9), expectReg(4, 0)],
+			},
+			{
+				title: "a later alias of the same name wins",
+				code: "alias x r1\nalias x r2\nmove x 4",
+				expected: [expectReg(1, 0), expectReg(2, 4)],
+			},
+			{
+				title: "a device pin",
+				code: "alias here db\ns here Setting 7\nl r0 here Setting",
+				expected: [expectReg(0, 7)],
+			},
+		];
+	}
 	override argumentList(): InstructionArgument[] {
 		return [
 			{

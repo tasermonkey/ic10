@@ -561,6 +561,15 @@ describe("labels, jumps, numbers and -Infinity follow the game (G30-G33, G35)", 
 		expect(runner.realContext.getRegister(1)).toBe(-Infinity);
 	});
 
+	test("the nan constant is NaN, directly and through a define", async () => {
+		// The chip keeps constants as defines holding the number, and NaN didn't parse back: it read as 0.
+		const runner = await runCode("move r0 nan\ndefine x nan\nmove r1 x\nsnan r2 nan");
+		expect(runner.realContext.getRegister(0)).toBeNaN();
+		expect(runner.realContext.getRegister(1)).toBeNaN();
+		expect(runner.realContext.getRegister(2)).toBe(1);
+		expect(strong(runner)).toEqual([]);
+	});
+
 	test("jr -2 at line index 4 lands on index 2 (G31)", async () => {
 		// Steps 1-4 run lines 0-3; step 5 is the jr; step 6 is the line it lands on (index 2, which writes 2).
 		const runner = await realRunner("move r7 0\nmove r7 1\nmove r7 2\nmove r7 3\njr -2\nmove r9 1");
